@@ -197,6 +197,7 @@
 
 		<!-- external package versions -->
 		<ormlite-core-version>3.1-SNAPSHOT</ormlite-core-version>
+		<android-version>2.1.2</android-version>
 		<!-- external test package versions -->		
 		<easymock-version>2.3</easymock-version>
 		<h2-version>1.2.128</h2-version>
@@ -212,8 +213,20 @@
 			<artifactId>ormlite-core</artifactId>
 			<version>${ormlite-core-version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.android</groupId>
+			<artifactId>android</artifactId>
+			<version>${android-version}</version>
+			<optional>true</optional>
+		</dependency>
 		<!-- =================================================================== -->
 		<!-- test dependencies -->
+		<dependency>
+			<groupId>com.j256</groupId>
+			<artifactId>ormlite-core</artifactId>
+			<version>${ormlite-core-version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
