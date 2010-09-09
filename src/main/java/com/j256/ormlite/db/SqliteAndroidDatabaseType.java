@@ -19,7 +19,7 @@ import com.j256.ormlite.field.FieldType;
  * 
  * @author graywatson
  */
-public class SqliteAndroidDatabaseType extends SqliteDatabaseType implements DatabaseType {
+public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements DatabaseType {
 
 	public SqliteAndroidDatabaseType() {
 	}
@@ -29,12 +29,10 @@ public class SqliteAndroidDatabaseType extends SqliteDatabaseType implements Dat
 		// Hang out. Nothing to do.
 	}
 
-	@Override
 	public String getDriverUrlPart() {
 		return null;
 	}
 
-	@Override
 	public String getDriverClassName() {
 		return null;
 	}
