@@ -212,7 +212,7 @@
 		<surefire.argLine />
 
 		<!-- external package versions -->
-		<ormlite-core-version>3.1-SNAPSHOT</ormlite-core-version>
+		<ormlite-version>3.1-SNAPSHOT</ormlite-version>
 		<android-version>2.1.2</android-version>
 		<!-- external test package versions -->
 		<easymock-version>2.3</easymock-version>
@@ -227,7 +227,7 @@
 		<dependency>
 			<groupId>com.j256.ormlite</groupId>
 			<artifactId>ormlite-core</artifactId>
-			<version>${ormlite-core-version}</version>
+			<version>${ormlite-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.android</groupId>
