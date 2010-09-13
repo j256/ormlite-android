@@ -232,13 +232,12 @@
 		<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>android</artifactId>
-            <scope>provided</scope>
+			<scope>provided</scope>
 			<version>${android-version}</version>
 			<optional>true</optional>
 		</dependency>
 		<!-- =================================================================== -->
 		<!-- test dependencies -->
-		
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
