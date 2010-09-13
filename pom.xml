@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.j256.ormlite</groupId>
 	<artifactId>ormlite-android</artifactId>
-	<version>3.1-SNAPSHOT</version>
+	<version>${ormlite-version}</version>
 	<packaging>jar</packaging>
 	<name>ORMLite Android</name>
 	<url>http://ormlite.sourceforge.net/</url>
@@ -212,7 +212,7 @@
 		<surefire.argLine />
 
 		<!-- external package versions -->
-		<ormlite-version>3.1-SNAPSHOT</ormlite-version>
+		<ormlite-version>3.2-SNAPSHOT</ormlite-version>
 		<android-version>2.1.2</android-version>
 		<!-- external test package versions -->
 		<easymock-version>2.3</easymock-version>
