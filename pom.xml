@@ -225,7 +225,7 @@
 		<!-- =================================================================== -->
 		<!-- main dependencies -->
 		<dependency>
-			<groupId>com.j256</groupId>
+			<groupId>com.j256.ormlite</groupId>
 			<artifactId>ormlite-core</artifactId>
 			<version>${ormlite-core-version}</version>
 		</dependency>
