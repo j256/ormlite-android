@@ -232,17 +232,13 @@
 		<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>android</artifactId>
+            <scope>provided</scope>
 			<version>${android-version}</version>
 			<optional>true</optional>
 		</dependency>
 		<!-- =================================================================== -->
 		<!-- test dependencies -->
-		<dependency>
-			<groupId>com.j256</groupId>
-			<artifactId>ormlite-core</artifactId>
-			<version>${ormlite-core-version}</version>
-			<scope>test</scope>
-		</dependency>
+		
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
