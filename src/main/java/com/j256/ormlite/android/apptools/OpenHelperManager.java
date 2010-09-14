@@ -11,13 +11,14 @@ import android.content.Context;
  * 
  * By default, this class uses the {@link ClassNameProvidedOpenHelperFactory} to generate the open helper object -- see
  * its Javadocs for more information about how it works. You can also call {@link #setOpenHelperFactory} with an
- * instance your own {@link SqliteOpenHelperFactory} or call {@link #setOpenHelper} the name of your helper class
- * directly. The helper instance will be kept in a static field and only released once its internal usage count goes to
- * 0.
+ * instance your own {@link SqliteOpenHelperFactory}. The helper instance will be kept in a static field and only
+ * released once its internal usage count goes to 0.
  * 
  * The SQLiteOpenHelper and database classes maintain one connection under the hood, and prevent locks in the java code.
  * Creating multiple connections can potentially be a source of trouble. This class shares the same connection instance
- * between multiple clients, which will allow multiple activities and services to run at the same time.
+ * between multiple clients, which will allow multiple activities and services to run at the same time. Every time you
+ * use the helper, you should call {@link #getHelper(Context)} on this class. When you are done with the helper you
+ * should call {@link #release()}.
  * 
  * @author kevingalligan, graywatson
  */
@@ -35,14 +36,6 @@ public class OpenHelperManager {
 	 */
 	public static void setOpenHelperFactory(SqliteOpenHelperFactory factory) {
 		OpenHelperManager.factory = factory;
-	}
-
-	/**
-	 * Set the manager with your own helper instance. Default is to use the {@link ClassNameProvidedOpenHelperFactory}
-	 * to generate an instance.
-	 */
-	public static void setOpenHelper(OrmLiteSqliteOpenHelper helper) {
-		OpenHelperManager.helper = helper;
 	}
 
 	/**
@@ -97,6 +90,6 @@ public class OpenHelperManager {
 		/**
 		 * Create and return an open helper associated with the context.
 		 */
-		public OrmLiteSqliteOpenHelper getHelper(Context c);
+		public OrmLiteSqliteOpenHelper getHelper(Context context);
 	}
 }

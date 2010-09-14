@@ -12,24 +12,14 @@ import com.j256.ormlite.support.ConnectionSource;
  * 
  * @author kevingalligan
  */
-public abstract class OrmLiteBaseService extends Service {
+public abstract class OrmLiteBaseService<H extends OrmLiteSqliteOpenHelper> extends Service {
 
-	private OrmLiteSqliteOpenHelper helper;
-
-	/**
-	 * This is called internally by the service class to populate the helper object instance. This should not be called
-	 * directly by client code. Use {@link #getHelper()} to get a helper instance.
-	 * 
-	 * If you are managing your own helper creation, override this method to supply this service with a helper instance.
-	 */
-	protected OrmLiteSqliteOpenHelper getHelperInternal(Context context) {
-		return OpenHelperManager.getHelper(context);
-	}
+	private H helper;
 
 	/**
 	 * Get a helper for this service.
 	 */
-	public synchronized OrmLiteSqliteOpenHelper getHelper() {
+	public synchronized H getHelper() {
 		if (helper == null) {
 			helper = getHelperInternal(this);
 		}
@@ -46,6 +36,22 @@ public abstract class OrmLiteBaseService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		releaseHelper(helper);
+	}
+
+	/**
+	 * @see OrmLiteBaseActivity#getHelperInternal(Context)
+	 */
+	protected H getHelperInternal(Context context) {
+		@SuppressWarnings("unchecked")
+		H newHelper = (H) OpenHelperManager.getHelper(context);
+		return newHelper;
+	}
+
+	/**
+	 * @see OrmLiteBaseActivity#releaseHelper(OrmLiteSqliteOpenHelper)
+	 */
+	protected void releaseHelper(H helper) {
 		if (helper != null) {
 			OpenHelperManager.release();
 			helper = null;

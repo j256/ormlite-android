@@ -12,25 +12,14 @@ import com.j256.ormlite.support.ConnectionSource;
  * 
  * @author kevingalligan
  */
-public abstract class OrmLiteBaseTabActivity extends TabActivity {
+public abstract class OrmLiteBaseTabActivity<H extends OrmLiteSqliteOpenHelper> extends TabActivity {
 
-	private OrmLiteSqliteOpenHelper helper;
-
-	/**
-	 * This is called internally by the activity class to populate the helper object instance. This should not be called
-	 * directly by client code. Use {@link #getHelper()} to get a helper instance.
-	 * 
-	 * If you are managing your own helper creation, override this method to supply this activity with a helper
-	 * instance.
-	 */
-	protected OrmLiteSqliteOpenHelper getHelperInternal(Context context) {
-		return OpenHelperManager.getHelper(context);
-	}
+	private H helper;
 
 	/**
 	 * Get a helper for this action.
 	 */
-	public synchronized OrmLiteSqliteOpenHelper getHelper() {
+	public synchronized H getHelper() {
 		if (helper == null) {
 			helper = getHelperInternal(this);
 		}
@@ -47,6 +36,25 @@ public abstract class OrmLiteBaseTabActivity extends TabActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		if (helper != null) {
+			OpenHelperManager.release();
+			helper = null;
+		}
+	}
+
+	/**
+	 * @see OrmLiteBaseActivity#getHelperInternal(Context)
+	 */
+	protected H getHelperInternal(Context context) {
+		@SuppressWarnings("unchecked")
+		H newHelper = (H) OpenHelperManager.getHelper(context);
+		return newHelper;
+	}
+
+	/**
+	 * @see OrmLiteBaseActivity#releaseHelper(OrmLiteSqliteOpenHelper)
+	 */
+	protected void releaseHelper(H helper) {
 		if (helper != null) {
 			OpenHelperManager.release();
 			helper = null;
