@@ -11,7 +11,7 @@ import com.j256.ormlite.support.ConnectionSource;
  * If you are using the default helper factory, you can simply call {@link #getHelper()} to get your helper class, or
  * {@link #getConnectionSource()} to get a {@link ConnectionSource}.
  * 
- * The method {@link #getHelper()} assumes you are using the default helper factory -- see {@link AndroidSqliteManager}.
+ * The method {@link #getHelper()} assumes you are using the default helper factory -- see {@link OpenHelperManager}.
  * If not, you'll need to provide your own helper instances which will need to implement a reference counting scheme.
  * This method will only be called if you use the database, and only called once for this activity's life-cycle. 'close'
  * will also be called once for each call to createInstance.
@@ -30,7 +30,7 @@ public abstract class OrmLiteBaseActivity extends Activity {
 	 * instance.
 	 */
 	protected OrmLiteSqliteOpenHelper getHelperInternal(Context context) {
-		return AndroidSqliteManager.getHelper(context);
+		return OpenHelperManager.getHelper(context);
 	}
 
 	/**
@@ -54,7 +54,7 @@ public abstract class OrmLiteBaseActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		if (helper != null) {
-			AndroidSqliteManager.release();
+			OpenHelperManager.release();
 			helper = null;
 		}
 	}

@@ -23,7 +23,7 @@ public abstract class OrmLiteBaseService extends Service {
 	 * If you are managing your own helper creation, override this method to supply this service with a helper instance.
 	 */
 	protected OrmLiteSqliteOpenHelper getHelperInternal(Context context) {
-		return AndroidSqliteManager.getHelper(context);
+		return OpenHelperManager.getHelper(context);
 	}
 
 	/**
@@ -47,7 +47,7 @@ public abstract class OrmLiteBaseService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		if (helper != null) {
-			AndroidSqliteManager.release();
+			OpenHelperManager.release();
 			helper = null;
 		}
 	}

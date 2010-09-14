@@ -24,7 +24,7 @@ public abstract class OrmLiteBaseTabActivity extends TabActivity {
 	 * instance.
 	 */
 	protected OrmLiteSqliteOpenHelper getHelperInternal(Context context) {
-		return AndroidSqliteManager.getHelper(context);
+		return OpenHelperManager.getHelper(context);
 	}
 
 	/**
@@ -48,7 +48,7 @@ public abstract class OrmLiteBaseTabActivity extends TabActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		if (helper != null) {
-			AndroidSqliteManager.release();
+			OpenHelperManager.release();
 			helper = null;
 		}
 	}

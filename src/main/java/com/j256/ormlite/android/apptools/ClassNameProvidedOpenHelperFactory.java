@@ -9,7 +9,7 @@ import android.content.Context;
  * 
  * @author kevingalligan
  */
-public class ClassNameProvidedOpenHelperFactory implements AndroidSqliteManager.SqliteOpenHelperFactory {
+public class ClassNameProvidedOpenHelperFactory implements OpenHelperManager.SqliteOpenHelperFactory {
 
 	public OrmLiteSqliteOpenHelper getHelper(Context c) {
 		int id = c.getResources().getIdentifier("open_helper_classname", "string", c.getPackageName());

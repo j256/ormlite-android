@@ -20,19 +20,19 @@ import android.util.Log;
  * 
  * @author kevingalligan
  */
-public class AndroidSqliteManager {
+public class OpenHelperManager {
 
 	private static SqliteOpenHelperFactory factory;
 	private static volatile OrmLiteSqliteOpenHelper instance = null;
 	private static AtomicInteger instanceCount = new AtomicInteger();
-	private static String LOG_NAME = AndroidSqliteManager.class.getName();
+	private static String LOG_NAME = OpenHelperManager.class.getName();
 
 	/**
 	 * Initialize the manager with your own helper factory. Default is to use the
 	 * {@link ClassNameProvidedOpenHelperFactory}.
 	 */
 	public static void init(SqliteOpenHelperFactory factory) {
-		AndroidSqliteManager.factory = factory;
+		OpenHelperManager.factory = factory;
 	}
 
 	/**

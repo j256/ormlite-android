@@ -20,8 +20,8 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 
 	private AndroidConnectionSource connectionSource;
 
-	public OrmLiteSqliteOpenHelper(Context context, String name, CursorFactory factory, int version) {
-		super(context, name, factory, version);
+	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion) {
+		super(context, databaseName, factory, databaseVersion);
 		connectionSource = new AndroidConnectionSource(this);
 	}
 
@@ -60,9 +60,10 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		super.close();
 		try {
 			connectionSource.close();
-			connectionSource = null;
 		} catch (SQLException e) {
 			// ignore the exception since the helper doesn't throw it
+		} finally {
+			connectionSource = null;
 		}
 	}
 
