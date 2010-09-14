@@ -5,7 +5,8 @@ import java.lang.reflect.Constructor;
 import android.content.Context;
 
 /**
- * The default helper factory. Provide the "open_helper_classname" in the "@string" Android resource.
+ * The default helper factory. This uses the "open_helper_classname" string identifier in your context as the class-name
+ * of your helper class.
  * 
  * @author kevingalligan
  */
