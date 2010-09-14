@@ -11,12 +11,6 @@ import com.j256.ormlite.field.FieldType;
  * <b> NOTE: </b> Support for Android is now native. See the section on the manual about running with Android.
  * </p>
  * 
- * <p>
- * <b> WARNING:</b> If you do endeavor to use JDBC under Android, understand that as of 8/2010, JDBC is currently
- * <i>unsupported</i>. This may change in the future but until that time, you should use this with caution. You may want
- * to try the {@link SqlDroidDatabaseType} if this driver does not work for you.
- * </p>
- * 
  * @author graywatson
  */
 public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements DatabaseType {
