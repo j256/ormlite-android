@@ -5,11 +5,7 @@ import com.j256.ormlite.field.FieldConverter;
 import com.j256.ormlite.field.FieldType;
 
 /**
- * Sqlite database type information for the Android OS. This has a difference driver class name.
- * 
- * <p>
- * <b> NOTE: </b> Support for Android is now native. See the section on the manual about running with Android.
- * </p>
+ * Sqlite database type information for the Android OS that makes native calls to the Android OS database APIs.
  * 
  * @author graywatson
  */
