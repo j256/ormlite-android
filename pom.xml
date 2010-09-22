@@ -211,7 +211,7 @@
 		<surefire.argLine />
 
 		<!-- external package versions -->
-		<ormlite-version>3.3-SNAPSHOT</ormlite-version>
+		<ormlite-version>3.3</ormlite-version>
 		<android-version>2.1.2</android-version>
 		<!-- external test package versions -->
 		<easymock-version>2.3</easymock-version>
