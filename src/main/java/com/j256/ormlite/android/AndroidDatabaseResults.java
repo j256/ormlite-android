@@ -7,6 +7,8 @@ import java.sql.Timestamp;
 
 import android.database.Cursor;
 
+import com.j256.ormlite.db.DatabaseType;
+import com.j256.ormlite.db.SqliteAndroidDatabaseType;
 import com.j256.ormlite.support.DatabaseResults;
 
 /**
@@ -18,6 +20,7 @@ public class AndroidDatabaseResults implements DatabaseResults {
 
 	private final Cursor cursor;
 	private boolean firstCall;
+	private static final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 
 	public AndroidDatabaseResults(Cursor cursor) {
 		this.cursor = cursor;
@@ -44,7 +47,21 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	}
 
 	public int findColumn(String columnName) throws SQLException {
-		return androidColumnIndexToJdbc(cursor.getColumnIndex(columnName));
+		int index = cursor.getColumnIndex(columnName);
+		if (index < 0) {
+			/*
+			 * Hack here. It turns out that if we've asked for '*' then the field foo is in the cursor as foo. But if we
+			 * ask for a particular field list, which escapes the field names, they are in the cursor with the escaping.
+			 * Ugly!!
+			 */
+			StringBuilder sb = new StringBuilder();
+			databaseType.appendEscapedEntityName(sb, columnName);
+			index = cursor.getColumnIndex(sb.toString());
+			if (index < 0) {
+				throw new SQLException("Unknown field '" + columnName + "' from the Android sqlite cursor");
+			}
+		}
+		return androidColumnIndexToJdbc(index);
 	}
 
 	public String getString(int columnIndex) throws SQLException {
