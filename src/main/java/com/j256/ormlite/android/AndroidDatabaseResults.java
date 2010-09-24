@@ -51,8 +51,8 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		if (index < 0) {
 			/*
 			 * Hack here. It turns out that if we've asked for '*' then the field foo is in the cursor as foo. But if we
-			 * ask for a particular field list, which escapes the field names, they are in the cursor with the escaping.
-			 * Ugly!!
+			 * ask for a particular field list, which escapes the field names, with DISTINCT the fiend names are in the
+			 * cursor with the escaping. Ugly!!
 			 */
 			StringBuilder sb = new StringBuilder();
 			databaseType.appendEscapedEntityName(sb, columnName);
