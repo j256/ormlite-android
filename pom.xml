@@ -217,6 +217,7 @@
 		<commons-logging-version>1.1.1</commons-logging-version>
 		<junit-version>4.8.1</junit-version>
 		<log4j-version>1.2.15</log4j-version>
+		<ormlite-version>${project.version}</ormlite-version>
 	</properties>
 	<dependencies>
 		<!-- =================================================================== -->
@@ -224,7 +225,7 @@
 		<dependency>
 			<groupId>com.j256.ormlite</groupId>
 			<artifactId>ormlite-core</artifactId>
-			<version>${project.version}</version>
+			<version>${ormlite-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.android</groupId>
@@ -238,7 +239,7 @@
 		<dependency>
 			<groupId>com.j256.ormlite</groupId>
 			<artifactId>ormlite-core</artifactId>
-			<version>${project.version}</version>
+			<version>${ormlite-version}</version>
 			<classifier>tests</classifier>
 			<scope>test</scope>
 		</dependency>
