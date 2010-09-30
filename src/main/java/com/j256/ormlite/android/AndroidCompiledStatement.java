@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.misc.SqlExceptionUtil;
+import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 import com.j256.ormlite.support.CompiledStatement;
 import com.j256.ormlite.support.DatabaseResults;
 
@@ -21,14 +22,16 @@ public class AndroidCompiledStatement implements CompiledStatement {
 
 	private final String sql;
 	private final SQLiteDatabase db;
+	private final StatementType type;
 
 	private Cursor cursor;
 	private final List<Object> args = new ArrayList<Object>();
 	private Integer max;
 
-	public AndroidCompiledStatement(String sql, SQLiteDatabase db) {
+	public AndroidCompiledStatement(String sql, SQLiteDatabase db, StatementType type) {
 		this.sql = sql;
 		this.db = db;
+		this.type = type;
 	}
 
 	public int getColumnCount() throws SQLException {
@@ -40,10 +43,16 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	}
 
 	public DatabaseResults executeQuery() throws SQLException {
+		if (type != StatementType.SELECT) {
+			throw new IllegalArgumentException("Cannot call executeQuery on a " + type + " statement");
+		}
 		return new AndroidDatabaseResults(getCursor());
 	}
 
 	public int executeUpdate() throws SQLException {
+		if (type == StatementType.SELECT) {
+			throw new IllegalArgumentException("Cannot call executeUpdate on a " + type + " statement");
+		}
 		String finalSql = null;
 		try {
 			if (max == null) {

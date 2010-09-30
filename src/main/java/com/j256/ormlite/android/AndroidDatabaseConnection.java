@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.stmt.GenericRowMapper;
+import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 import com.j256.ormlite.support.CompiledStatement;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.support.GeneratedKeyHolder;
@@ -63,8 +64,8 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		db.endTransaction();
 	}
 
-	public CompiledStatement compileStatement(String statement) throws SQLException {
-		CompiledStatement stmt = new AndroidCompiledStatement(statement, db);
+	public CompiledStatement compileStatement(String statement, StatementType type) throws SQLException {
+		CompiledStatement stmt = new AndroidCompiledStatement(statement, db, type);
 		return stmt;
 	}
 
