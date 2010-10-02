@@ -50,6 +50,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	}
 
 	public int executeUpdate() throws SQLException {
+		// this could come from DELETE or UPDATE, just not a SELECT
 		if (type == StatementType.SELECT) {
 			throw new IllegalArgumentException("Cannot call executeUpdate on a " + type + " statement");
 		}
@@ -62,7 +63,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 			}
 			db.execSQL(finalSql, args.toArray(new Object[args.size()]));
 		} catch (Exception e) {
-			throw SqlExceptionUtil.create("Problems executing Android query: " + finalSql, e);
+			throw SqlExceptionUtil.create("Problems executing Android statement: " + finalSql, e);
 		}
 		return 1;
 	}
