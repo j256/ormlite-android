@@ -14,7 +14,7 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 	}
 
 	@Override
-	public void loadDriver() throws ClassNotFoundException {
+	public void loadDriver() {
 		// Hang out. Nothing to do.
 	}
 
