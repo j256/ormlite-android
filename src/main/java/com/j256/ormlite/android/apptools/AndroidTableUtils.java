@@ -14,13 +14,11 @@ import com.j256.ormlite.table.TableUtils;
  */
 public class AndroidTableUtils {
 
-	private static SqliteAndroidDatabaseType dbType = new SqliteAndroidDatabaseType();
-
 	/**
 	 * Create the table for the dataClass through the connectionSource.
 	 */
 	public static <T> int createTable(ConnectionSource connectionSource, Class<T> dataClass) throws SQLException {
-		return TableUtils.createTable(dbType, connectionSource, dataClass);
+		return TableUtils.createTable(connectionSource, dataClass);
 	}
 
 	/**
@@ -28,7 +26,7 @@ public class AndroidTableUtils {
 	 */
 	public static <T> int createTable(ConnectionSource connectionSource, DatabaseTableConfig<T> tableConfig)
 			throws SQLException {
-		return TableUtils.createTable(dbType, connectionSource, tableConfig);
+		return TableUtils.createTable(connectionSource, tableConfig);
 	}
 
 	/**
@@ -37,7 +35,7 @@ public class AndroidTableUtils {
 	 */
 	public static <T> int dropTable(ConnectionSource connectionSource, Class<T> dataClass, boolean ignoreErrors)
 			throws SQLException {
-		return TableUtils.dropTable(dbType, connectionSource, dataClass, ignoreErrors);
+		return TableUtils.dropTable(connectionSource, dataClass, ignoreErrors);
 	}
 
 	/**
@@ -46,6 +44,6 @@ public class AndroidTableUtils {
 	 */
 	public static <T> int dropTable(ConnectionSource connectionSource, DatabaseTableConfig<T> tableConfig,
 			boolean ignoreErrors) throws SQLException {
-		return TableUtils.dropTable(dbType, connectionSource, tableConfig, ignoreErrors);
+		return TableUtils.dropTable(connectionSource, tableConfig, ignoreErrors);
 	}
 }

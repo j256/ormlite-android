@@ -4,6 +4,8 @@ import java.sql.SQLException;
 
 import android.database.sqlite.SQLiteDatabase;
 
+import com.j256.ormlite.db.DatabaseType;
+import com.j256.ormlite.db.SqliteAndroidDatabaseType;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
 
@@ -16,6 +18,7 @@ public abstract class BaseAndroidConnectionSource implements ConnectionSource {
 
 	private DatabaseConnection readOnlyConnection = null;
 	private DatabaseConnection readWriteConnection = null;
+	private DatabaseType databaseType = new SqliteAndroidDatabaseType();
 
 	/**
 	 * Get a read-only version of our database.
@@ -45,5 +48,9 @@ public abstract class BaseAndroidConnectionSource implements ConnectionSource {
 	}
 
 	public void close() throws SQLException {
+	}
+
+	public DatabaseType getDatabaseType() {
+		return databaseType;
 	}
 }
