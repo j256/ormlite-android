@@ -45,16 +45,25 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		return connectionSource;
 	}
 
+	/**
+	 * Satisfies the {@link SQLiteOpenHelper#onCreate(SQLiteDatabase)} interface method.
+	 */
 	@Override
 	public final void onCreate(SQLiteDatabase db) {
 		onCreate(db, new InitConnectionSource(db));
 	}
 
+	/**
+	 * Satisfies the {@link SQLiteOpenHelper#onUpgrade(SQLiteDatabase, int, int)} interface method.
+	 */
 	@Override
 	public final void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		onUpgrade(db, new InitConnectionSource(db), oldVersion, newVersion);
 	}
 
+	/**
+	 * Close any open connections.
+	 */
 	@Override
 	public void close() {
 		super.close();

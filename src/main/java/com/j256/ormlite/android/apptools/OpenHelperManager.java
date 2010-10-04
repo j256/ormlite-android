@@ -5,9 +5,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.content.Context;
 
 /**
- * There are several schemes to manage the database connections in an Android app, but as an app gets more complicated,
- * there are many potential places where database locks can occur. This class helps organize and access in a manner that
- * will allow database connection sharing between multiple threads in a single app.
+ * This helps organize and access database connections to optimize connection sharing. There are several schemes to
+ * manage the database connections in an Android app, but as an app gets more complicated, there are many potential
+ * places where database locks can occur. This class allows database connection sharing between multiple threads in a
+ * single app.
  * 
  * By default, this class uses the {@link ClassNameProvidedOpenHelperFactory} to generate the open helper object -- see
  * its Javadocs for more information about how it works. You can also call {@link #setOpenHelperFactory} with an
