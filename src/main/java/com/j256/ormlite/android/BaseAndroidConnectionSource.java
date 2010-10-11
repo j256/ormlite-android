@@ -45,6 +45,15 @@ public abstract class BaseAndroidConnectionSource implements ConnectionSource {
 	}
 
 	public void releaseConnection(DatabaseConnection connection) throws SQLException {
+		// noop since connection management is handled by the OS
+	}
+
+	public void saveTransactionConnection(DatabaseConnection connection) throws SQLException {
+		// noop since connection management is handled by the OS
+	}
+
+	public void clearTransactionConnection(DatabaseConnection connection) throws SQLException {
+		// noop since connection management is handled by the OS
 	}
 
 	public void close() throws SQLException {
