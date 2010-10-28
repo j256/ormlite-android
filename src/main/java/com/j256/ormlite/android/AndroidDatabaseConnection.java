@@ -29,20 +29,20 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		this.readWrite = readWrite;
 	}
 
-	public boolean isAutoCommitSupported() throws SQLException {
+	public boolean isAutoCommitSupported() {
 		return false;
 	}
 
-	public boolean getAutoCommit() throws SQLException {
+	public boolean getAutoCommit() {
 		// You have to explicitly commit your transactions, so this is sort of correct
 		return !db.inTransaction();
 	}
 
-	public void setAutoCommit(boolean autoCommit) throws SQLException {
+	public void setAutoCommit(boolean autoCommit) {
 		// always in auto-commit mode
 	}
 
-	public Savepoint setSavePoint(String name) throws SQLException {
+	public Savepoint setSavePoint(String name) {
 		db.beginTransaction();
 		return null;
 	}
@@ -54,17 +54,17 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		return readWrite;
 	}
 
-	public void commit(Savepoint savepoint) throws SQLException {
+	public void commit(Savepoint savepoint) {
 		db.setTransactionSuccessful();
 		db.endTransaction();
 	}
 
-	public void rollback(Savepoint savepoint) throws SQLException {
+	public void rollback(Savepoint savepoint) {
 		// no setTransactionSuccessful() means it is a rollback
 		db.endTransaction();
 	}
 
-	public CompiledStatement compileStatement(String statement, StatementType type) throws SQLException {
+	public CompiledStatement compileStatement(String statement, StatementType type) {
 		CompiledStatement stmt = new AndroidCompiledStatement(statement, db, type);
 		return stmt;
 	}
@@ -72,7 +72,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	/**
 	 * Android doesn't return the number of rows inserted.
 	 */
-	public int insert(String statement, Object[] args, SqlType[] argFieldTypes) throws SQLException {
+	public int insert(String statement, Object[] args, SqlType[] argFieldTypes) {
 
 		SQLiteStatement stmt = db.compileStatement(statement);
 		try {
@@ -102,7 +102,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
-	public int update(String statement, Object[] args, SqlType[] argFieldTypes) throws SQLException {
+	public int update(String statement, Object[] args, SqlType[] argFieldTypes) {
 
 		SQLiteStatement stmt = db.compileStatement(statement);
 		try {
@@ -116,7 +116,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
-	public int delete(String statement, Object[] args, SqlType[] argFieldTypes) throws SQLException {
+	public int delete(String statement, Object[] args, SqlType[] argFieldTypes) {
 		// delete is the same as update
 		return update(statement, args, argFieldTypes);
 	}
@@ -144,7 +144,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
-	public long queryForLong(String statement) throws SQLException {
+	public long queryForLong(String statement) {
 		SQLiteStatement stmt = db.compileStatement(statement);
 		try {
 			return stmt.simpleQueryForLong();
@@ -155,11 +155,11 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
-	public void close() throws SQLException {
+	public void close() {
 		db.close();
 	}
 
-	private void bindArgs(SQLiteStatement stmt, Object[] args, SqlType[] argFieldTypes) throws SQLException {
+	private void bindArgs(SQLiteStatement stmt, Object[] args, SqlType[] argFieldTypes) {
 		if (args == null) {
 			return;
 		}
