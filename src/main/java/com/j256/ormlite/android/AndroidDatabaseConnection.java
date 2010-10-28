@@ -159,6 +159,10 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		db.close();
 	}
 
+	public boolean isClosed() {
+		return !db.isOpen();
+	}
+
 	private void bindArgs(SQLiteStatement stmt, Object[] args, SqlType[] argFieldTypes) {
 		if (args == null) {
 			return;
