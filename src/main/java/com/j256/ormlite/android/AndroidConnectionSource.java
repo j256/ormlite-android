@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.db.SqliteAndroidDatabaseType;
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
+import com.j256.ormlite.support.BaseConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
 
@@ -17,25 +20,23 @@ import com.j256.ormlite.support.DatabaseConnection;
  * 
  * @author kevingalligan, graywatson
  */
-public class AndroidConnectionSource implements ConnectionSource {
+public class AndroidConnectionSource extends BaseConnectionSource implements ConnectionSource {
+
+	private static final Logger logger = LoggerFactory.getLogger(AndroidConnectionSource.class);
 
 	private SQLiteOpenHelper helper;
 	private DatabaseConnection readOnlyConnection = null;
 	private DatabaseConnection readWriteConnection = null;
 	private DatabaseType databaseType = new SqliteAndroidDatabaseType();
-	private boolean useThreadLocal = false;
-	private final ThreadLocal<DatabaseConnection> savedConnection = new ThreadLocal<DatabaseConnection>();
 
 	public AndroidConnectionSource(SQLiteOpenHelper helper) {
 		this.helper = helper;
 	}
 
 	public DatabaseConnection getReadOnlyConnection() throws SQLException {
-		if (useThreadLocal) {
-			DatabaseConnection conn = savedConnection.get();
-			if (conn != null) {
-				return conn;
-			}
+		DatabaseConnection conn = getSavedConnection();
+		if (conn != null) {
+			return conn;
 		}
 		if (readOnlyConnection == null) {
 			readOnlyConnection = new AndroidDatabaseConnection(helper.getReadableDatabase(), false);
@@ -44,11 +45,9 @@ public class AndroidConnectionSource implements ConnectionSource {
 	}
 
 	public DatabaseConnection getReadWriteConnection() throws SQLException {
-		if (useThreadLocal) {
-			DatabaseConnection conn = savedConnection.get();
-			if (conn != null) {
-				return conn;
-			}
+		DatabaseConnection conn = getSavedConnection();
+		if (conn != null) {
+			return conn;
 		}
 		if (readWriteConnection == null) {
 			readWriteConnection = new AndroidDatabaseConnection(helper.getWritableDatabase(), true);
@@ -61,17 +60,11 @@ public class AndroidConnectionSource implements ConnectionSource {
 	}
 
 	public void saveSpecialConnection(DatabaseConnection connection) {
-		/*
-		 * We can't just set the read-only and read-write connections to be the connection since it is not synchronized
-		 * and other threads may not get the reset in the clear method.
-		 */
-		useThreadLocal = true;
-		savedConnection.set(connection);
+		saveSpecial(connection);
 	}
 
 	public void clearSpecialConnection(DatabaseConnection connection) {
-		useThreadLocal = false;
-		savedConnection.set(null);
+		clearSpecial(connection, logger);
 	}
 
 	public void close() {
