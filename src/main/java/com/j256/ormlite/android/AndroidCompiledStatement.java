@@ -93,10 +93,14 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		this.max = max;
 	}
 
-	/**
-	 * Not thread safe. Not sure if we need it, but keep that in mind.
+	/***
+	 * This is mostly an internal class but is exposed for those people who need access to the Cursor itself.
+	 * 
+	 * <p>
+	 * NOTE: This is not thread safe. Not sure if we need it, but keep that in mind.
+	 * </p>
 	 */
-	private Cursor getCursor() throws SQLException {
+	public Cursor getCursor() throws SQLException {
 		if (cursor == null) {
 			String finalSql = null;
 			try {
