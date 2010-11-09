@@ -59,8 +59,8 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		// noop since connection management is handled by AndroidOS
 	}
 
-	public void saveSpecialConnection(DatabaseConnection connection) {
-		saveSpecial(connection);
+	public boolean saveSpecialConnection(DatabaseConnection connection) {
+		return saveSpecial(connection);
 	}
 
 	public void clearSpecialConnection(DatabaseConnection connection) {
