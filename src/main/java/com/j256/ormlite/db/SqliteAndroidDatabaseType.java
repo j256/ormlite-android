@@ -18,9 +18,9 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 		// Hang out. Nothing to do.
 	}
 
-	public String getDriverUrlPart() {
+	public boolean isDatabaseUrlThisType(String url, String dbTypePart) {
 		// not used by the android code
-		return null;
+		return true;
 	}
 
 	public String getDriverClassName() {
