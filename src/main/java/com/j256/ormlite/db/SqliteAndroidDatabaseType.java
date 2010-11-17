@@ -23,7 +23,8 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 		return true;
 	}
 
-	public String getDriverClassName() {
+	@Override
+	protected String getDriverClassName() {
 		// no driver to load in android-land
 		return null;
 	}
