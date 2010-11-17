@@ -72,28 +72,19 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	/**
 	 * Android doesn't return the number of rows inserted.
 	 */
-	public int insert(String statement, Object[] args, SqlType[] argFieldTypes) {
-
-		SQLiteStatement stmt = db.compileStatement(statement);
-		try {
-			bindArgs(stmt, args, argFieldTypes);
-			stmt.executeInsert();
-			return 1;
-		} finally {
-			if (stmt != null) {
-				stmt.close();
-			}
-		}
+	public int insert(String statement, Object[] args, SqlType[] argFieldTypes) throws SQLException {
+		return insert(statement, args, argFieldTypes, null);
 	}
 
 	public int insert(String statement, Object[] args, SqlType[] argFieldTypes, GeneratedKeyHolder keyHolder)
 			throws SQLException {
-
 		SQLiteStatement stmt = db.compileStatement(statement);
 		try {
 			bindArgs(stmt, args, argFieldTypes);
 			long rowId = stmt.executeInsert();
-			keyHolder.addKey(rowId);
+			if (keyHolder != null) {
+				keyHolder.addKey(rowId);
+			}
 			return 1;
 		} finally {
 			if (stmt != null) {
@@ -103,7 +94,6 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	}
 
 	public int update(String statement, Object[] args, SqlType[] argFieldTypes) {
-
 		SQLiteStatement stmt = db.compileStatement(statement);
 		try {
 			bindArgs(stmt, args, argFieldTypes);
