@@ -168,8 +168,6 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 						stmt.bindString(argIndex, arg.toString());
 						break;
 					case BOOLEAN :
-						stmt.bindLong(argIndex, ((Boolean) arg) ? 1 : 0);
-						break;
 					case BYTE :
 					case SHORT :
 					case INTEGER :
