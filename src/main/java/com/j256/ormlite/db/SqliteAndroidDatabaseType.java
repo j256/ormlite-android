@@ -15,7 +15,7 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 
 	@Override
 	public void loadDriver() {
-		// Hang out. Nothing to do.
+		// noop
 	}
 
 	public boolean isDatabaseUrlThisType(String url, String dbTypePart) {

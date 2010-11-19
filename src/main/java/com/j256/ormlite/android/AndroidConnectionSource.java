@@ -14,7 +14,8 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
 
 /**
- * Main connection source. Uses the standard Android SQLiteOpenHelper. For best results, use our helper,
+ * Android version of the connection source. Uses the standard Android SQLiteOpenHelper. For best results, use our
+ * helper,
  * 
  * @see OrmLiteSqliteOpenHelper
  * 
