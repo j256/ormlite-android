@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.j256.ormlite.android.AndroidConnectionSource;
 import com.j256.ormlite.android.AndroidDatabaseConnection;
 import com.j256.ormlite.support.ConnectionSource;
+import com.j256.ormlite.support.DatabaseConnection;
 
 /**
  * SQLite database open helper which can be extended by your application to help manage when the application needs to
@@ -78,9 +79,12 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		 * create or update the database. So we have to use the database argument and save a connection to it on the
 		 * AndroidConnectionSource, otherwise it will go recursive if the subclass calls getConnectionSource().
 		 */
-		AndroidDatabaseConnection conn = new AndroidDatabaseConnection(db, true);
+		DatabaseConnection conn = cs.getSpecialConnection();
+		if (conn == null) {
+			conn = new AndroidDatabaseConnection(db, true);
+		}
+		cs.saveSpecialConnection(conn);
 		try {
-			cs.saveSpecialConnection(conn);
 			onCreate(db, cs);
 		} finally {
 			cs.clearSpecialConnection(conn);
@@ -98,9 +102,12 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		 * create or update the database. So we have to use the database argument and save a connection to it on the
 		 * AndroidConnectionSource, otherwise it will go recursive if the subclass calls getConnectionSource().
 		 */
-		AndroidDatabaseConnection conn = new AndroidDatabaseConnection(db, true);
+		DatabaseConnection conn = cs.getSpecialConnection();
+		if (conn == null) {
+			conn = new AndroidDatabaseConnection(db, true);
+		}
+		cs.saveSpecialConnection(conn);
 		try {
-			cs.saveSpecialConnection(conn);
 			onUpgrade(db, cs, oldVersion, newVersion);
 		} finally {
 			cs.clearSpecialConnection(conn);
