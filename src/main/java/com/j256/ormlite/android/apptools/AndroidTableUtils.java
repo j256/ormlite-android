@@ -30,7 +30,7 @@ public class AndroidTableUtils {
 	}
 
 	/**
-	 * @deprecated Use {@link TableUtils#dropTable(com.j256.ormlite.db.DatabaseType, ConnectionSource, Class, boolean)}
+	 * @deprecated Use {@link TableUtils#dropTable(ConnectionSource, Class, boolean)}
 	 */
 	@Deprecated
 	public static <T> int dropTable(ConnectionSource connectionSource, Class<T> dataClass, boolean ignoreErrors)
@@ -40,7 +40,7 @@ public class AndroidTableUtils {
 
 	/**
 	 * @deprecated Use
-	 *             {@link TableUtils#dropTable(com.j256.ormlite.db.DatabaseType, ConnectionSource, DatabaseTableConfig, boolean)}
+	 *             {@link TableUtils#dropTable(ConnectionSource, DatabaseTableConfig, boolean)}
 	 */
 	@Deprecated
 	public static <T> int dropTable(ConnectionSource connectionSource, DatabaseTableConfig<T> tableConfig,
