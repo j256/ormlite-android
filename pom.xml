@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<!-- ormlite configuration file for Maven (http://maven.apache.org/) -->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.j256.ormlite</groupId>
@@ -24,7 +25,8 @@
 	<scm>
 		<url>http://ormlite.svn.sourceforge.net/viewvc/ormlite/ormlite-android/trunk/</url>
 		<connection>scm:svn:https://ormlite.svn.sourceforge.net/svnroot/ormlite/ormlite-android/trunk</connection>
-		<developerConnection>scm:svn:https://ormlite.svn.sourceforge.net/svnroot/ormlite/ormlite-android/trunk</developerConnection>
+		<developerConnection>scm:svn:https://ormlite.svn.sourceforge.net/svnroot/ormlite/ormlite-android/trunk
+		</developerConnection>
 	</scm>
 	<developers>
 		<developer>
@@ -132,6 +134,10 @@
 					<additionalparam>-tag inheritDoc:X</additionalparam>
 					<excludePackageNames>com.j256.ormlite.stmt.query,com.j256.ormlite.stmt.mapped
 					</excludePackageNames>
+					<includeDependencySources>true</includeDependencySources>
+					<dependencySourceIncludes>
+						<dependencySourceInclude>com.j256.ormlite:*</dependencySourceInclude>
+					</dependencySourceIncludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -204,10 +210,8 @@
 		</plugins>
 	</build>
 	<properties>
-		<!--
-			default empty string that can be overridden on command line. due to surefire's parser bug, if we don't have this here
-			and have any other characters where this is used, it'll get replaced with string "null"
-		-->
+		<!-- default empty string that can be overridden on command line. due to surefire's parser bug, if we don't have this here 
+			and have any other characters where this is used, it'll get replaced with string "null" -->
 		<surefire.argLine />
 
 		<android-version>2.1.2</android-version>
@@ -226,6 +230,12 @@
 			<groupId>com.j256.ormlite</groupId>
 			<artifactId>ormlite-core</artifactId>
 			<version>${ormlite-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.j256.ormlite</groupId>
+			<artifactId>ormlite-core</artifactId>
+			<version>${ormlite-version}</version>
+			<classifier>sources</classifier>
 		</dependency>
 		<dependency>
 			<groupId>com.google.android</groupId>
