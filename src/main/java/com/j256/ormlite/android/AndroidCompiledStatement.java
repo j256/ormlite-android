@@ -62,7 +62,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 				finalSql = sql + " " + max;
 			}
 			db.execSQL(finalSql, args.toArray(new Object[args.size()]));
-		} catch (Exception e) {
+		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("Problems executing Android statement: " + finalSql, e);
 		}
 		return 1;
@@ -74,7 +74,11 @@ public class AndroidCompiledStatement implements CompiledStatement {
 
 	public void close() throws SQLException {
 		if (cursor != null) {
-			cursor.close();
+			try {
+				cursor.close();
+ 			} catch (android.database.SQLException e) {
+				throw SqlExceptionUtil.create("Problems closing Android cursor", e);
+ 			}
 		}
 	}
 
@@ -111,7 +115,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 				}
 				cursor = db.rawQuery(finalSql, args.toArray(new String[args.size()]));
 				cursor.moveToFirst();
-			} catch (Exception e) {
+			} catch (android.database.SQLException e) {
 				throw SqlExceptionUtil.create("Problems executing Android query: " + finalSql, e);
 			}
 		}

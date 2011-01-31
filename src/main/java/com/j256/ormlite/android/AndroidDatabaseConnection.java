@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.stmt.GenericRowMapper;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 import com.j256.ormlite.support.CompiledStatement;
@@ -33,18 +34,26 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		return false;
 	}
 
-	public boolean getAutoCommit() {
-		// You have to explicitly commit your transactions, so this is sort of correct
-		return !db.inTransaction();
+	public boolean getAutoCommit() throws SQLException {
+		try {
+			// You have to explicitly commit your transactions, so this is sort of correct
+			return !db.inTransaction();
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("problems getting auto-commit from database", e);
+		}
 	}
 
 	public void setAutoCommit(boolean autoCommit) {
 		// always in auto-commit mode
 	}
 
-	public Savepoint setSavePoint(String name) {
-		db.beginTransaction();
-		return null;
+	public Savepoint setSavePoint(String name) throws SQLException {
+		try {
+			db.beginTransaction();
+			return null;
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("problems beginning transaction", e);
+		}
 	}
 
 	/**
@@ -54,14 +63,22 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		return readWrite;
 	}
 
-	public void commit(Savepoint savepoint) {
-		db.setTransactionSuccessful();
-		db.endTransaction();
+	public void commit(Savepoint savepoint) throws SQLException {
+		try {
+			db.setTransactionSuccessful();
+			db.endTransaction();
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("problems commiting transaction", e);
+		}
 	}
 
-	public void rollback(Savepoint savepoint) {
-		// no setTransactionSuccessful() means it is a rollback
-		db.endTransaction();
+	public void rollback(Savepoint savepoint) throws SQLException {
+		try {
+			// no setTransactionSuccessful() means it is a rollback
+			db.endTransaction();
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("problems rolling back transaction", e);
+		}
 	}
 
 	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes,
@@ -79,14 +96,17 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 
 	public int insert(String statement, Object[] args, FieldType[] argFieldTypes, GeneratedKeyHolder keyHolder)
 			throws SQLException {
-		SQLiteStatement stmt = db.compileStatement(statement);
+		SQLiteStatement stmt = null;
 		try {
+			stmt = db.compileStatement(statement);
 			bindArgs(stmt, args, argFieldTypes);
 			long rowId = stmt.executeInsert();
 			if (keyHolder != null) {
 				keyHolder.addKey(rowId);
 			}
 			return 1;
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("inserting to database failed: " + statement, e);
 		} finally {
 			if (stmt != null) {
 				stmt.close();
@@ -94,12 +114,15 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
-	public int update(String statement, Object[] args, FieldType[] argFieldTypes) {
-		SQLiteStatement stmt = db.compileStatement(statement);
+	public int update(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
+		SQLiteStatement stmt = null;
 		try {
+			stmt = db.compileStatement(statement);
 			bindArgs(stmt, args, argFieldTypes);
 			stmt.execute();
 			return 1;
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("updating database failed: " + statement, e);
 		} finally {
 			if (stmt != null) {
 				stmt.close();
@@ -107,16 +130,17 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
-	public int delete(String statement, Object[] args, FieldType[] argFieldTypes) {
+	public int delete(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
 		// delete is the same as update
 		return update(statement, args, argFieldTypes);
 	}
 
 	public <T> Object queryForOne(String statement, Object[] args, FieldType[] argFieldTypes,
 			GenericRowMapper<T> rowMapper) throws SQLException {
-		Cursor cursor = db.rawQuery(statement, toStrings(args));
+		Cursor cursor = null;
 
 		try {
+			cursor = db.rawQuery(statement, toStrings(args));
 			AndroidDatabaseResults results = new AndroidDatabaseResults(cursor);
 			if (!results.next()) {
 				return null;
@@ -128,6 +152,8 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 					return first;
 				}
 			}
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("queryForOne from database failed: " + statement, e);
 		} finally {
 			if (cursor != null) {
 				cursor.close();
@@ -135,10 +161,13 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
-	public long queryForLong(String statement) {
-		SQLiteStatement stmt = db.compileStatement(statement);
+	public long queryForLong(String statement) throws SQLException {
+		SQLiteStatement stmt = null;
 		try {
+			stmt = db.compileStatement(statement);
 			return stmt.simpleQueryForLong();
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("queryForLong from database failed: " + statement, e);
 		} finally {
 			if (stmt != null) {
 				stmt.close();
@@ -146,12 +175,20 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
-	public void close() {
-		db.close();
+	public void close() throws SQLException {
+		try {
+			db.close();
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("problems closing the database connection", e);
+		}
 	}
 
-	public boolean isClosed() {
-		return !db.isOpen();
+	public boolean isClosed() throws SQLException {
+		try {
+			return !db.isOpen();
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("problems detecting if the database is closed", e);
+		}
 	}
 
 	private void bindArgs(SQLiteStatement stmt, Object[] args, FieldType[] argFieldTypes) {
