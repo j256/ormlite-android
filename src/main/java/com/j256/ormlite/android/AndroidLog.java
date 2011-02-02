@@ -11,11 +11,17 @@ import com.j256.ormlite.logger.LoggerFactory;
  */
 public class AndroidLog implements com.j256.ormlite.logger.Log {
 
+	private final static int MAX_TAG_LENGTH = 23;
 	private String className;
 
 	public AndroidLog(String className) {
 		// get the last part of the class name
 		this.className = LoggerFactory.getSimpleClassName(className);
+		// make sure that our tag length is not too long
+		int length = this.className.length();
+		if (length > MAX_TAG_LENGTH) {
+			this.className = this.className.substring(length - MAX_TAG_LENGTH, length);
+		}
 	}
 
 	public boolean isLevelEnabled(Level level) {
