@@ -132,8 +132,6 @@
 				<configuration>
 					<showPackage>false</showPackage>
 					<additionalparam>-tag inheritDoc:X</additionalparam>
-					<excludePackageNames>com.j256.ormlite.stmt.query,com.j256.ormlite.stmt.mapped
-					</excludePackageNames>
 				</configuration>
 			</plugin>
 			<plugin>
