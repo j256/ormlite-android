@@ -70,9 +70,11 @@ public class AndroidDatabaseResults implements DatabaseResults {
 
 	public boolean getBoolean(int columnIndex) throws SQLException {
 		int col = jdbcColumnIndexToAndroid(columnIndex);
-		if (cursor.isNull(col))
+		if (cursor.isNull(col) || cursor.getShort(col) == 0) {
 			return false;
-		return cursor.getShort(col) != 0;
+		} else {
+			return true;
+		}
 	}
 
 	public byte getByte(int columnIndex) throws SQLException {
