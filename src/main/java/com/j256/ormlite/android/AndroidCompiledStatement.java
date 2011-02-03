@@ -76,9 +76,9 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		if (cursor != null) {
 			try {
 				cursor.close();
- 			} catch (android.database.SQLException e) {
+			} catch (android.database.SQLException e) {
 				throw SqlExceptionUtil.create("Problems closing Android cursor", e);
- 			}
+			}
 		}
 	}
 
