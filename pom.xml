@@ -11,8 +11,9 @@
 	<description>Lightweight Object Relational Model (ORM) Android classes</description>
 	<licenses>
 		<license>
-			<name>BSD License</name>
-			<url>http://www.opensource.org/licenses/bsd-license.php</url>
+			<name>ISC License</name>
+			<url>http://ormlite.sourceforge.net/LICENSE.txt</url>
+			<!-- http://opensource.org/licenses/isc-license -->
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
