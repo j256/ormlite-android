@@ -42,17 +42,17 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		return getCursor().getColumnName(AndroidDatabaseResults.jdbcColumnIndexToAndroid(column));
 	}
 
-	public DatabaseResults executeQuery() throws SQLException {
+	public DatabaseResults runQuery() throws SQLException {
+		// this could come from DELETE or UPDATE, just not a SELECT
 		if (type != StatementType.SELECT) {
-			throw new IllegalArgumentException("Cannot call executeQuery on a " + type + " statement");
+			throw new IllegalArgumentException("Cannot call query on a " + type + " statement");
 		}
 		return new AndroidDatabaseResults(getCursor());
 	}
 
-	public int executeUpdate() throws SQLException {
-		// this could come from DELETE or UPDATE, just not a SELECT
+	public int runUpdate() throws SQLException {
 		if (type == StatementType.SELECT) {
-			throw new IllegalArgumentException("Cannot call executeUpdate on a " + type + " statement");
+			throw new IllegalArgumentException("Cannot call update on a " + type + " statement");
 		}
 		String finalSql = null;
 		try {
@@ -66,6 +66,18 @@ public class AndroidCompiledStatement implements CompiledStatement {
 			throw SqlExceptionUtil.create("Problems executing Android statement: " + finalSql, e);
 		}
 		return 1;
+	}
+
+	public boolean runExecute() throws SQLException {
+		if (type != StatementType.EXECUTE) {
+			throw new IllegalArgumentException("Cannot call execute on a " + type + " statement");
+		}
+		try {
+			db.execSQL(sql, new Object[0]);
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("Problems executing Android statement: " + sql, e);
+		}
+		return true;
 	}
 
 	public DatabaseResults getGeneratedKeys() throws SQLException {
