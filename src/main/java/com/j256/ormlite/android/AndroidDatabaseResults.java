@@ -132,4 +132,11 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	public static int androidColumnIndexToJdbc(int columnIndex) {
 		return columnIndex + 1;
 	}
+
+	/***
+	 * Returns the underlying Android cursor object. This should not be used unless you know what you are doing.
+	 */
+	public Cursor getRawCursor() {
+		return cursor;
+	}
 }
