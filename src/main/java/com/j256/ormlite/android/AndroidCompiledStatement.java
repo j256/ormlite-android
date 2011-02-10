@@ -68,7 +68,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		return 1;
 	}
 
-	public boolean runExecute() throws SQLException {
+	public int runExecute() throws SQLException {
 		if (type != StatementType.EXECUTE) {
 			throw new IllegalArgumentException("Cannot call execute on a " + type + " statement");
 		}
@@ -77,7 +77,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("Problems executing Android statement: " + sql, e);
 		}
-		return true;
+		return 0;
 	}
 
 	public DatabaseResults getGeneratedKeys() throws SQLException {
