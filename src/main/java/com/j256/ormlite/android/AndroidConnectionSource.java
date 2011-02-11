@@ -60,7 +60,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		// noop since connection management is handled by AndroidOS
 	}
 
-	public boolean saveSpecialConnection(DatabaseConnection connection) {
+	public boolean saveSpecialConnection(DatabaseConnection connection) throws SQLException {
 		return saveSpecial(connection);
 	}
 

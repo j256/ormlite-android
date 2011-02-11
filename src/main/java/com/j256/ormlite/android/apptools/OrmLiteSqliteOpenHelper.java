@@ -1,5 +1,7 @@
 package com.j256.ormlite.android.apptools;
 
+import java.sql.SQLException;
+
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
@@ -80,14 +82,22 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		 * AndroidConnectionSource, otherwise it will go recursive if the subclass calls getConnectionSource().
 		 */
 		DatabaseConnection conn = cs.getSpecialConnection();
+		boolean clearSpecial = false;
 		if (conn == null) {
 			conn = new AndroidDatabaseConnection(db, true);
+			try {
+				cs.saveSpecialConnection(conn);
+				clearSpecial = true;
+			} catch (SQLException e) {
+				throw new IllegalStateException("Could not save special connection", e);
+			}
 		}
-		cs.saveSpecialConnection(conn);
 		try {
 			onCreate(db, cs);
 		} finally {
-			cs.clearSpecialConnection(conn);
+			if (clearSpecial) {
+				cs.clearSpecialConnection(conn);
+			}
 		}
 	}
 
@@ -103,14 +113,22 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		 * AndroidConnectionSource, otherwise it will go recursive if the subclass calls getConnectionSource().
 		 */
 		DatabaseConnection conn = cs.getSpecialConnection();
+		boolean clearSpecial = false;
 		if (conn == null) {
 			conn = new AndroidDatabaseConnection(db, true);
+			try {
+				cs.saveSpecialConnection(conn);
+				clearSpecial = true;
+			} catch (SQLException e) {
+				throw new IllegalStateException("Could not save special connection", e);
+			}
 		}
-		cs.saveSpecialConnection(conn);
 		try {
 			onUpgrade(db, cs, oldVersion, newVersion);
 		} finally {
-			cs.clearSpecialConnection(conn);
+			if (clearSpecial) {
+				cs.clearSpecialConnection(conn);
+			}
 		}
 	}
 
