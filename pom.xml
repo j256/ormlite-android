@@ -12,8 +12,7 @@
 	<licenses>
 		<license>
 			<name>ISC License</name>
-			<url>http://ormlite.sourceforge.net/LICENSE.txt</url>
-			<!-- http://opensource.org/licenses/isc-license -->
+			<url>http://ormlite.com/docs/license</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
