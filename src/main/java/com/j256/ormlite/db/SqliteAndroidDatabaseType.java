@@ -41,12 +41,14 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 		appendShortType(sb);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public FieldConverter getFieldConverter(DataType dataType) {
 		// we are only overriding certain types
 		switch (dataType) {
 			case JAVA_DATE :
-				return DataType.JAVA_DATE_STRING;
+			case DATE :
+				return DataType.DATE_STRING;
 			default :
 				return super.getFieldConverter(dataType);
 		}
