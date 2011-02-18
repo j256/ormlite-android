@@ -30,6 +30,11 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 	}
 
 	@Override
+	public String getDatabaseName() {
+		return "Android SQLite";
+	}
+
+	@Override
 	protected void appendDateType(StringBuilder sb, int fieldWidth) {
 		// default is to store the date as a string
 		appendDateStringType(sb, fieldWidth);
