@@ -191,6 +191,11 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	public boolean isTableExists(String tableName) throws SQLException {
+		// NOTE: it is non trivial to do this check since the helper will auto-create if it doesn't exist
+		return true;
+	}
+
 	private void bindArgs(SQLiteStatement stmt, Object[] args, FieldType[] argFieldTypes) {
 		if (args == null) {
 			return;
