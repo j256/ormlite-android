@@ -196,7 +196,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		return true;
 	}
 
-	private void bindArgs(SQLiteStatement stmt, Object[] args, FieldType[] argFieldTypes) {
+	private void bindArgs(SQLiteStatement stmt, Object[] args, FieldType[] argFieldTypes) throws SQLException {
 		if (args == null) {
 			return;
 		}
@@ -208,6 +208,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			} else {
 				switch (argFieldTypes[i].getSqlType()) {
 					case STRING :
+					case LONG_STRING :
 						stmt.bindString(argIndex, arg.toString());
 						break;
 					case BOOLEAN :
@@ -224,6 +225,8 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 					case SERIALIZABLE :
 						stmt.bindBlob(argIndex, (byte[]) arg);
 						break;
+					default :
+						throw new SQLException("Unknown sql argument type " + argFieldTypes[i].getSqlType());
 				}
 			}
 		}
