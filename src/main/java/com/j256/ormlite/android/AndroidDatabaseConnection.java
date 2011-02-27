@@ -223,6 +223,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 						stmt.bindDouble(argIndex, ((Number) arg).doubleValue());
 						break;
 					case BYTE_ARRAY :
+					case SERIALIZABLE :
 						stmt.bindBlob(argIndex, (byte[]) arg);
 						break;
 					default :
