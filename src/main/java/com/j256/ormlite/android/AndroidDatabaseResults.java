@@ -113,7 +113,7 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		return new ByteArrayInputStream(cursor.getBlob(jdbcColumnIndexToAndroid(columnIndex)));
 	}
 
-	public boolean isNull(int columnIndex) throws SQLException {
+	public boolean wasNull(int columnIndex) throws SQLException {
 		return cursor.isNull(jdbcColumnIndexToAndroid(columnIndex));
 	}
 
