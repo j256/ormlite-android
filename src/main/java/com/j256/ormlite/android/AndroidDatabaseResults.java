@@ -31,10 +31,6 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		return cursor.getColumnCount();
 	}
 
-	public String getColumnName(int column) throws SQLException {
-		return cursor.getColumnName(column);
-	}
-
 	public boolean next() throws SQLException {
 		boolean returnValue;
 		if (firstCall) {
@@ -61,16 +57,15 @@ public class AndroidDatabaseResults implements DatabaseResults {
 				throw new SQLException("Unknown field '" + columnName + "' from the Android sqlite cursor");
 			}
 		}
-		return androidColumnIndexToJdbc(index);
+		return index;
 	}
 
 	public String getString(int columnIndex) throws SQLException {
-		return cursor.getString(jdbcColumnIndexToAndroid(columnIndex));
+		return cursor.getString(columnIndex);
 	}
 
 	public boolean getBoolean(int columnIndex) throws SQLException {
-		int col = jdbcColumnIndexToAndroid(columnIndex);
-		if (cursor.isNull(col) || cursor.getShort(col) == 0) {
+		if (cursor.isNull(columnIndex) || cursor.getShort(columnIndex) == 0) {
 			return false;
 		} else {
 			return true;
@@ -82,27 +77,27 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	}
 
 	public byte[] getBytes(int columnIndex) throws SQLException {
-		return cursor.getBlob(jdbcColumnIndexToAndroid(columnIndex));
+		return cursor.getBlob(columnIndex);
 	}
 
 	public short getShort(int columnIndex) throws SQLException {
-		return cursor.getShort(jdbcColumnIndexToAndroid(columnIndex));
+		return cursor.getShort(columnIndex);
 	}
 
 	public int getInt(int columnIndex) throws SQLException {
-		return cursor.getInt(jdbcColumnIndexToAndroid(columnIndex));
+		return cursor.getInt(columnIndex);
 	}
 
 	public long getLong(int columnIndex) throws SQLException {
-		return cursor.getLong(jdbcColumnIndexToAndroid(columnIndex));
+		return cursor.getLong(columnIndex);
 	}
 
 	public float getFloat(int columnIndex) throws SQLException {
-		return cursor.getFloat(jdbcColumnIndexToAndroid(columnIndex));
+		return cursor.getFloat(columnIndex);
 	}
 
 	public double getDouble(int columnIndex) throws SQLException {
-		return cursor.getDouble(jdbcColumnIndexToAndroid(columnIndex));
+		return cursor.getDouble(columnIndex);
 	}
 
 	public Timestamp getTimestamp(int columnIndex) throws SQLException {
@@ -110,27 +105,11 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	}
 
 	public InputStream getBlobStream(int columnIndex) throws SQLException {
-		return new ByteArrayInputStream(cursor.getBlob(jdbcColumnIndexToAndroid(columnIndex)));
+		return new ByteArrayInputStream(cursor.getBlob(columnIndex));
 	}
 
 	public boolean wasNull(int columnIndex) throws SQLException {
-		return cursor.isNull(jdbcColumnIndexToAndroid(columnIndex));
-	}
-
-	/**
-	 * Convert the jdbc column index to one suitable for Android. Jdbc-land has the first argument being 1 and in
-	 * Android it is 0.
-	 */
-	public static int jdbcColumnIndexToAndroid(int columnIndex) {
-		return columnIndex - 1;
-	}
-
-	/**
-	 * Convert the Android column index to one suitable for JDBC. Jdbc-land has the first argument being 1 and in
-	 * Android it is 0.
-	 */
-	public static int androidColumnIndexToJdbc(int columnIndex) {
-		return columnIndex + 1;
+		return cursor.isNull(columnIndex);
 	}
 
 	/***

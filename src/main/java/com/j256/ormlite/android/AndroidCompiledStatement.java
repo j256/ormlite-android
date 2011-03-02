@@ -39,7 +39,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	}
 
 	public String getColumnName(int column) throws SQLException {
-		return getCursor().getColumnName(AndroidDatabaseResults.jdbcColumnIndexToAndroid(column));
+		return getCursor().getColumnName(column);
 	}
 
 	public DatabaseResults runQuery() throws SQLException {
@@ -96,12 +96,12 @@ public class AndroidCompiledStatement implements CompiledStatement {
 
 	public void setNull(int parameterIndex, SqlType sqlType) throws SQLException {
 		isInPrep();
-		args.add(AndroidDatabaseResults.jdbcColumnIndexToAndroid(parameterIndex), null);
+		args.add(parameterIndex, null);
 	}
 
 	public void setObject(int parameterIndex, Object obj, SqlType sqlType) throws SQLException {
 		isInPrep();
-		args.add(AndroidDatabaseResults.jdbcColumnIndexToAndroid(parameterIndex), obj.toString());
+		args.add(parameterIndex, obj.toString());
 	}
 
 	public void setMaxRows(int max) throws SQLException {
