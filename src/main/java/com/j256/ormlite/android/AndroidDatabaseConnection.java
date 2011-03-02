@@ -203,27 +203,27 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		for (int i = 0; i < args.length; i++) {
 			Object arg = args[i];
 			if (arg == null) {
-				stmt.bindNull(i);
+				stmt.bindNull(i + 1);
 			} else {
 				switch (argFieldTypes[i].getSqlType()) {
 					case STRING :
 					case LONG_STRING :
-						stmt.bindString(i, arg.toString());
+						stmt.bindString(i + 1, arg.toString());
 						break;
 					case BOOLEAN :
 					case BYTE :
 					case SHORT :
 					case INTEGER :
 					case LONG :
-						stmt.bindLong(i, ((Number) arg).longValue());
+						stmt.bindLong(i + 1, ((Number) arg).longValue());
 						break;
 					case FLOAT :
 					case DOUBLE :
-						stmt.bindDouble(i, ((Number) arg).doubleValue());
+						stmt.bindDouble(i + 1, ((Number) arg).doubleValue());
 						break;
 					case BYTE_ARRAY :
 					case SERIALIZABLE :
-						stmt.bindBlob(i, (byte[]) arg);
+						stmt.bindBlob(i + 1, (byte[]) arg);
 						break;
 					default :
 						throw new SQLException("Unknown sql argument type " + argFieldTypes[i].getSqlType());
