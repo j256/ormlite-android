@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.j256.ormlite</groupId>
 	<artifactId>ormlite-android</artifactId>
-	<version>4.15-SNAPSHOT</version>
+	<version>4.15</version>
 	<packaging>jar</packaging>
 	<name>ORMLite Android</name>
 	<url>http://ormlite.sourceforge.net/</url>
@@ -22,9 +22,9 @@
 		<version>2</version>
 	</parent>
 	<scm>
-		<url>http://ormlite.svn.sourceforge.net/viewvc/ormlite/ormlite-android/trunk/</url>
-		<connection>scm:svn:https://ormlite.svn.sourceforge.net/svnroot/ormlite/ormlite-android/trunk</connection>
-		<developerConnection>scm:svn:https://ormlite.svn.sourceforge.net/svnroot/ormlite/ormlite-android/trunk
+		<url>http://ormlite.svn.sourceforge.net/viewvc/ormlite/ormlite-android/tags/ormlite-android-4.15</url>
+		<connection>scm:svn:https://ormlite.svn.sourceforge.net/svnroot/ormlite/ormlite-android/tags/ormlite-android-4.15</connection>
+		<developerConnection>scm:svn:https://ormlite.svn.sourceforge.net/svnroot/ormlite/ormlite-android/tags/ormlite-android-4.15
 		</developerConnection>
 	</scm>
 	<developers>
