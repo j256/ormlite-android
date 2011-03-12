@@ -58,4 +58,9 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 				return super.getFieldConverter(dataType);
 		}
 	}
+
+	@Override
+	public boolean isNestedSavePointsSupported() {
+		return false;
+	}
 }
