@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.j256.ormlite.android.AndroidConnectionSource;
 import com.j256.ormlite.android.AndroidDatabaseConnection;
+import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
 
@@ -143,5 +145,12 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		} finally {
 			connectionSource = null;
 		}
+	}
+
+	/**
+	 * Get a DAO for our class. This stores the DAO in a map to try and cache them.
+	 */
+	public <T, ID> Dao<T, ID> getDao(Class<T> clazz) throws SQLException {
+		return DaoManager.createDao(getConnectionSource(), clazz);
 	}
 }
