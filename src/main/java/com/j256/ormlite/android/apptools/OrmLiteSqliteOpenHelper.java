@@ -151,6 +151,10 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 * Get a DAO for our class. This stores the DAO in a map to try and cache them.
 	 */
 	public <D extends Dao<T,?>, T> D getDao(Class<T> clazz) throws SQLException {
-		return DaoManager.createDao(getConnectionSource(), clazz);
+		@SuppressWarnings("unchecked")
+		Dao<Object, Object> dao = (Dao<Object, Object>)DaoManager.createDao(getConnectionSource(), clazz);
+		@SuppressWarnings("unchecked")
+		D castDao = (D)dao;
+		return castDao;
 	}
 }
