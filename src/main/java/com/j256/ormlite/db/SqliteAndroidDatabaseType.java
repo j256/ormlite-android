@@ -63,4 +63,9 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 	public boolean isNestedSavePointsSupported() {
 		return false;
 	}
+
+	@Override
+	public boolean isBatchUseTransaction() {
+		return true;
+	}
 }
