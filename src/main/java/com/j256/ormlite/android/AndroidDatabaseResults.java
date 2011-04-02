@@ -73,7 +73,14 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	}
 
 	public char getChar(int columnIndex) throws SQLException {
-		return getChar(columnIndex);
+		String string = cursor.getString(columnIndex);
+		if (string == null || string.length() == 0) {
+			return 0;
+		} else if (string.length() == 1) {
+			return string.charAt(0);
+		} else {
+			throw new SQLException("More than 1 character stored in database column: " + columnIndex);
+		}
 	}
 
 	public byte getByte(int columnIndex) throws SQLException {
