@@ -206,6 +206,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 				stmt.bindNull(i + 1);
 			} else {
 				switch (argFieldTypes[i].getSqlType()) {
+					case CHAR :
 					case STRING :
 					case LONG_STRING :
 						stmt.bindString(i + 1, arg.toString());

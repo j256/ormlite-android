@@ -72,6 +72,10 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		}
 	}
 
+	public char getChar(int columnIndex) throws SQLException {
+		return getChar(columnIndex);
+	}
+
 	public byte getByte(int columnIndex) throws SQLException {
 		return (byte) getShort(columnIndex);
 	}
