@@ -57,8 +57,7 @@ public class OpenHelperManager {
 			}
 		}
 
-		@SuppressWarnings("unused")
-		int instC = instanceCount.incrementAndGet();
+		instanceCount.incrementAndGet();
 		// Log.d(LOG_NAME, "helper instance count: " + instC);
 		return helper;
 	}

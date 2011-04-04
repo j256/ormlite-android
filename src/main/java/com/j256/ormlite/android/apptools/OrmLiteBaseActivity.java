@@ -21,15 +21,18 @@ import com.j256.ormlite.support.ConnectionSource;
 public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> extends Activity {
 
 	private H helper;
+	private Object lock = new Object();
 
 	/**
 	 * Get a helper for this action.
 	 */
-	public synchronized H getHelper() {
-		if (helper == null) {
-			helper = getHelperInternal(this);
+	public H getHelper() {
+		synchronized (lock) {
+			if (helper == null) {
+				helper = getHelperInternal(this);
+			}
+			return helper;
 		}
-		return helper;
 	}
 
 	/**
@@ -42,7 +45,9 @@ public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> ext
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		releaseHelper(helper);
+		synchronized (lock) {
+			releaseHelper(helper);
+		}
 	}
 
 	/**
