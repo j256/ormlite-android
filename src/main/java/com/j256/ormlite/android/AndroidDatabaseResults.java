@@ -50,7 +50,7 @@ public class AndroidDatabaseResults implements DatabaseResults {
 			 * ask for a particular field list, which escapes the field names, with DISTINCT the fiend names are in the
 			 * cursor with the escaping. Ugly!!
 			 */
-			StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder(columnName.length() + 4);
 			databaseType.appendEscapedEntityName(sb, columnName);
 			index = cursor.getColumnIndex(sb.toString());
 			if (index < 0) {
