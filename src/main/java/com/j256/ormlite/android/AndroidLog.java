@@ -11,8 +11,15 @@ import com.j256.ormlite.logger.LoggerFactory;
  */
 public class AndroidLog implements com.j256.ormlite.logger.Log {
 
+	private final static String ALL_LOGS_NAME = "ORMLite";
+	private final static int REFRESH_LEVEL_CACHE_EVERY = 200;
+
 	private final static int MAX_TAG_LENGTH = 23;
 	private String className;
+
+	// we do this because supposedly Log.isLoggable() always does IO
+	private volatile int levelCacheC = 0;
+	private final boolean levelCache[];
 
 	public AndroidLog(String className) {
 		// get the last part of the class name
@@ -22,10 +29,30 @@ public class AndroidLog implements com.j256.ormlite.logger.Log {
 		if (length > MAX_TAG_LENGTH) {
 			this.className = this.className.substring(length - MAX_TAG_LENGTH, length);
 		}
+		// find the maximum level value
+		int maxLevel = 0;
+		for (com.j256.ormlite.logger.Log.Level level : com.j256.ormlite.logger.Log.Level.values()) {
+			int androidLevel = levelToAndroidLevel(level);
+			if (androidLevel > maxLevel) {
+				maxLevel = androidLevel;
+			}
+		}
+		levelCache = new boolean[maxLevel + 1];
+		refreshLevelCache();
 	}
 
 	public boolean isLevelEnabled(Level level) {
-		return Log.isLoggable(className, levelToJavaLevel(level));
+		// we don't care if this is not synchronized, it will be updated sooner or later and multiple updates are fine.
+		if (++levelCacheC >= REFRESH_LEVEL_CACHE_EVERY) {
+			refreshLevelCache();
+			levelCacheC = 0;
+		}
+		int androidLevel = levelToAndroidLevel(level);
+		if (androidLevel < levelCache.length) {
+			return levelCache[androidLevel];
+		} else {
+			return isLevelEnabledInternal(androidLevel);
+		}
 	}
 
 	public void log(Level level, String msg) {
@@ -80,7 +107,21 @@ public class AndroidLog implements com.j256.ormlite.logger.Log {
 		}
 	}
 
-	private int levelToJavaLevel(com.j256.ormlite.logger.Log.Level level) {
+	private void refreshLevelCache() {
+		for (com.j256.ormlite.logger.Log.Level level : com.j256.ormlite.logger.Log.Level.values()) {
+			int androidLevel = levelToAndroidLevel(level);
+			if (androidLevel < levelCache.length) {
+				levelCache[androidLevel] = isLevelEnabledInternal(androidLevel);
+			}
+		}
+	}
+
+	private boolean isLevelEnabledInternal(int androidLevel) {
+		// this is supposedly expensive with an IO operation for each call so we cache them into levelCache[]
+		return Log.isLoggable(className, androidLevel) || Log.isLoggable(ALL_LOGS_NAME, androidLevel);
+	}
+
+	private int levelToAndroidLevel(com.j256.ormlite.logger.Log.Level level) {
 		switch (level) {
 			case TRACE :
 				return Log.VERBOSE;
