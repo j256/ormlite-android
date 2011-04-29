@@ -18,7 +18,7 @@ import com.j256.ormlite.support.DatabaseConnection;
  * SQLite database open helper which can be extended by your application to help manage when the application needs to
  * create or upgrade its database.
  * 
- * @author kevingalligan
+ * @author kevingalligan, graywatson
  */
 public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 

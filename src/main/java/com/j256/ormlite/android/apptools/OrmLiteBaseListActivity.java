@@ -2,6 +2,7 @@ package com.j256.ormlite.android.apptools;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.os.Bundle;
 
 import com.j256.ormlite.support.ConnectionSource;
 
@@ -10,23 +11,17 @@ import com.j256.ormlite.support.ConnectionSource;
  * 
  * For more information, see {@link OrmLiteBaseActivity}.
  * 
- * @author kevingalligan
+ * @author graywatson, kevingalligan
  */
 public abstract class OrmLiteBaseListActivity<H extends OrmLiteSqliteOpenHelper> extends ListActivity {
 
-	private H helper;
-	private Object lock = new Object();
+	private volatile H helper;
 
 	/**
 	 * Get a helper for this action.
 	 */
 	public H getHelper() {
-		synchronized (lock) {
-			if (helper == null) {
-				helper = getHelperInternal(this);
-			}
-			return helper;
-		}
+		return helper;
 	}
 
 	/**
@@ -37,15 +32,28 @@ public abstract class OrmLiteBaseListActivity<H extends OrmLiteSqliteOpenHelper>
 	}
 
 	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		if (helper == null) {
+			helper = getHelperInternal(this);
+		}
+		super.onCreate(savedInstanceState);
+	}
+
+	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		synchronized (lock) {
-			releaseHelper(helper);
-		}
+		releaseHelper(helper);
 	}
 
 	/**
-	 * @see OrmLiteBaseActivity#getHelperInternal(Context)
+	 * This is called internally by the class to populate the helper object instance. This should not be called directly
+	 * by client code unless you know what you are doing. Use {@link #getHelper()} to get a helper instance. If you are
+	 * managing your own helper creation, override this method to supply this activity with a helper instance.
+	 * 
+	 * <p>
+	 * <b> NOTE: </b> If you override this method, you most likely will need to override the
+	 * {@link #releaseHelper(OrmLiteSqliteOpenHelper)} method as well.
+	 * </p>
 	 */
 	protected H getHelperInternal(Context context) {
 		@SuppressWarnings("unchecked")
@@ -54,12 +62,16 @@ public abstract class OrmLiteBaseListActivity<H extends OrmLiteSqliteOpenHelper>
 	}
 
 	/**
-	 * @see OrmLiteBaseActivity#releaseHelper(OrmLiteSqliteOpenHelper)
+	 * Release the helper instance created in {@link #getHelperInternal(Context)}. You most likely will not need to call
+	 * this directly since {@link #onDestroy()} does it for you.
+	 * 
+	 * <p>
+	 * <b> NOTE: </b> If you override this method, you most likely will need to override the
+	 * {@link #getHelperInternal(Context)} method as well.
+	 * </p>
 	 */
 	protected void releaseHelper(H helper) {
-		if (helper != null) {
-			OpenHelperManager.release();
-			helper = null;
-		}
+		OpenHelperManager.release();
+		helper = null;
 	}
 }

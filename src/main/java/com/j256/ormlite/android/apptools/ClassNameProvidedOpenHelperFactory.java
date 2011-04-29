@@ -8,8 +8,11 @@ import android.content.Context;
  * The default helper factory. This uses the "open_helper_classname" string identifier in your context as the class-name
  * of your helper class.
  * 
+ * @deprecated We are using other mechanisms now to inject the helper class. See
+ *             {@link OpenHelperManager#getHelper(Context, java.lang.reflect.Type)}.
  * @author kevingalligan
  */
+@Deprecated
 public class ClassNameProvidedOpenHelperFactory implements OpenHelperManager.SqliteOpenHelperFactory {
 
 	public OrmLiteSqliteOpenHelper getHelper(Context c) {
