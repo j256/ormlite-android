@@ -19,9 +19,10 @@ import android.content.Context;
  * 
  * The SQLiteOpenHelper and database classes maintain one connection under the hood, and prevent locks in the java code.
  * Creating multiple connections can potentially be a source of trouble. This class shares the same connection instance
- * between multiple clients, which will allow multiple activities and services to run at the same time. Every time you
- * use the helper, you should call {@link #getHelper(Context, Class)} on this class. When you are done with the helper
- * you should call {@link #release()}.
+ * between multiple clients, which will allow multiple activities and services to run at the same time.
+ * 
+ * Every time you use the helper, you should call {@link #getHelper(Context, Class)} on this class. When you are done
+ * with the helper you should call {@link #release()}.
  * 
  * @author graywatson, kevingalligan
  */
@@ -37,7 +38,7 @@ public class OpenHelperManager {
 	private static Object helperLock = new Object();
 
 	/**
-	 * Set the manager with your own helper factory. This is now a noop.
+	 * Set the manager with your own helper factory.
 	 * 
 	 * @deprecated You should either use {@link #setOpenHelperClass(Class)} or call {@link #getHelper(Context)}.
 	 */
@@ -57,6 +58,17 @@ public class OpenHelperManager {
 	/**
 	 * Get the static instance of our open helper. This has a usage counter on it so make sure all calls to this method
 	 * have an associated call to {@link #release()}.
+	 * 
+	 * <p>
+	 * To find the helper class, this does the following: <br />
+	 * 1) If the factory class (albeit deprecated) was injected it will be used to get the helper. <br />
+	 * 2) If the class has been set with a call to {@link #setOpenHelperClass(Class)}, it will be used to construct a
+	 * helper. <br />
+	 * 3) If the resource class name is configured in the strings.xml file it will be used. <br />
+	 * 4) The context class hierarchy is walked looking at the generic parameters for a class extending
+	 * OrmLiteSqliteOpenHelper. This is used by the {@link OrmLiteBaseActivity} and other base classes. <br />
+	 * 5) An exception is thrown saying that it was not able to set the helper class.
+	 * </p>
 	 */
 	public static OrmLiteSqliteOpenHelper getHelper(Context context) {
 		if (helper == null) {
@@ -154,25 +166,30 @@ public class OpenHelperManager {
 			}
 		}
 
-		// try walking the context to see if we can get the class from a parameter
+		// try walking the context class to see if we can get the OrmLiteSqliteOpenHelper from a generic parameter
 		for (; componentClass != null; componentClass = componentClass.getSuperclass()) {
 			Type superType = componentClass.getGenericSuperclass();
 			if (superType == null || !(superType instanceof ParameterizedType)) {
 				continue;
 			}
+			// get the generic type arguments
 			Type[] types = ((ParameterizedType) superType).getActualTypeArguments();
+			// defense
 			if (types == null || types.length == 0) {
 				continue;
 			}
-			if (!(types[0] instanceof Class)) {
-				continue;
-			}
-			Class<?> clazz = (Class<?>) types[0];
-			if (OrmLiteSqliteOpenHelper.class.isAssignableFrom(clazz)) {
-				@SuppressWarnings("unchecked")
-				Class<? extends OrmLiteSqliteOpenHelper> castOpenHelperClass =
-						(Class<? extends OrmLiteSqliteOpenHelper>) clazz;
-				return castOpenHelperClass;
+			for (Type type : types) {
+				// defense
+				if (!(type instanceof Class)) {
+					continue;
+				}
+				Class<?> clazz = (Class<?>) type;
+				if (OrmLiteSqliteOpenHelper.class.isAssignableFrom(clazz)) {
+					@SuppressWarnings("unchecked")
+					Class<? extends OrmLiteSqliteOpenHelper> castOpenHelperClass =
+							(Class<? extends OrmLiteSqliteOpenHelper>) clazz;
+					return castOpenHelperClass;
+				}
 			}
 		}
 		throw new IllegalStateException(
