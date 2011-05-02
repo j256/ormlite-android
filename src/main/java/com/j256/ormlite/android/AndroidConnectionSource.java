@@ -25,24 +25,23 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 
 	private static final Logger logger = LoggerFactory.getLogger(AndroidConnectionSource.class);
 
-	private SQLiteOpenHelper helper;
-	private DatabaseConnection readOnlyConnection = null;
-	private DatabaseConnection readWriteConnection = null;
-	private DatabaseType databaseType = new SqliteAndroidDatabaseType();
+	private final SQLiteOpenHelper helper;
+	private DatabaseConnection connection = null;
+	private volatile boolean isOpen = true;
+	private final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 
 	public AndroidConnectionSource(SQLiteOpenHelper helper) {
 		this.helper = helper;
 	}
 
 	public DatabaseConnection getReadOnlyConnection() throws SQLException {
-		DatabaseConnection conn = getSavedConnection();
-		if (conn != null) {
-			return conn;
-		}
-		if (readOnlyConnection == null) {
-			readOnlyConnection = new AndroidDatabaseConnection(helper.getReadableDatabase(), false);
-		}
-		return readOnlyConnection;
+		/*
+		 * We have to use the read-write connection because getWritableDatabase() can call close on
+		 * getReadableDatabase() in the future. This has something to do with Android's SQLite connection management.
+		 * 
+		 * See android docs: http://developer.android.com/reference/android/database/sqlite/SQLiteOpenHelper.html
+		 */
+		return getReadWriteConnection();
 	}
 
 	public DatabaseConnection getReadWriteConnection() throws SQLException {
@@ -50,10 +49,10 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		if (conn != null) {
 			return conn;
 		}
-		if (readWriteConnection == null) {
-			readWriteConnection = new AndroidDatabaseConnection(helper.getWritableDatabase(), true);
+		if (connection == null) {
+			connection = new AndroidDatabaseConnection(helper.getWritableDatabase(), true);
 		}
-		return readWriteConnection;
+		return connection;
 	}
 
 	public void releaseConnection(DatabaseConnection connection) throws SQLException {
@@ -70,9 +69,14 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 
 	public void close() {
 		// the helper is closed so it calls close here, so this CANNOT be a call back to helper.close()
+		isOpen = false;
 	}
 
 	public DatabaseType getDatabaseType() {
 		return databaseType;
+	}
+
+	public boolean isOpen() {
+		return isOpen;
 	}
 }
