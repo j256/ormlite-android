@@ -72,6 +72,9 @@ public class OpenHelperManager {
 	 */
 	public static OrmLiteSqliteOpenHelper getHelper(Context context) {
 		if (helper == null) {
+			if (context == null) {
+				throw new IllegalArgumentException("context argument is null");
+			}
 			synchronized (helperLock) {
 				if (helper == null) {
 					Context appContext = context.getApplicationContext();
@@ -92,6 +95,17 @@ public class OpenHelperManager {
 		instanceCount.incrementAndGet();
 		// Log.d(LOG_NAME, "helper instance count: " + instC);
 		return helper;
+	}
+
+	/**
+	 * Like {@link #getHelper(Context)} but sets the helper class beforehand.
+	 */
+	public static OrmLiteSqliteOpenHelper getHelper(Context context,
+			Class<? extends OrmLiteSqliteOpenHelper> openHelperClass) {
+		if (helper == null) {
+			innerSetHelperClass(openHelperClass);
+		}
+		return getHelper(context);
 	}
 
 	/**
@@ -201,7 +215,7 @@ public class OpenHelperManager {
 	 * Factory for providing open helpers.
 	 * 
 	 * @deprecated We are using other mechanisms now to inject the helper class. See
-	 *             {@link OpenHelperManager#getHelper(Context, java.lang.reflect.Type)}.
+	 *             {@link OpenHelperManager#getHelper(Context)}.
 	 */
 	@Deprecated
 	public interface SqliteOpenHelperFactory {

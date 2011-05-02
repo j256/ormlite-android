@@ -11,6 +11,8 @@ import com.j256.ormlite.android.AndroidConnectionSource;
 import com.j256.ormlite.android.AndroidDatabaseConnection;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
 
@@ -22,7 +24,9 @@ import com.j256.ormlite.support.DatabaseConnection;
  */
 public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 
+	private Logger logger = LoggerFactory.getLogger(getClass());
 	private AndroidConnectionSource connectionSource = new AndroidConnectionSource(this);
+	private volatile boolean isOpen = true;
 
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion) {
 		super(context, databaseName, factory, databaseVersion);
@@ -69,6 +73,10 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 * Get the connection source associated with the helper.
 	 */
 	public ConnectionSource getConnectionSource() {
+		if (!isOpen) {
+			// we don't throw this exception, but log it for debugging purposes
+			logger.error(new IllegalStateException(), "Getting connectionSource called after closed");
+		}
 		return connectionSource;
 	}
 
@@ -140,11 +148,19 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	@Override
 	public void close() {
 		super.close();
-		try {
-			connectionSource.close();
-		} finally {
-			connectionSource = null;
-		}
+		connectionSource.close();
+		/*
+		 * We used to set connectionSource to null here but now we just set the closed flag and then log heavily if
+		 * someone uses getConectionSource() after this point.
+		 */
+		isOpen = false;
+	}
+
+	/**
+	 * Return true if the helper is still open. Once {@link #close()} is called then this will return false.
+	 */
+	public boolean isOpen() {
+		return isOpen;
 	}
 
 	/**
