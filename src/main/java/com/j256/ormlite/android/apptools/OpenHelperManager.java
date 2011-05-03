@@ -4,10 +4,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import android.content.Context;
+
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
-
-import android.content.Context;
 
 /**
  * This helps organize and access database connections to optimize connection sharing. There are several schemes to
