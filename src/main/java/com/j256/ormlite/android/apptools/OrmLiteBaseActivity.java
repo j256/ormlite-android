@@ -22,14 +22,22 @@ import com.j256.ormlite.support.ConnectionSource;
 public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> extends Activity {
 
 	private volatile H helper;
+	private volatile boolean created = false;
+	private volatile boolean destroyed = false;
 
 	/**
 	 * Get a helper for this action.
 	 */
 	public H getHelper() {
 		if (helper == null) {
-			throw new IllegalStateException(
-					"Helper has already been closed and is null.  It cannot be used after onDestroy() is called?");
+			if (!created) {
+				throw new IllegalStateException("A call has not been made to onCreate() yet so the helper is null");
+			} else if (destroyed) {
+				throw new IllegalStateException(
+						"A call to onDestroy has already been made and the helper cannot be used after that point");
+			} else {
+				throw new IllegalStateException("Helper is null for some unknown reason");
+			}
 		} else {
 			return helper;
 		}
@@ -46,6 +54,7 @@ public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> ext
 	protected void onCreate(Bundle savedInstanceState) {
 		if (helper == null) {
 			helper = getHelperInternal(this);
+			created = true;
 		}
 		super.onCreate(savedInstanceState);
 	}
@@ -54,6 +63,7 @@ public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> ext
 	protected void onDestroy() {
 		super.onDestroy();
 		releaseHelper(helper);
+		destroyed = true;
 	}
 
 	/**
