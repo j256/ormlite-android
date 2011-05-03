@@ -70,7 +70,7 @@ public abstract class OrmLiteBaseService<H extends OrmLiteSqliteOpenHelper> exte
 	 * </p>
 	 */
 	protected void releaseHelper(H helper) {
-		OpenHelperManager.release();
+		OpenHelperManager.releaseHelper();
 		helper = null;
 	}
 }

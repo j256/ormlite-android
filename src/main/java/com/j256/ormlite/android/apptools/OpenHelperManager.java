@@ -3,7 +3,9 @@ package com.j256.ormlite.android.apptools;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
 
 import android.content.Context;
 
@@ -21,21 +23,22 @@ import android.content.Context;
  * Creating multiple connections can potentially be a source of trouble. This class shares the same connection instance
  * between multiple clients, which will allow multiple activities and services to run at the same time.
  * 
- * Every time you use the helper, you should call {@link #getHelper(Context, Class)} on this class. When you are done
- * with the helper you should call {@link #release()}.
+ * Every time you use the helper, you should call {@link #getHelper(Context)} or {@link #getHelper(Context, Class)}.
+ * When you are done with the helper you should call {@link #releaseHelper()}.
  * 
  * @author graywatson, kevingalligan
  */
 public class OpenHelperManager {
 
 	private static final String HELPER_CLASS_RESOURCE_NAME = "open_helper_classname";
+	private static Logger logger = LoggerFactory.getLogger(OpenHelperManager.class);
 
 	private static SqliteOpenHelperFactory factory = null;
 	private static Class<? extends OrmLiteSqliteOpenHelper> helperClass = null;
 	private static volatile OrmLiteSqliteOpenHelper helper = null;
-	private static AtomicInteger instanceCount = new AtomicInteger();
+	private static boolean wasClosed = false;
+	private static int instanceCount = 0;
 	// private static String LOG_NAME = OpenHelperManager.class.getName();
-	private static Object helperLock = new Object();
 
 	/**
 	 * Set the manager with your own helper factory.
@@ -56,8 +59,15 @@ public class OpenHelperManager {
 	}
 
 	/**
-	 * Get the static instance of our open helper. This has a usage counter on it so make sure all calls to this method
-	 * have an associated call to {@link #release()}.
+	 * Create a static instance of our open helper. This has a usage counter on it so make sure all calls to this method
+	 * have an associated call to {@link #releaseHelper()}. This should be called during an onCreate() type of method
+	 * when the application or service is starting. The caller should then keep the helper around until it is shutting
+	 * down when {@link #releaseHelper()} should be called.
+	 * 
+	 * <p>
+	 * If multiple parts of your application need the helper, they call can call this as long as they each call release
+	 * when they are done.
+	 * </p>
 	 * 
 	 * <p>
 	 * To find the helper class, this does the following: <br />
@@ -70,33 +80,37 @@ public class OpenHelperManager {
 	 * 5) An exception is thrown saying that it was not able to set the helper class.
 	 * </p>
 	 */
-	public static OrmLiteSqliteOpenHelper getHelper(Context context) {
+	public static synchronized OrmLiteSqliteOpenHelper getHelper(Context context) {
 		if (helper == null) {
 			if (context == null) {
 				throw new IllegalArgumentException("context argument is null");
 			}
-			synchronized (helperLock) {
-				if (helper == null) {
-					Context appContext = context.getApplicationContext();
-					if (factory == null) {
-						if (helperClass == null) {
-							innerSetHelperClass(lookupHelperClass(appContext, context.getClass()));
-						}
-						helper = constructHelper(helperClass, appContext);
-					} else {
-						helper = factory.getHelper(appContext);
-					}
-					// Log.d(LOG_NAME, "Zero instances.  Created helper.");
-					instanceCount.set(0);
-				}
+			if (wasClosed) {
+				/*
+				 * This can happen if you are calling get/release and then get again. This class is not designed to do
+				 * this. You should get the helper in the onCreate, hold an instance to it in your code and then release
+				 * it in onDestroy.
+				 */
+				logger.error(new IllegalStateException(),
+						"The helper has already been closed and should not be re-opened.");
 			}
+			Context appContext = context.getApplicationContext();
+			if (factory == null) {
+				if (helperClass == null) {
+					innerSetHelperClass(lookupHelperClass(appContext, context.getClass()));
+				}
+				helper = constructHelper(helperClass, appContext);
+			} else {
+				helper = factory.getHelper(appContext);
+			}
+			// Log.d(LOG_NAME, "Zero instances.  Created helper.");
+			instanceCount = 0;
 		}
 
-		instanceCount.incrementAndGet();
+		instanceCount++;
 		// Log.d(LOG_NAME, "helper instance count: " + instC);
 		return helper;
 	}
-
 	/**
 	 * Like {@link #getHelper(Context)} but sets the helper class beforehand.
 	 */
@@ -109,22 +123,36 @@ public class OpenHelperManager {
 	}
 
 	/**
-	 * Release the helper that was previous returned by a call to one of the getHelper methods. This will decrement the
-	 * usage counter and close the helper if the counter is 0.
+	 * @deprecated This has been renamed to be {@link #releaseHelper()}.
 	 */
+	@Deprecated
 	public static void release() {
-		int instC = instanceCount.decrementAndGet();
-		// Log.d(LOG_NAME, "helper instance count: " + instC);
-		if (instC == 0) {
-			synchronized (helperLock) {
-				if (helper != null) {
-					// Log.d(LOG_NAME, "Zero instances.  Closing helper.");
-					helper.close();
-					helper = null;
-				}
+		releaseHelper();
+	}
+
+	/**
+	 * Release the helper that was previously returned by a call {@link #getHelper(Context)} or
+	 * {@link #getHelper(Context, Class)}. This will decrement the usage counter and close the helper if the counter is
+	 * 0.
+	 * 
+	 * <p>
+	 * <b> WARNING: </b> This should be called in an onDestroy() type of method when your application or service is
+	 * terminating or if your code is no longer going to use the helper or derived DAOs in any way. _Don't_ call this
+	 * method if you expect to call {@link #getHelper(Context)} again before the application terminates.
+	 * </p>
+	 */
+	public static synchronized void releaseHelper() {
+		instanceCount--;
+		// Log.d(LOG_NAME, "helper instance count: " + instanceCount);
+		if (instanceCount == 0) {
+			if (helper != null) {
+				// Log.d(LOG_NAME, "Zero instances.  Closing helper.");
+				helper.close();
+				helper = null;
+				wasClosed = true;
 			}
-		} else if (instC < 0) {
-			throw new IllegalStateException("Too many calls to release helper.  Instance count = " + instC);
+		} else if (instanceCount < 0) {
+			throw new IllegalStateException("Too many calls to release helper.  Instance count = " + instanceCount);
 		}
 	}
 

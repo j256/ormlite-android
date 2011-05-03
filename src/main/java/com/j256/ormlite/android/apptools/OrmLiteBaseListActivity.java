@@ -71,7 +71,7 @@ public abstract class OrmLiteBaseListActivity<H extends OrmLiteSqliteOpenHelper>
 	 * </p>
 	 */
 	protected void releaseHelper(H helper) {
-		OpenHelperManager.release();
+		OpenHelperManager.releaseHelper();
 		helper = null;
 	}
 }
