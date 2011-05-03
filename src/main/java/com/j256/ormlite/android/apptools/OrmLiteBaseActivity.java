@@ -27,7 +27,12 @@ public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> ext
 	 * Get a helper for this action.
 	 */
 	public H getHelper() {
-		return helper;
+		if (helper == null) {
+			throw new IllegalStateException(
+					"Helper has already been closed and is null.  It cannot be used after onDestroy() is called?");
+		} else {
+			return helper;
+		}
 	}
 
 	/**
