@@ -86,13 +86,8 @@ public class OpenHelperManager {
 				throw new IllegalArgumentException("context argument is null");
 			}
 			if (wasClosed) {
-				/*
-				 * This can happen if you are calling get/release and then get again. This class is not designed to do
-				 * this. You should get the helper in the onCreate, hold an instance to it in your code and then release
-				 * it in onDestroy.
-				 */
-				logger.error(new IllegalStateException(),
-						"The helper has already been closed and should not be re-opened.");
+				// this can happen if you are calling get/release and then get again
+				logger.info("helper has already been closed and is being re-opened.");
 			}
 			Context appContext = context.getApplicationContext();
 			if (factory == null) {
