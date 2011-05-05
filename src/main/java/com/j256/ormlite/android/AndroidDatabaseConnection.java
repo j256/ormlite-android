@@ -81,8 +81,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
-	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes,
-			FieldType[] resultFieldTypes) {
+	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes) {
 		CompiledStatement stmt = new AndroidCompiledStatement(statement, db, type);
 		return stmt;
 	}
