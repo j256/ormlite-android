@@ -9,7 +9,7 @@ import android.content.Context;
  * of your helper class.
  * 
  * @deprecated We are using other mechanisms now to inject the helper class. See
- *             {@link OpenHelperManager#getHelper(Context, java.lang.reflect.Type)}.
+ *             {@link OpenHelperManager#getHelper(Context)}.
  * @author kevingalligan
  */
 @Deprecated

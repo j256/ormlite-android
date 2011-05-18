@@ -70,7 +70,7 @@ public abstract class OrmLiteBaseTabActivity<H extends OrmLiteSqliteOpenHelper> 
 	 * {@link #releaseHelper(OrmLiteSqliteOpenHelper)} method as well.
 	 * </p>
 	 * 
-	 * @see {@link OpenHelperManager#getHelper(Context)}
+	 * @see OpenHelperManager#getHelper(Context)
 	 */
 	protected H getHelperInternal(Context context) {
 		@SuppressWarnings("unchecked")
@@ -87,7 +87,7 @@ public abstract class OrmLiteBaseTabActivity<H extends OrmLiteSqliteOpenHelper> 
 	 * {@link #getHelperInternal(Context)} method as well.
 	 * </p>
 	 * 
-	 * @see {@link OpenHelperManager#releaseHelper()}
+	 * @see OpenHelperManager#releaseHelper()
 	 */
 	protected void releaseHelper(H helper) {
 		OpenHelperManager.releaseHelper();
