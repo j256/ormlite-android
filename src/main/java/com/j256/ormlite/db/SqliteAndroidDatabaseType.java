@@ -1,5 +1,6 @@
 package com.j256.ormlite.db;
 
+import com.j256.ormlite.field.DataPersister;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.FieldConverter;
 
@@ -37,25 +38,23 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 	@Override
 	protected void appendDateType(StringBuilder sb, int fieldWidth) {
 		// default is to store the date as a string
-		appendDateStringType(sb, fieldWidth);
+		appendStringType(sb, fieldWidth);
 	}
 
 	@Override
-	protected void appendBooleanType(StringBuilder sb) {
+	protected void appendBooleanType(StringBuilder sb, int fieldWidth) {
 		// we have to convert booleans to numbers
-		appendShortType(sb);
+		appendShortType(sb, fieldWidth);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
-	public FieldConverter getFieldConverter(DataType dataType) {
+	public FieldConverter getFieldConverter(DataPersister dataPersister) {
 		// we are only overriding certain types
-		switch (dataType) {
-			case JAVA_DATE :
+		switch (dataPersister.getSqlType()) {
 			case DATE :
-				return DataType.DATE_STRING;
+				return DataType.DATE_STRING.getDataPersister();
 			default :
-				return super.getFieldConverter(dataType);
+				return super.getFieldConverter(dataPersister);
 		}
 	}
 
