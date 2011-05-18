@@ -1,8 +1,8 @@
 package com.j256.ormlite.db;
 
 import com.j256.ormlite.field.DataPersister;
-import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.FieldConverter;
+import com.j256.ormlite.field.types.DateStringType;
 
 /**
  * Sqlite database type information for the Android OS that makes native calls to the Android OS database APIs.
@@ -52,7 +52,7 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 		// we are only overriding certain types
 		switch (dataPersister.getSqlType()) {
 			case DATE :
-				return DataType.DATE_STRING.getDataPersister();
+				return DateStringType.getSingleton();
 			default :
 				return super.getFieldConverter(dataPersister);
 		}
