@@ -30,7 +30,6 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 		return null;
 	}
 
-	@Override
 	public String getDatabaseName() {
 		return "Android SQLite";
 	}
