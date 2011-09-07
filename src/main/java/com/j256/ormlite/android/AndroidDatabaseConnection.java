@@ -87,13 +87,6 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		return stmt;
 	}
 
-	/**
-	 * Android doesn't return the number of rows inserted.
-	 */
-	public int insert(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
-		return insert(statement, args, argFieldTypes, null);
-	}
-
 	public int insert(String statement, Object[] args, FieldType[] argFieldTypes, GeneratedKeyHolder keyHolder)
 			throws SQLException {
 		SQLiteStatement stmt = null;
