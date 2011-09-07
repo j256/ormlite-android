@@ -7,6 +7,7 @@ import java.util.List;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
@@ -42,12 +43,12 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		return getCursor().getColumnName(column);
 	}
 
-	public DatabaseResults runQuery() throws SQLException {
+	public DatabaseResults runQuery(ObjectCache objectCache) throws SQLException {
 		// this could come from DELETE or UPDATE, just not a SELECT
 		if (type != StatementType.SELECT) {
 			throw new IllegalArgumentException("Cannot call query on a " + type + " statement");
 		}
-		return new AndroidDatabaseResults(getCursor());
+		return new AndroidDatabaseResults(getCursor(), objectCache);
 	}
 
 	public int runUpdate() throws SQLException {
@@ -78,10 +79,6 @@ public class AndroidCompiledStatement implements CompiledStatement {
 			throw SqlExceptionUtil.create("Problems executing Android statement: " + sql, e);
 		}
 		return 0;
-	}
-
-	public DatabaseResults getGeneratedKeys() throws SQLException {
-		throw new UnsupportedOperationException("Unsupported operation to getGeneratedKeys");
 	}
 
 	public void close() throws SQLException {

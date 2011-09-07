@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
+import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.stmt.GenericRowMapper;
@@ -135,12 +136,12 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	}
 
 	public <T> Object queryForOne(String statement, Object[] args, FieldType[] argFieldTypes,
-			GenericRowMapper<T> rowMapper) throws SQLException {
+			GenericRowMapper<T> rowMapper, ObjectCache objectCache) throws SQLException {
 		Cursor cursor = null;
 
 		try {
 			cursor = db.rawQuery(statement, toStrings(args));
-			AndroidDatabaseResults results = new AndroidDatabaseResults(cursor);
+			AndroidDatabaseResults results = new AndroidDatabaseResults(cursor, objectCache);
 			if (!results.next()) {
 				return null;
 			} else {

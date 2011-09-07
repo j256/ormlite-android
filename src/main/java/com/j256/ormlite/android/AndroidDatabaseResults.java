@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 
 import android.database.Cursor;
 
+import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.db.SqliteAndroidDatabaseType;
 import com.j256.ormlite.support.DatabaseResults;
@@ -19,12 +20,14 @@ import com.j256.ormlite.support.DatabaseResults;
 public class AndroidDatabaseResults implements DatabaseResults {
 
 	private final Cursor cursor;
+	private final ObjectCache objectCache;
 	private boolean firstCall;
 	private static final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 
-	public AndroidDatabaseResults(Cursor cursor) {
+	public AndroidDatabaseResults(Cursor cursor, ObjectCache objectCache) {
 		this.cursor = cursor;
 		this.firstCall = true;
+		this.objectCache = objectCache;
 	}
 
 	public int getColumnCount() throws SQLException {
@@ -121,6 +124,10 @@ public class AndroidDatabaseResults implements DatabaseResults {
 
 	public boolean wasNull(int columnIndex) throws SQLException {
 		return cursor.isNull(columnIndex);
+	}
+
+	public ObjectCache getObjectCache() {
+		return objectCache;
 	}
 
 	/***
