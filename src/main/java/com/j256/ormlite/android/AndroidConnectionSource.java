@@ -2,6 +2,7 @@ package com.j256.ormlite.android;
 
 import java.sql.SQLException;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
@@ -14,10 +15,8 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
 
 /**
- * Android version of the connection source. Uses the standard Android SQLiteOpenHelper. For best results, use our
- * helper,
- * 
- * @see OrmLiteSqliteOpenHelper
+ * Android version of the connection source. Takes a standard Android {@link SQLiteOpenHelper}. For best results, use
+ * {@link OrmLiteSqliteOpenHelper}. You can also construct with a {@link SQLiteDatabase}.
  * 
  * @author kevingalligan, graywatson
  */
@@ -26,12 +25,19 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 	private static final Logger logger = LoggerFactory.getLogger(AndroidConnectionSource.class);
 
 	private final SQLiteOpenHelper helper;
+	private final SQLiteDatabase sqliteDatabase;
 	private DatabaseConnection connection = null;
 	private volatile boolean isOpen = true;
 	private final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 
 	public AndroidConnectionSource(SQLiteOpenHelper helper) {
 		this.helper = helper;
+		this.sqliteDatabase = null;
+	}
+
+	public AndroidConnectionSource(SQLiteDatabase sqliteDatabase) {
+		this.helper = null;
+		this.sqliteDatabase = sqliteDatabase;
 	}
 
 	public DatabaseConnection getReadOnlyConnection() throws SQLException {
@@ -50,7 +56,11 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 			return conn;
 		}
 		if (connection == null) {
-			connection = new AndroidDatabaseConnection(helper.getWritableDatabase(), true);
+			if (sqliteDatabase == null) {
+				connection = new AndroidDatabaseConnection(helper.getWritableDatabase(), true);
+			} else {
+				connection = new AndroidDatabaseConnection(sqliteDatabase, true);
+			}
 		}
 		return connection;
 	}
