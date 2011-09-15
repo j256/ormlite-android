@@ -1,5 +1,6 @@
 package com.j256.ormlite.android.apptools;
 
+import java.io.InputStream;
 import java.sql.SQLException;
 
 import android.content.Context;
@@ -30,6 +31,29 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion) {
 		super(context, databaseName, factory, databaseVersion);
+	}
+
+	/**
+	 * Same as {@link #OrmLiteSqliteOpenHelper(Context, String, CursorFactory, int)} but with the addition of a file-id
+	 * of the object configuration file. See {@link OrmLiteConfigUtil} for details.
+	 * 
+	 * @param objectConfigFileId
+	 *            file-id which probably should be a R.raw.ormlite_config.txt or some static value.
+	 */
+	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion,
+			int objectConfigFileId) {
+		super(context, databaseName, factory, databaseVersion);
+
+		// if a config file-id was specified then load it into the DaoManager
+		InputStream stream = context.getResources().openRawResource(objectConfigFileId);
+		if (stream == null) {
+			throw new IllegalStateException("Could not find object config file with id " + objectConfigFileId);
+		}
+		try {
+			DaoManager.loadDatabaseConfigFromStream(stream);
+		} catch (SQLException e) {
+			throw new IllegalStateException("Could not load object config file", e);
+		}
 	}
 
 	/**
