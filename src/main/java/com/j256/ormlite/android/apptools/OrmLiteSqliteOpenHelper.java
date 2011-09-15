@@ -34,8 +34,8 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Same as {@link #OrmLiteSqliteOpenHelper(Context, String, CursorFactory, int)} but with the addition of a file-id
-	 * of the object configuration file. See {@link OrmLiteConfigUtil} for details.
+	 * Same as the other constructor with the addition of a file-id of the object configuration file. See
+	 * {@link OrmLiteConfigUtil} for details.
 	 * 
 	 * @param objectConfigFileId
 	 *            file-id which probably should be a R.raw.ormlite_config.txt or some static value.

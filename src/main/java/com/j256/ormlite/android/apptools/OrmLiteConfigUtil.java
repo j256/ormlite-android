@@ -67,8 +67,8 @@ public class OrmLiteConfigUtil {
 	protected static final String RAW_DIR_NAME = "raw";
 
 	/**
-	 * Calls {@link #findAnnotatedClasses(File)} for the current directory ("."), calls {@link #lookForRawDir}, and then
-	 * calls {@link #writeConfigFile(File, String, Class[])}.
+	 * Calls {@link #findAnnotatedClasses(File)} for the current directory ("."), calls {@link #findRawDir(File)}, and
+	 * then calls {@link #writeConfigFile(File, String, Class[])}.
 	 */
 	protected static void writeConfigFile(String fileName) throws Exception {
 		File rootDir = new File(".");
