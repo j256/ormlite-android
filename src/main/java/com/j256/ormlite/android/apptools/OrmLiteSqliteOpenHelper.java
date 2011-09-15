@@ -1,5 +1,8 @@
 package com.j256.ormlite.android.apptools;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.sql.SQLException;
 
@@ -34,21 +37,40 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Same as the other constructor with the addition of a file-id of the object configuration file. See
+	 * Same as the other constructor with the addition of a file-id of the table config-file. See
 	 * {@link OrmLiteConfigUtil} for details.
 	 * 
-	 * @param objectConfigFileId
+	 * @param configFileId
 	 *            file-id which probably should be a R.raw.ormlite_config.txt or some static value.
 	 */
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion,
-			int objectConfigFileId) {
+			int configFileId) {
+		this(context, databaseName, factory, databaseVersion, openFileId(context, configFileId));
+	}
+
+	/**
+	 * Same as the other constructor with the addition of a config-file. See {@link OrmLiteConfigUtil} for details.
+	 * 
+	 * @param configFile
+	 *            Configuration file to be loaded.
+	 */
+	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion,
+			File configFile) {
+		this(context, databaseName, factory, databaseVersion, openFile(configFile));
+	}
+
+	/**
+	 * Same as the other constructor with the addition of a input stream to the table config-file. See
+	 * {@link OrmLiteConfigUtil} for details.
+	 * 
+	 * @param stream
+	 *            Stream opened to the configuration file to be loaded.
+	 */
+	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion,
+			InputStream stream) {
 		super(context, databaseName, factory, databaseVersion);
 
 		// if a config file-id was specified then load it into the DaoManager
-		InputStream stream = context.getResources().openRawResource(objectConfigFileId);
-		if (stream == null) {
-			throw new IllegalStateException("Could not find object config file with id " + objectConfigFileId);
-		}
 		try {
 			DaoManager.loadDatabaseConfigFromStream(stream);
 		} catch (SQLException e) {
@@ -194,5 +216,21 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		@SuppressWarnings("unchecked")
 		D dao = (D) DaoManager.createDao(getConnectionSource(), clazz);
 		return dao;
+	}
+
+	private static InputStream openFileId(Context context, int fileId) {
+		InputStream stream = context.getResources().openRawResource(fileId);
+		if (stream == null) {
+			throw new IllegalStateException("Could not find object config file with id " + fileId);
+		}
+		return stream;
+	}
+
+	private static InputStream openFile(File configFile) {
+		try {
+			return new FileInputStream(configFile);
+		} catch (FileNotFoundException e) {
+			throw new IllegalArgumentException("Could not open config file " + configFile, e);
+		}
 	}
 }

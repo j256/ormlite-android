@@ -67,19 +67,33 @@ public class OrmLiteConfigUtil {
 	protected static final String RAW_DIR_NAME = "raw";
 
 	/**
+	 * A call through to {@link #writeConfigFile(String)} taking the file name from the single command line argument.
+	 */
+	public static void main(String[] args) throws Exception {
+		if (args.length != 1) {
+			throw new IllegalArgumentException("Main can take a single file-name argument.");
+		}
+		writeConfigFile(args[0]);
+	}
+
+	/**
 	 * Calls {@link #findAnnotatedClasses(File)} for the current directory ("."), calls {@link #findRawDir(File)}, and
 	 * then calls {@link #writeConfigFile(File, String, Class[])}.
 	 */
 	protected static void writeConfigFile(String fileName) throws Exception {
 		File rootDir = new File(".");
 		Class<?>[] classes = findAnnotatedClasses(rootDir);
-		File rawDir = findRawDir(rootDir);
-		if (rawDir == null) {
-			System.err.println("Could not file " + RAW_DIR_NAME + " directory");
-		} else {
-			writeConfigFile(rawDir, fileName, classes);
-			System.out.println("Done.");
-		}
+		writeConfigFile(fileName, classes);
+	}
+
+	/**
+	 * Calls {@link #findAnnotatedClasses(File)} for the current directory (".") and then calls
+	 * {@link #writeConfigFile(File, Class[])}.
+	 */
+	protected static void writeConfigFile(File configFile) throws Exception {
+		File rootDir = new File(".");
+		Class<?>[] classes = findAnnotatedClasses(rootDir);
+		writeConfigFile(configFile, classes);
 	}
 
 	/**
@@ -97,12 +111,28 @@ public class OrmLiteConfigUtil {
 	}
 
 	/**
+	 * Calls {@link #findRawDir(File)} and then writes a configuration fileName in the raw directory with the
+	 * configuration from classes.
+	 */
+	protected static void writeConfigFile(String fileName, Class<?>[] classes) throws Exception {
+		File rootDir = new File(".");
+		File rawDir = findRawDir(rootDir);
+		if (rawDir == null) {
+			System.err.println("Could not file " + RAW_DIR_NAME + " directory");
+		} else {
+			File configFile = new File(rawDir, fileName);
+			writeConfigFile(configFile, classes);
+			System.out.println("Done.");
+		}
+	}
+
+	/**
 	 * Look for the resource-directory in the current directory or the directories above. Then look for the
 	 * raw-directory underneath the resource-directory.
 	 */
 	protected static File findRawDir(File dir) throws Exception {
 		for (int i = 0; i < 20; i++) {
-			File rawDir = lookForRawDirRecurse(dir);
+			File rawDir = findResRawDir(dir);
 			if (rawDir != null) {
 				return rawDir;
 			}
@@ -114,10 +144,8 @@ public class OrmLiteConfigUtil {
 	/**
 	 * Write a configuration file in the raw directory with the configuration from classes.
 	 */
-	protected static void writeConfigFile(File rawDir, String fileName, Class<?>[] classes) throws Exception {
-		File configFile = new File(rawDir, fileName);
+	protected static void writeConfigFile(File configFile, Class<?>[] classes) throws Exception {
 		System.out.println("Writing configurations to " + configFile.getAbsolutePath());
-
 		DatabaseType databaseType = new SqliteAndroidDatabaseType();
 		BufferedWriter writer = new BufferedWriter(new FileWriter(configFile), 4096);
 		try {
@@ -206,9 +234,9 @@ public class OrmLiteConfigUtil {
 	}
 
 	/**
-	 * Recursive version of {@link #findRawDir(File)}.
+	 * Look for the resource directory with raw beneath it.
 	 */
-	private static File lookForRawDirRecurse(File dir) throws Exception {
+	private static File findResRawDir(File dir) throws Exception {
 		for (File file : dir.listFiles()) {
 			if (file.getName().equals(RESOURCE_DIR_NAME) && file.isDirectory()) {
 				File[] rawFiles = file.listFiles(new FileFilter() {
