@@ -33,22 +33,11 @@ public class OpenHelperManager {
 	private static final String HELPER_CLASS_RESOURCE_NAME = "open_helper_classname";
 	private static Logger logger = LoggerFactory.getLogger(OpenHelperManager.class);
 
-	private static SqliteOpenHelperFactory factory = null;
 	private static Class<? extends OrmLiteSqliteOpenHelper> helperClass = null;
 	private static volatile OrmLiteSqliteOpenHelper helper = null;
 	private static boolean wasClosed = false;
 	private static int instanceCount = 0;
 	// private static String LOG_NAME = OpenHelperManager.class.getName();
-
-	/**
-	 * Set the manager with your own helper factory.
-	 * 
-	 * @deprecated You should either use {@link #setOpenHelperClass(Class)} or call {@link #getHelper(Context)}.
-	 */
-	@Deprecated
-	public static void setOpenHelperFactory(SqliteOpenHelperFactory factory) {
-		OpenHelperManager.factory = factory;
-	}
 
 	/**
 	 * If you are _not_ using the {@link OrmLiteBaseActivity} type classes then you will need to call this in a static
@@ -90,14 +79,10 @@ public class OpenHelperManager {
 				logger.info("helper has already been closed and is being re-opened.");
 			}
 			Context appContext = context.getApplicationContext();
-			if (factory == null) {
-				if (helperClass == null) {
-					innerSetHelperClass(lookupHelperClass(appContext, context.getClass()));
-				}
-				helper = constructHelper(helperClass, appContext);
-			} else {
-				helper = factory.getHelper(appContext);
+			if (helperClass == null) {
+				innerSetHelperClass(lookupHelperClass(appContext, context.getClass()));
 			}
+			helper = constructHelper(helperClass, appContext);
 			// Log.d(LOG_NAME, "Zero instances.  Created helper.");
 			instanceCount = 0;
 		}
@@ -232,20 +217,5 @@ public class OpenHelperManager {
 		throw new IllegalStateException(
 				"Could not find OpenHelperClass because none of its generic parameters extends OrmLiteSqliteOpenHelper: "
 						+ componentClass);
-	}
-
-	/**
-	 * Factory for providing open helpers.
-	 * 
-	 * @deprecated We are using other mechanisms now to inject the helper class. See
-	 *             {@link OpenHelperManager#getHelper(Context)}.
-	 */
-	@Deprecated
-	public interface SqliteOpenHelperFactory {
-
-		/**
-		 * Create and return an open helper associated with the context.
-		 */
-		public OrmLiteSqliteOpenHelper getHelper(Context context);
 	}
 }
