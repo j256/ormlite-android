@@ -72,7 +72,9 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 
 		// if a config file-id was specified then load it into the DaoManager
 		try {
-			DaoManager.loadDatabaseConfigFromStream(stream);
+			if (stream != null) {
+				DaoManager.loadDatabaseConfigFromStream(stream);
+			}
 		} catch (SQLException e) {
 			throw new IllegalStateException("Could not load object config file", e);
 		}
@@ -228,7 +230,11 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 
 	private static InputStream openFile(File configFile) {
 		try {
-			return new FileInputStream(configFile);
+			if (configFile == null) {
+				return null;
+			} else {
+				return new FileInputStream(configFile);
+			}
 		} catch (FileNotFoundException e) {
 			throw new IllegalArgumentException("Could not open config file " + configFile, e);
 		}

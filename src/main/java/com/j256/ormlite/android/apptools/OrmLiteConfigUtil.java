@@ -4,10 +4,14 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,6 +70,8 @@ public class OrmLiteConfigUtil {
 	 */
 	protected static final String RAW_DIR_NAME = "raw";
 
+	private static final DatabaseType databaseType = new SqliteAndroidDatabaseType();
+
 	/**
 	 * A call through to {@link #writeConfigFile(String)} taking the file name from the single command line argument.
 	 */
@@ -77,52 +83,69 @@ public class OrmLiteConfigUtil {
 	}
 
 	/**
-	 * Calls {@link #findAnnotatedClasses(File)} for the current directory ("."), calls {@link #findRawDir(File)}, and
-	 * then calls {@link #writeConfigFile(File, String, Class[])}.
+	 * Finds the annotated classes in the current directory or below and writes a configuration file to the file-name in
+	 * the raw folder.
 	 */
-	protected static void writeConfigFile(String fileName) throws Exception {
-		File rootDir = new File(".");
-		Class<?>[] classes = findAnnotatedClasses(rootDir);
-		writeConfigFile(fileName, classes);
-	}
-
-	/**
-	 * Calls {@link #findAnnotatedClasses(File)} for the current directory (".") and then calls
-	 * {@link #writeConfigFile(File, Class[])}.
-	 */
-	protected static void writeConfigFile(File configFile) throws Exception {
-		File rootDir = new File(".");
-		Class<?>[] classes = findAnnotatedClasses(rootDir);
-		writeConfigFile(configFile, classes);
-	}
-
-	/**
-	 * Run through the directories from the root-directory looking for files that end with ".java" and contain one of
-	 * the {@link DatabaseTable}, {@link DatabaseField}, or {@link DatabaseFieldSimple} annotations.
-	 */
-	protected static Class<?>[] findAnnotatedClasses(File rootDir) throws Exception {
-		List<Class<?>> classList = new ArrayList<Class<?>>();
-		findAnnotatedClasses(rootDir, classList);
-		if (classList.isEmpty()) {
-			System.err.println("No annotated classes were found");
-			System.exit(1);
+	public static void writeConfigFile(String fileName) throws Exception {
+		File rawDir = findRawDir(new File("."));
+		if (rawDir == null) {
+			System.err.println("Could not find " + RAW_DIR_NAME + " directory");
+		} else {
+			File configFile = new File(rawDir, fileName);
+			writeConfigFile(configFile);
 		}
-		return classList.toArray(new Class[classList.size()]);
 	}
 
 	/**
-	 * Calls {@link #findRawDir(File)} and then writes a configuration fileName in the raw directory with the
-	 * configuration from classes.
+	 * Finds the annotated classes in the current directory or below and writes a configuration file.
 	 */
-	protected static void writeConfigFile(String fileName, Class<?>[] classes) throws Exception {
+	public static void writeConfigFile(File configFile) throws Exception {
+		System.out.println("Writing configurations to " + configFile.getAbsolutePath());
+		BufferedWriter writer = new BufferedWriter(new FileWriter(configFile), 4096);
+		try {
+			writeHeader(writer);
+			findAnnotatedClasses(writer, new File("."));
+			System.out.println("Done.");
+		} finally {
+			writer.close();
+		}
+	}
+
+	/**
+	 * Writes a configuration fileName in the raw directory with the configuration for classes.
+	 */
+	public static void writeConfigFile(String fileName, Class<?>[] classes) throws Exception {
 		File rootDir = new File(".");
 		File rawDir = findRawDir(rootDir);
 		if (rawDir == null) {
-			System.err.println("Could not file " + RAW_DIR_NAME + " directory");
+			System.out.println("Could not find " + RAW_DIR_NAME + " directory");
 		} else {
 			File configFile = new File(rawDir, fileName);
 			writeConfigFile(configFile, classes);
+		}
+	}
+
+	/**
+	 * Write a configuration file with the configuration for classes.
+	 */
+	public static void writeConfigFile(File configFile, Class<?>[] classes) throws Exception {
+		System.out.println("Writing configurations to " + configFile.getAbsolutePath());
+		writeConfigFile(new FileOutputStream(configFile), classes);
+	}
+
+	/**
+	 * Write a configuration file to an output stream with the configuration for classes.
+	 */
+	public static void writeConfigFile(OutputStream outputStream, Class<?>[] classes) throws Exception {
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream), 4096);
+		try {
+			writeHeader(writer);
+			for (Class<?> clazz : classes) {
+				writeConfigForTable(writer, clazz);
+			}
 			System.out.println("Done.");
+		} finally {
+			writer.close();
 		}
 	}
 
@@ -131,7 +154,7 @@ public class OrmLiteConfigUtil {
 	 * raw-directory underneath the resource-directory.
 	 */
 	protected static File findRawDir(File dir) throws Exception {
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; dir != null && i < 20; i++) {
 			File rawDir = findResRawDir(dir);
 			if (rawDir != null) {
 				return rawDir;
@@ -141,54 +164,21 @@ public class OrmLiteConfigUtil {
 		return null;
 	}
 
-	/**
-	 * Write a configuration file in the raw directory with the configuration from classes.
-	 */
-	protected static void writeConfigFile(File configFile, Class<?>[] classes) throws Exception {
-		System.out.println("Writing configurations to " + configFile.getAbsolutePath());
-		DatabaseType databaseType = new SqliteAndroidDatabaseType();
-		BufferedWriter writer = new BufferedWriter(new FileWriter(configFile), 4096);
-		try {
-			writer.append('#');
-			writer.newLine();
-			writer.append("# generated on ").append(new SimpleDateFormat("yyyy/MM/dd hh:mm:ss").format(new Date()));
-			writer.newLine();
-			writer.append('#');
-			writer.newLine();
-			for (Class<?> clazz : classes) {
-				String tableName = DatabaseTableConfig.extractTableName(clazz);
-				List<DatabaseFieldConfig> fieldConfigs = new ArrayList<DatabaseFieldConfig>();
-				for (Field field : clazz.getDeclaredFields()) {
-					DatabaseFieldConfig fieldConfig = DatabaseFieldConfig.fromField(databaseType, tableName, field);
-					if (fieldConfig != null) {
-						fieldConfigs.add(fieldConfig);
-					}
-				}
-				if (fieldConfigs.isEmpty()) {
-					System.out.println("Skipping " + clazz + " because of no annotated fields");
-					continue;
-				}
-				@SuppressWarnings({ "rawtypes", "unchecked" })
-				DatabaseTableConfig<?> tableConfig = new DatabaseTableConfig(clazz, tableName, fieldConfigs);
-				tableConfig.write(writer);
-				writer.append("#################################");
-				writer.newLine();
-				System.out.println("Wrote config for " + clazz);
-			}
-		} finally {
-			writer.close();
-		}
+	private static void writeHeader(BufferedWriter writer) throws IOException {
+		writer.append('#');
+		writer.newLine();
+		writer.append("# generated on ").append(new SimpleDateFormat("yyyy/MM/dd hh:mm:ss").format(new Date()));
+		writer.newLine();
+		writer.append('#');
+		writer.newLine();
 	}
 
-	/**
-	 * Recursive version of {@link #findAnnotatedClasses(File)}.
-	 */
-	private static void findAnnotatedClasses(File dir, List<Class<?>> classList) throws Exception {
+	private static void findAnnotatedClasses(BufferedWriter writer, File dir) throws Exception {
 		for (File file : dir.listFiles()) {
 			if (file.isDirectory()) {
-				findAnnotatedClasses(file, classList);
+				findAnnotatedClasses(writer, file);
 			} else if (file.getName().endsWith(".java")) {
-				String prefix = getPackageOfAnnotatedFile(file);
+				String prefix = getPackageOfClass(file);
 				if (prefix == null) {
 					continue;
 				}
@@ -196,9 +186,59 @@ public class OrmLiteConfigUtil {
 				// cut off the .java
 				name = name.substring(0, name.length() - ".java".length());
 				String className = prefix + "." + name;
-				classList.add(Class.forName(className));
+				Class<?> clazz;
+				try {
+					clazz = Class.forName(className);
+				} catch (ClassNotFoundException e) {
+					System.err.println("Could not load class file for: " + file);
+					continue;
+				}
+				if (classHasAnnotations(clazz)) {
+					writeConfigForTable(writer, clazz);
+				}
 			}
 		}
+	}
+
+	private static void writeConfigForTable(BufferedWriter writer, Class<?> clazz) throws SQLException, IOException {
+		String tableName = DatabaseTableConfig.extractTableName(clazz);
+		List<DatabaseFieldConfig> fieldConfigs = new ArrayList<DatabaseFieldConfig>();
+		// walk up the classes finding the fields
+		for (Class<?> working = clazz; working != null; working = working.getSuperclass()) {
+			for (Field field : working.getDeclaredFields()) {
+				DatabaseFieldConfig fieldConfig = DatabaseFieldConfig.fromField(databaseType, tableName, field);
+				if (fieldConfig != null) {
+					fieldConfigs.add(fieldConfig);
+				}
+			}
+		}
+		if (fieldConfigs.isEmpty()) {
+			System.out.println("Skipping " + clazz + " because no annotated fields found");
+			return;
+		}
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		DatabaseTableConfig<?> tableConfig = new DatabaseTableConfig(clazz, tableName, fieldConfigs);
+		tableConfig.write(writer);
+		writer.append("#################################");
+		writer.newLine();
+		System.out.println("Wrote config for " + clazz);
+	}
+
+	private static boolean classHasAnnotations(Class<?> clazz) {
+		do {
+			if (clazz.getAnnotation(DatabaseTable.class) != null) {
+				return true;
+			}
+			for (Field field : clazz.getDeclaredFields()) {
+				if (field.getAnnotation(DatabaseField.class) != null
+						|| field.getAnnotation(DatabaseFieldSimple.class) != null) {
+					return true;
+				}
+			}
+			clazz = clazz.getSuperclass();
+		} while (clazz != null);
+
+		return false;
 	}
 
 	/**
@@ -206,9 +246,8 @@ public class OrmLiteConfigUtil {
 	 * 
 	 * @return Package prefix string or null or no annotations.
 	 */
-	private static String getPackageOfAnnotatedFile(File file) throws IOException {
+	private static String getPackageOfClass(File file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(file));
-		String prefix = null;
 		try {
 			while (true) {
 				String line = reader.readLine();
@@ -217,15 +256,7 @@ public class OrmLiteConfigUtil {
 				}
 				if (line.startsWith("package")) {
 					String[] parts = line.split("[ \t;]");
-					prefix = parts[1];
-				}
-				if (line.startsWith("import " + DatabaseTable.class.getName())
-						|| line.startsWith("import " + DatabaseField.class.getName())
-						|| line.startsWith("import " + DatabaseFieldSimple.class.getName())) {
-					if (prefix == null) {
-						throw new IllegalStateException("Found import in " + file + " but no package statement");
-					}
-					return prefix;
+					return parts[1];
 				}
 			}
 		} finally {
