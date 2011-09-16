@@ -70,6 +70,11 @@ public class OrmLiteConfigUtil {
 	 */
 	protected static final String RAW_DIR_NAME = "raw";
 
+	/**
+	 * Maximum recursion level while we are looking for source files.
+	 */
+	protected static int maxFindSourceLevel = 20;
+
 	private static final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 
 	/**
@@ -104,7 +109,7 @@ public class OrmLiteConfigUtil {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(configFile), 4096);
 		try {
 			writeHeader(writer);
-			findAnnotatedClasses(writer, new File("."));
+			findAnnotatedClasses(writer, new File("."), 0);
 			System.out.println("Done.");
 		} finally {
 			writer.close();
@@ -118,7 +123,7 @@ public class OrmLiteConfigUtil {
 		File rootDir = new File(".");
 		File rawDir = findRawDir(rootDir);
 		if (rawDir == null) {
-			System.out.println("Could not find " + RAW_DIR_NAME + " directory");
+			System.err.println("Could not find " + RAW_DIR_NAME + " directory");
 		} else {
 			File configFile = new File(rawDir, fileName);
 			writeConfigFile(configFile, classes);
@@ -143,6 +148,7 @@ public class OrmLiteConfigUtil {
 			for (Class<?> clazz : classes) {
 				writeConfigForTable(writer, clazz);
 			}
+			// NOTE: done is here because this is public
 			System.out.println("Done.");
 		} finally {
 			writer.close();
@@ -173,29 +179,37 @@ public class OrmLiteConfigUtil {
 		writer.newLine();
 	}
 
-	private static void findAnnotatedClasses(BufferedWriter writer, File dir) throws Exception {
+	private static void findAnnotatedClasses(BufferedWriter writer, File dir, int level) throws Exception {
 		for (File file : dir.listFiles()) {
 			if (file.isDirectory()) {
-				findAnnotatedClasses(writer, file);
-			} else if (file.getName().endsWith(".java")) {
-				String prefix = getPackageOfClass(file);
-				if (prefix == null) {
-					continue;
+				// recurse if we aren't deep enough
+				if (level < maxFindSourceLevel) {
+					findAnnotatedClasses(writer, file, level + 1);
 				}
-				String name = file.getName();
-				// cut off the .java
-				name = name.substring(0, name.length() - ".java".length());
-				String className = prefix + "." + name;
-				Class<?> clazz;
-				try {
-					clazz = Class.forName(className);
-				} catch (ClassNotFoundException e) {
-					System.err.println("Could not load class file for: " + file);
-					continue;
-				}
-				if (classHasAnnotations(clazz)) {
-					writeConfigForTable(writer, clazz);
-				}
+				continue;
+			}
+			// skip non .java files
+			if (!file.getName().endsWith(".java")) {
+				continue;
+			}
+			String packageName = getPackageOfClass(file);
+			if (packageName == null) {
+				System.err.println("Could not find package name for: " + file);
+				continue;
+			}
+			// get the filename and cut off the .java
+			String name = file.getName();
+			name = name.substring(0, name.length() - ".java".length());
+			String className = packageName + "." + name;
+			Class<?> clazz;
+			try {
+				clazz = Class.forName(className);
+			} catch (ClassNotFoundException e) {
+				System.err.println("Could not load class file for: " + file);
+				continue;
+			}
+			if (classHasAnnotations(clazz)) {
+				writeConfigForTable(writer, clazz);
 			}
 		}
 	}
@@ -225,7 +239,7 @@ public class OrmLiteConfigUtil {
 	}
 
 	private static boolean classHasAnnotations(Class<?> clazz) {
-		do {
+		for (; clazz != null; clazz = clazz.getSuperclass()) {
 			if (clazz.getAnnotation(DatabaseTable.class) != null) {
 				return true;
 			}
@@ -235,8 +249,7 @@ public class OrmLiteConfigUtil {
 					return true;
 				}
 			}
-			clazz = clazz.getSuperclass();
-		} while (clazz != null);
+		}
 
 		return false;
 	}
