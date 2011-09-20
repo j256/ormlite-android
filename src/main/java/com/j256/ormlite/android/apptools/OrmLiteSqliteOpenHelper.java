@@ -19,6 +19,7 @@ import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
+import com.j256.ormlite.table.DatabaseTableConfigLoader;
 
 /**
  * SQLite database open helper which can be extended by your application to help manage when the application needs to
@@ -73,7 +74,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		// if a config file-id was specified then load it into the DaoManager
 		try {
 			if (stream != null) {
-				DaoManager.loadDatabaseConfigFromStream(stream);
+				DaoManager.addCachedDatabaseConfigs(DatabaseTableConfigLoader.loadDatabaseConfigFromStream(stream));
 			}
 		} catch (SQLException e) {
 			throw new IllegalStateException("Could not load object config file", e);

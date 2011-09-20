@@ -25,6 +25,7 @@ import com.j256.ormlite.field.DatabaseFieldConfig;
 import com.j256.ormlite.field.DatabaseFieldSimple;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.DatabaseTableConfig;
+import com.j256.ormlite.table.DatabaseTableConfigLoader;
 
 /**
  * Database configuration file helper class that is used to write a configuration file into the raw resource
@@ -232,7 +233,7 @@ public class OrmLiteConfigUtil {
 		}
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		DatabaseTableConfig<?> tableConfig = new DatabaseTableConfig(clazz, tableName, fieldConfigs);
-		tableConfig.write(writer);
+		DatabaseTableConfigLoader.write(writer, tableConfig);
 		writer.append("#################################");
 		writer.newLine();
 		System.out.println("Wrote config for " + clazz);
