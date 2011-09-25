@@ -129,6 +129,11 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	}
 
 	public <T> Object queryForOne(String statement, Object[] args, FieldType[] argFieldTypes,
+			GenericRowMapper<T> rowMapper) throws SQLException {
+		return queryForOne(statement, args, argFieldTypes, rowMapper, null);
+	}
+
+	public <T> Object queryForOne(String statement, Object[] args, FieldType[] argFieldTypes,
 			GenericRowMapper<T> rowMapper, ObjectCache objectCache) throws SQLException {
 		Cursor cursor = null;
 
