@@ -80,17 +80,16 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		// if a config file-id was specified then load it into the DaoManager
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(stream), 4096);
-			try {
-				DaoManager.addCachedDatabaseConfigs(DatabaseTableConfigLoader.loadDatabaseConfigFromReader(reader));
-			} finally {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					// ignore close errors
-				}
-			}
+			DaoManager.addCachedDatabaseConfigs(DatabaseTableConfigLoader.loadDatabaseConfigFromReader(reader));
 		} catch (SQLException e) {
 			throw new IllegalStateException("Could not load object config file", e);
+		} finally {
+			try {
+				// we close the stream here because we may not get a reader
+				stream.close();
+			} catch (IOException e) {
+				// ignore close errors
+			}
 		}
 	}
 
