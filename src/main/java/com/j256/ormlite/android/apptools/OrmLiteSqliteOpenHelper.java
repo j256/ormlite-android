@@ -1,9 +1,12 @@
 package com.j256.ormlite.android.apptools;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 
 import android.content.Context;
@@ -70,11 +73,21 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion,
 			InputStream stream) {
 		super(context, databaseName, factory, databaseVersion);
+		if (stream == null) {
+			return;
+		}
 
 		// if a config file-id was specified then load it into the DaoManager
 		try {
-			if (stream != null) {
-				DaoManager.addCachedDatabaseConfigs(DatabaseTableConfigLoader.loadDatabaseConfigFromStream(stream));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(stream), 4096);
+			try {
+				DaoManager.addCachedDatabaseConfigs(DatabaseTableConfigLoader.loadDatabaseConfigFromReader(reader));
+			} finally {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					// ignore close errors
+				}
 			}
 		} catch (SQLException e) {
 			throw new IllegalStateException("Could not load object config file", e);
