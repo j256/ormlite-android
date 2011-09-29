@@ -205,8 +205,10 @@ public class OrmLiteConfigUtil {
 			Class<?> clazz;
 			try {
 				clazz = Class.forName(className);
-			} catch (ClassNotFoundException e) {
+			} catch (Throwable t) {
+				// amazingly, this sometimes throws an Error
 				System.err.println("Could not load class file for: " + file);
+				System.err.println("     " + t);
 				continue;
 			}
 			if (classHasAnnotations(clazz)) {
@@ -240,15 +242,32 @@ public class OrmLiteConfigUtil {
 	}
 
 	private static boolean classHasAnnotations(Class<?> clazz) {
-		for (; clazz != null; clazz = clazz.getSuperclass()) {
+		while (clazz != null) {
 			if (clazz.getAnnotation(DatabaseTable.class) != null) {
 				return true;
 			}
-			for (Field field : clazz.getDeclaredFields()) {
+			Field[] fields;
+			try {
+				fields = clazz.getDeclaredFields();
+			} catch (Throwable t) {
+				// amazingly, this sometimes throws an Error
+				System.err.println("Could not load get delcared fields from: " + clazz);
+				System.err.println("     " + t);
+				return false;
+			}
+			for (Field field : fields) {
 				if (field.getAnnotation(DatabaseField.class) != null
 						|| field.getAnnotation(DatabaseFieldSimple.class) != null) {
 					return true;
 				}
+			}
+			try {
+				clazz = clazz.getSuperclass();
+			} catch (Throwable t) {
+				// amazingly, this sometimes throws an Error
+				System.err.println("Could not get super class for: " + clazz);
+				System.err.println("     " + t);
+				return false;
 			}
 		}
 
@@ -268,16 +287,17 @@ public class OrmLiteConfigUtil {
 				if (line == null) {
 					return null;
 				}
-				if (line.startsWith("package")) {
+				if (line.contains("package")) {
 					String[] parts = line.split("[ \t;]");
-					return parts[1];
+					if (parts.length > 1 && parts[0].equals("package")) {
+						return parts[1];
+					}
 				}
 			}
 		} finally {
 			reader.close();
 		}
 	}
-
 	/**
 	 * Look for the resource directory with raw beneath it.
 	 */
