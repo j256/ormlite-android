@@ -37,7 +37,6 @@ public class OpenHelperManager {
 	private static volatile OrmLiteSqliteOpenHelper helper = null;
 	private static boolean wasClosed = false;
 	private static int instanceCount = 0;
-	// private static String LOG_NAME = OpenHelperManager.class.getName();
 
 	/**
 	 * If you are _not_ using the {@link OrmLiteBaseActivity} type classes then you will need to call this in a static
@@ -83,23 +82,24 @@ public class OpenHelperManager {
 				innerSetHelperClass(lookupHelperClass(appContext, context.getClass()));
 			}
 			helper = constructHelper(helperClass, appContext);
-			// Log.d(LOG_NAME, "Zero instances.  Created helper.");
+			logger.debug("Zero instances.  Created helper.");
 			instanceCount = 0;
 		}
 
 		instanceCount++;
-		// Log.d(LOG_NAME, "helper instance count: " + instC);
+		logger.debug("helper instance count = {} ", instanceCount);
 		return helper;
 	}
 	/**
 	 * Like {@link #getHelper(Context)} but sets the helper class beforehand.
 	 */
-	public static OrmLiteSqliteOpenHelper getHelper(Context context,
-			Class<? extends OrmLiteSqliteOpenHelper> openHelperClass) {
+	public static <T extends OrmLiteSqliteOpenHelper> T getHelper(Context context, Class<T> openHelperClass) {
 		if (helper == null) {
 			innerSetHelperClass(openHelperClass);
 		}
-		return getHelper(context);
+		@SuppressWarnings("unchecked")
+		T castHelper = (T) getHelper(context);
+		return castHelper;
 	}
 
 	/**
@@ -123,10 +123,10 @@ public class OpenHelperManager {
 	 */
 	public static synchronized void releaseHelper() {
 		instanceCount--;
-		// Log.d(LOG_NAME, "helper instance count: " + instanceCount);
+		logger.debug("helper instance count = {}", instanceCount);
 		if (instanceCount == 0) {
 			if (helper != null) {
-				// Log.d(LOG_NAME, "Zero instances.  Closing helper.");
+				logger.debug("Zero instances.  Closing helper.");
 				helper.close();
 				helper = null;
 				wasClosed = true;
