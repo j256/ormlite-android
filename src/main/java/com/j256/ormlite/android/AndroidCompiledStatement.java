@@ -43,10 +43,6 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		return getCursor().getColumnName(column);
 	}
 
-	public DatabaseResults runQuery() throws SQLException {
-		return runQuery(null);
-	}
-
 	public DatabaseResults runQuery(ObjectCache objectCache) throws SQLException {
 		// this could come from DELETE or UPDATE, just not a SELECT
 		if (type != StatementType.SELECT) {
