@@ -73,7 +73,7 @@ public abstract class OrmLiteBaseTabActivity<H extends OrmLiteSqliteOpenHelper> 
 	 * @see OpenHelperManager#getHelper(Context)
 	 */
 	protected H getHelperInternal(Context context) {
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "deprecation" })
 		H newHelper = (H) OpenHelperManager.getHelper(context);
 		return newHelper;
 	}
@@ -86,11 +86,9 @@ public abstract class OrmLiteBaseTabActivity<H extends OrmLiteSqliteOpenHelper> 
 	 * <b> NOTE: </b> If you override this method, you most likely will need to override the
 	 * {@link #getHelperInternal(Context)} method as well.
 	 * </p>
-	 * 
-	 * @see OpenHelperManager#releaseHelper()
 	 */
 	protected void releaseHelper(H helper) {
 		OpenHelperManager.releaseHelper();
-		helper = null;
+		this.helper = null;
 	}
 }

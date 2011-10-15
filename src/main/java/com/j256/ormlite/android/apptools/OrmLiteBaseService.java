@@ -70,7 +70,7 @@ public abstract class OrmLiteBaseService<H extends OrmLiteSqliteOpenHelper> exte
 	 * </p>
 	 */
 	protected H getHelperInternal(Context context) {
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "deprecation" })
 		H newHelper = (H) OpenHelperManager.getHelper(context);
 		return newHelper;
 	}
@@ -86,6 +86,6 @@ public abstract class OrmLiteBaseService<H extends OrmLiteSqliteOpenHelper> exte
 	 */
 	protected void releaseHelper(H helper) {
 		OpenHelperManager.releaseHelper();
-		helper = null;
+		this.helper = null;
 	}
 }
