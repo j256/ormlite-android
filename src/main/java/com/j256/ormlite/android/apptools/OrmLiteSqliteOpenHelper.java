@@ -18,6 +18,7 @@ import com.j256.ormlite.android.AndroidConnectionSource;
 import com.j256.ormlite.android.AndroidDatabaseConnection;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.support.ConnectionSource;
@@ -225,12 +226,25 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Get a DAO for our class. This stores the DAO in a cache for reuse.
+	 * Get a Doa for our class. This uses the {@link DaoManager} to cache the DAO for future gets.
 	 */
-	public <D extends Dao<T, ?>, T> D getDao(Class<T> clazz) throws SQLException {
+	public <T, ID> Dao<T, ID> getDao(Class<T> clazz) throws SQLException {
 		@SuppressWarnings("unchecked")
-		D dao = (D) DaoManager.createDao(getConnectionSource(), clazz);
+		Dao<T, ID> dao = (Dao<T, ID>) DaoManager.createDao(getConnectionSource(), clazz);
 		return dao;
+	}
+
+	/**
+	 * Get a RuntimeExceptionDao for our class. This uses the {@link DaoManager} to cache the DAO for future gets.
+	 */
+	public <T, ID> RuntimeExceptionDao<T, ID> getRuntimeExceptionDao(Class<T> clazz) {
+		try {
+			@SuppressWarnings("unchecked")
+			Dao<T, ID> dao = (Dao<T, ID>) DaoManager.createDao(getConnectionSource(), clazz);
+			return new RuntimeExceptionDao<T, ID>(dao);
+		} catch (SQLException e) {
+			throw new RuntimeException("Could not create RuntimeExcepitionDao for class " + clazz, e);
+		}
 	}
 
 	private static InputStream openFileId(Context context, int fileId) {

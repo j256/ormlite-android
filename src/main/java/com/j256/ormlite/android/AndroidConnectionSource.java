@@ -26,7 +26,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 
 	private final SQLiteOpenHelper helper;
 	private final SQLiteDatabase sqliteDatabase;
-	private DatabaseConnection connection = null;
+	private AndroidDatabaseConnection connection = null;
 	private volatile boolean isOpen = true;
 	private final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 
