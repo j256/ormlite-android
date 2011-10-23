@@ -226,7 +226,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * Get a Doa for our class. This uses the {@link DaoManager} to cache the DAO for future gets.
+	 * Get a DAO for our class. This uses the {@link DaoManager} to cache the DAO for future gets.
 	 */
 	public <T, ID> Dao<T, ID> getDao(Class<T> clazz) throws SQLException {
 		@SuppressWarnings("unchecked")
