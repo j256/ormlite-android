@@ -176,7 +176,8 @@ public class DatabaseTableConfigUtil {
 	}
 
 	/**
-	 * Enumeration that converts from field/value to {@link DatabaseFieldConfig}.
+	 * Enumeration that converts from field/value from the {@link DatabaseField} annotation to
+	 * {@link DatabaseFieldConfig} values. This is very specific to this annotation.
 	 */
 	private enum ConfigField {
 		columnName() {
