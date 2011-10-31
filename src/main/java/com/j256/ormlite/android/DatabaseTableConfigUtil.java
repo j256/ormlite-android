@@ -18,10 +18,10 @@ import com.j256.ormlite.table.DatabaseTableConfig;
 /**
  * Class which uses reflection to make the job of processing the {@link DatabaseField} annotation more efficient. In
  * current (as of 11/2011) versions of Android, Annotations are ghastly slow. This uses reflection on the Android
- * classes to work around this issue. Gross and a hack but a significant performance improvement.
+ * classes to work around this issue. Gross and a hack but a significant (~20x) performance improvement.
  * 
  * <p>
- * THanks much go to Josh Guilfoyle for the idea and the code framework to make this happen.
+ * Thanks much go to Josh Guilfoyle for the idea and the code framework to make this happen.
  * </p>
  * 
  * @author joshguilfoyle, graywatson
@@ -59,6 +59,9 @@ public class DatabaseTableConfigUtil {
 		}
 	}
 
+	/**
+	 * Extract our configuration information from the field by looking for a {@link DatabaseField} annotation.
+	 */
 	private static DatabaseFieldConfig configFromField(DatabaseType databaseType, String tableName, Field field)
 			throws SQLException {
 
@@ -66,6 +69,10 @@ public class DatabaseTableConfigUtil {
 			return DatabaseFieldConfig.fromField(databaseType, tableName, field);
 		}
 
+		/*
+		 * This, unfortunately, we can't get around. This creates a AnnotationFactory, an array of AnnotationMember
+		 * fields, and possibly another array of AnnotationMember values. This creates a large number of GC'd objects.
+		 */
 		DatabaseField databaseField = field.getAnnotation(DatabaseField.class);
 		if (databaseField == null) {
 			return null;
@@ -85,19 +92,22 @@ public class DatabaseTableConfigUtil {
 		}
 	}
 
+	/**
+	 * Instead of calling the annotation methods directly, we peer inside the proxy and investigate the array of
+	 * AnnotationMember objects stored by the AnnotationFactory.
+	 */
 	private static DatabaseFieldConfig buildConfig(DatabaseField databaseField, String tableName, Field field)
 			throws Exception {
 		InvocationHandler proxy = Proxy.getInvocationHandler(databaseField);
 		if (proxy.getClass() != annotationFactoryClazz) {
 			return null;
 		}
+		// this should be an array of AnnotationMember objects
 		Object elementsObject = elementsField.get(proxy);
 		if (elementsObject == null) {
 			return null;
 		}
-		DatabaseFieldConfig config = new DatabaseFieldConfig();
-		config.setTableName(tableName);
-		config.setFieldName(field.getName());
+		DatabaseFieldConfig config = new DatabaseFieldConfig(field.getName());
 		Object[] objs = (Object[]) elementsObject;
 		for (int i = 0; i < configFields.length; i++) {
 			Object value = valueField.get(objs[i]);
@@ -108,6 +118,10 @@ public class DatabaseTableConfigUtil {
 		return config;
 	}
 
+	/**
+	 * This does all of the class reflection fu to find our classes, find the order of field names, and construct our
+	 * array of ConfigField entries the correspond to the AnnotationMember array.
+	 */
 	private static ConfigField[] lookupClasses() {
 		try {
 			annotationFactoryClazz = Class.forName("org.apache.harmony.lang.annotation.AnnotationFactory");
