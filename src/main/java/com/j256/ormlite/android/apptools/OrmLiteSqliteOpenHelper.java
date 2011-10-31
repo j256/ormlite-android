@@ -16,6 +16,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.j256.ormlite.android.AndroidConnectionSource;
 import com.j256.ormlite.android.AndroidDatabaseConnection;
+import com.j256.ormlite.android.DatabaseTableConfigUtil;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -23,6 +24,7 @@ import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
+import com.j256.ormlite.table.DatabaseTableConfig;
 import com.j256.ormlite.table.DatabaseTableConfigLoader;
 
 /**
@@ -234,9 +236,25 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 * </p>
 	 */
 	public <D extends Dao<T, ?>, T> D getDao(Class<T> clazz) throws SQLException {
+		// lookup the dao, possibly invoking the cached database config
+		Dao<T, ?> dao = DaoManager.lookupDao(getConnectionSource(), clazz);
+		if (dao == null) {
+			// try to use our new reflection magic
+			DatabaseTableConfig<T> tableConfig = DatabaseTableConfigUtil.fromClass(connectionSource, clazz);
+			if (tableConfig == null) {
+				/**
+				 * TODO: we have to do this to get to see if they are using the deprecated annotations like
+				 * {@link DatabaseFieldSimple}.
+				 */
+				dao = (Dao<T, ?>) DaoManager.createDao(getConnectionSource(), clazz);
+			} else {
+				dao = (Dao<T, ?>) DaoManager.createDao(getConnectionSource(), tableConfig);
+			}
+		}
+
 		@SuppressWarnings("unchecked")
-		D dao = (D) DaoManager.createDao(getConnectionSource(), clazz);
-		return dao;
+		D castDao = (D) dao;
+		return castDao;
 	}
 
 	/**
@@ -249,7 +267,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public <D extends RuntimeExceptionDao<T, ?>, T> D getRuntimeExceptionDao(Class<T> clazz) {
 		try {
-			Dao<T, ?> dao = DaoManager.createDao(getConnectionSource(), clazz);
+			Dao<T, ?> dao = getDao(clazz);
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			D castDao = (D) new RuntimeExceptionDao(dao);
 			return castDao;

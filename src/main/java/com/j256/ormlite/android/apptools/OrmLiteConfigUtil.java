@@ -60,6 +60,7 @@ import com.j256.ormlite.table.DatabaseTableConfigLoader;
  * 
  * @author graywatson
  */
+@SuppressWarnings("deprecation")
 public class OrmLiteConfigUtil {
 
 	/**
