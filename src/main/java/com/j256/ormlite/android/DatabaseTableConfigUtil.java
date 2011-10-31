@@ -145,6 +145,7 @@ public class DatabaseTableConfigUtil {
 				return null;
 			}
 
+			// this should be an array of AnnotationMember objects
 			Object elements = elementsField.get(proxy);
 			if (elements == null || elements.getClass() != annotationMemberArrayClazz) {
 				return null;
@@ -153,13 +154,14 @@ public class DatabaseTableConfigUtil {
 			Object[] elementArray = (Object[]) elements;
 			ConfigField[] configFields = new ConfigField[elementArray.length];
 
+			// build our array of ConfigField enum entries that match the AnnotationMember array
 			for (int i = 0; i < elementArray.length; i++) {
 				String name = (String) nameField.get(elementArray[i]);
 				configFields[i] = ConfigField.valueOf(name);
 			}
 			return configFields;
 		} catch (Exception e) {
-			// if any reflection fu
+			// if any reflection fu fails then we bail and use the default _slow_ mechanisms
 			return null;
 		}
 	}
