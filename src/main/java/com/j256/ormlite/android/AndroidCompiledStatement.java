@@ -91,14 +91,13 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		}
 	}
 
-	public void setNull(int parameterIndex, SqlType sqlType) throws SQLException {
-		isInPrep();
-		args.add(parameterIndex, null);
-	}
-
 	public void setObject(int parameterIndex, Object obj, SqlType sqlType) throws SQLException {
 		isInPrep();
-		args.add(parameterIndex, obj.toString());
+		if (obj == null) {
+			args.add(parameterIndex, null);
+		} else {
+			args.add(parameterIndex, obj.toString());
+		}
 	}
 
 	public void setMaxRows(int max) throws SQLException {
