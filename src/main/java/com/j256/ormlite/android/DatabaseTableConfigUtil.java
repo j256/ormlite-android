@@ -33,8 +33,9 @@ public class DatabaseTableConfigUtil {
 	private static Class<?> annotationMemberClazz;
 	private static Field nameField;
 	private static Field valueField;
+	private static int workedC = 0;
 
-	private static final ConfigField[] configFields = lookupClasses();
+	private static final int[] configFieldNums = lookupClasses();
 
 	/**
 	 * Build our list table config from a class using some annotation fu around.
@@ -60,12 +61,141 @@ public class DatabaseTableConfigUtil {
 	}
 
 	/**
+	 * Return the number of fields configured using our reflection hack. This is for testing.
+	 */
+	public static int getWorkedC() {
+		return workedC;
+	}
+
+	/**
+	 * This does all of the class reflection fu to find our classes, find the order of field names, and construct our
+	 * array of ConfigField entries the correspond to the AnnotationMember array.
+	 */
+	private static int[] lookupClasses() {
+		Class<?> annotationMemberArrayClazz;
+		try {
+			annotationFactoryClazz = Class.forName("org.apache.harmony.lang.annotation.AnnotationFactory");
+			annotationMemberClazz = Class.forName("org.apache.harmony.lang.annotation.AnnotationMember");
+			annotationMemberArrayClazz = Class.forName("[Lorg.apache.harmony.lang.annotation.AnnotationMember;");
+			annotationMemberClazz = Class.forName("org.apache.harmony.lang.annotation.AnnotationMember");
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
+
+		Field fieldField;
+		try {
+			elementsField = annotationFactoryClazz.getDeclaredField("elements");
+			elementsField.setAccessible(true);
+
+			nameField = annotationMemberClazz.getDeclaredField("name");
+			nameField.setAccessible(true);
+			valueField = annotationMemberClazz.getDeclaredField("value");
+			valueField.setAccessible(true);
+
+			fieldField = DatabaseFieldSample.class.getDeclaredField("field");
+		} catch (SecurityException e) {
+			return null;
+		} catch (NoSuchFieldException e) {
+			return null;
+		}
+
+		DatabaseField databaseField = fieldField.getAnnotation(DatabaseField.class);
+		InvocationHandler proxy = Proxy.getInvocationHandler(databaseField);
+		if (proxy.getClass() != annotationFactoryClazz) {
+			return null;
+		}
+
+		try {
+			// this should be an array of AnnotationMember objects
+			Object elements = elementsField.get(proxy);
+			if (elements == null || elements.getClass() != annotationMemberArrayClazz) {
+				return null;
+			}
+
+			Object[] elementArray = (Object[]) elements;
+			int[] configNums = new int[elementArray.length];
+
+			// build our array of field-numbers that match the AnnotationMember array
+			for (int i = 0; i < elementArray.length; i++) {
+				String name = (String) nameField.get(elementArray[i]);
+				configNums[i] = configFieldNameToNum(name);
+			}
+			return configNums;
+		} catch (IllegalAccessException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Convert the name of the @DatabaseField fields into a number for easy processing later.
+	 */
+	private static int configFieldNameToNum(String configName) {
+		if (configName.equals("columnName")) {
+			return 1;
+		} else if (configName.equals("dataType")) {
+			return 2;
+		} else if (configName.equals("defaultValue")) {
+			return 3;
+		} else if (configName.equals("width")) {
+			return 4;
+		} else if (configName.equals("canBeNull")) {
+			return 5;
+		} else if (configName.equals("id")) {
+			return 6;
+		} else if (configName.equals("generatedId")) {
+			return 7;
+		} else if (configName.equals("generatedIdSequence")) {
+			return 8;
+		} else if (configName.equals("foreign")) {
+			return 9;
+		} else if (configName.equals("useGetSet")) {
+			return 10;
+		} else if (configName.equals("unknownEnumName")) {
+			return 11;
+		} else if (configName.equals("throwIfNull")) {
+			return 12;
+		} else if (configName.equals("persisted")) {
+			return 13;
+		} else if (configName.equals("format")) {
+			return 14;
+		} else if (configName.equals("unique")) {
+			return 15;
+		} else if (configName.equals("uniqueCombo")) {
+			return 16;
+		} else if (configName.equals("index")) {
+			return 17;
+		} else if (configName.equals("uniqueIndex")) {
+			return 18;
+		} else if (configName.equals("indexName")) {
+			return 19;
+		} else if (configName.equals("uniqueIndexName")) {
+			return 20;
+		} else if (configName.equals("foreignAutoRefresh")) {
+			return 21;
+		} else if (configName.equals("maxForeignAutoRefreshLevel")) {
+			return 22;
+		} else if (configName.equals("persisterClass")) {
+			return 23;
+		} else if (configName.equals("allowGeneratedIdInsert")) {
+			return 24;
+		} else if (configName.equals("columnDefinition")) {
+			return 25;
+		} else if (configName.equals("foreignAutoCreate")) {
+			return 26;
+		} else if (configName.equals("version")) {
+			return 27;
+		} else {
+			throw new IllegalStateException("Could not find support for DatabaseField " + configName);
+		}
+	}
+
+	/**
 	 * Extract our configuration information from the field by looking for a {@link DatabaseField} annotation.
 	 */
 	private static DatabaseFieldConfig configFromField(DatabaseType databaseType, String tableName, Field field)
 			throws SQLException {
 
-		if (configFields == null) {
+		if (configFieldNums == null) {
 			return DatabaseFieldConfig.fromField(databaseType, tableName, field);
 		}
 
@@ -88,6 +218,7 @@ public class DatabaseTableConfigUtil {
 		if (config == null) {
 			return DatabaseFieldConfig.fromField(databaseType, tableName, field);
 		} else {
+			workedC++;
 			return config;
 		}
 	}
@@ -109,60 +240,117 @@ public class DatabaseTableConfigUtil {
 		}
 		DatabaseFieldConfig config = new DatabaseFieldConfig(field.getName());
 		Object[] objs = (Object[]) elementsObject;
-		for (int i = 0; i < configFields.length; i++) {
+		for (int i = 0; i < configFieldNums.length; i++) {
 			Object value = valueField.get(objs[i]);
 			if (value != null) {
-				configFields[i].assignConfigField(config, field, value);
+				assignConfigField(configFieldNums[i], config, field, value);
 			}
 		}
 		return config;
 	}
 
 	/**
-	 * This does all of the class reflection fu to find our classes, find the order of field names, and construct our
-	 * array of ConfigField entries the correspond to the AnnotationMember array.
+	 * Converts from field/value from the {@link DatabaseField} annotation to {@link DatabaseFieldConfig} values. This
+	 * is very specific to this annotation.
 	 */
-	private static ConfigField[] lookupClasses() {
-		try {
-			annotationFactoryClazz = Class.forName("org.apache.harmony.lang.annotation.AnnotationFactory");
-			annotationMemberClazz = Class.forName("org.apache.harmony.lang.annotation.AnnotationMember");
-			Class<?> annotationMemberArrayClazz =
-					Class.forName("[Lorg.apache.harmony.lang.annotation.AnnotationMember;");
+	private static void assignConfigField(int configNum, DatabaseFieldConfig config, Field field, Object value) {
+		switch (configNum) {
+			case 1 :
+				config.setColumnName(valueIfNotBlank((String) value));
+				break;
+			case 2 :
+				config.setDataType((DataType) value);
+				break;
+			case 3 :
+				String defaultValue = (String) value;
+				if (!(defaultValue == null || defaultValue.equals(DatabaseField.DEFAULT_STRING))) {
+					config.setDefaultValue(defaultValue);
+				}
+				break;
+			case 4 :
+				config.setWidth((Integer) value);
+				break;
+			case 5 :
+				config.setCanBeNull((Boolean) value);
+				break;
+			case 6 :
+				config.setId((Boolean) value);
+				break;
+			case 7 :
+				config.setGeneratedId((Boolean) value);
+				break;
+			case 8 :
+				config.setGeneratedIdSequence(valueIfNotBlank((String) value));
+				break;
+			case 9 :
+				config.setForeign((Boolean) value);
+				break;
+			case 10 :
+				config.setUseGetSet((Boolean) value);
+				break;
+			case 11 :
+				config.setUnknownEnumValue(DatabaseFieldConfig.findMatchingEnumVal(field, (String) value));
+				break;
+			case 12 :
+				config.setThrowIfNull((Boolean) value);
+				break;
+			case 13 :
+				config.setPersisted((Boolean) value);
+				break;
+			case 14 :
+				config.setFormat(valueIfNotBlank((String) value));
+				break;
+			case 15 :
+				config.setUnique((Boolean) value);
+				break;
+			case 16 :
+				config.setUniqueCombo((Boolean) value);
+				break;
+			case 17 :
+				config.setIndex((Boolean) value);
+				break;
+			case 18 :
+				config.setUniqueIndex((Boolean) value);
+				break;
+			case 19 :
+				config.setIndexName(valueIfNotBlank((String) value));
+				break;
+			case 20 :
+				config.setUniqueIndexName(valueIfNotBlank((String) value));
+				break;
+			case 21 :
+				config.setForeignAutoRefresh((Boolean) value);
+				break;
+			case 22 :
+				config.setMaxForeignAutoRefreshLevel((Integer) value);
+				break;
+			case 23 :
+				@SuppressWarnings("unchecked")
+				Class<? extends DataPersister> clazz = (Class<? extends DataPersister>) value;
+				config.setPersisterClass(clazz);
+				break;
+			case 24 :
+				config.setAllowGeneratedIdInsert((Boolean) value);
+				break;
+			case 25 :
+				config.setColumnDefinition(valueIfNotBlank((String) value));
+				break;
+			case 26 :
+				config.setForeignAutoCreate((Boolean) value);
+				break;
+			case 27 :
+				config.setVersion((Boolean) value);
+				break;
+			default :
+				throw new IllegalStateException("Could not find support for DatabaseField number " + configNum);
+		}
+	}
 
-			elementsField = annotationFactoryClazz.getDeclaredField("elements");
-			elementsField.setAccessible(true);
-
-			annotationMemberClazz = Class.forName("org.apache.harmony.lang.annotation.AnnotationMember");
-			nameField = annotationMemberClazz.getDeclaredField("name");
-			nameField.setAccessible(true);
-			valueField = annotationMemberClazz.getDeclaredField("value");
-			valueField.setAccessible(true);
-
-			Field field = DatabaseFieldSample.class.getDeclaredField("field");
-			DatabaseField databaseField = field.getAnnotation(DatabaseField.class);
-			InvocationHandler proxy = Proxy.getInvocationHandler(databaseField);
-			if (proxy.getClass() != annotationFactoryClazz) {
-				return null;
-			}
-
-			// this should be an array of AnnotationMember objects
-			Object elements = elementsField.get(proxy);
-			if (elements == null || elements.getClass() != annotationMemberArrayClazz) {
-				return null;
-			}
-
-			Object[] elementArray = (Object[]) elements;
-			ConfigField[] configFields = new ConfigField[elementArray.length];
-
-			// build our array of ConfigField enum entries that match the AnnotationMember array
-			for (int i = 0; i < elementArray.length; i++) {
-				String name = (String) nameField.get(elementArray[i]);
-				configFields[i] = ConfigField.valueOf(name);
-			}
-			return configFields;
-		} catch (Exception e) {
-			// if any reflection fu fails then we bail and use the default _slow_ mechanisms
+	private static String valueIfNotBlank(String value) {
+		if (value == null || value.length() == 0) {
 			return null;
+		} else {
+			return value;
 		}
 	}
 
@@ -173,194 +361,5 @@ public class DatabaseTableConfigUtil {
 		@SuppressWarnings("unused")
 		@DatabaseField
 		String field;
-	}
-
-	/**
-	 * Enumeration that converts from field/value from the {@link DatabaseField} annotation to
-	 * {@link DatabaseFieldConfig} values. This is very specific to this annotation.
-	 */
-	private enum ConfigField {
-		columnName() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setColumnName(valueIfNotBlank((String) value));
-			}
-		},
-		dataType() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setDataType((DataType) value);
-			}
-		},
-		defaultValue() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				String defaultValue = (String) value;
-				if (!defaultValue.equals(DatabaseField.DEFAULT_STRING)) {
-					config.setDefaultValue(defaultValue);
-				}
-			}
-		},
-		width() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setWidth((Integer) value);
-			}
-		},
-		canBeNull() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setCanBeNull((Boolean) value);
-			}
-		},
-		id() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setId((Boolean) value);
-			}
-		},
-		generatedId() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setGeneratedId((Boolean) value);
-			}
-		},
-		generatedIdSequence() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setGeneratedIdSequence(valueIfNotBlank((String) value));
-			}
-		},
-		foreign() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setForeign((Boolean) value);
-			}
-		},
-		useGetSet() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setUseGetSet((Boolean) value);
-			}
-		},
-		unknownEnumName() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setUnknownEnumValue(DatabaseFieldConfig.findMatchingEnumVal(field, (String) value));
-			}
-		},
-		throwIfNull() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setThrowIfNull((Boolean) value);
-			}
-		},
-		persisted() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setPersisted((Boolean) value);
-			}
-		},
-		format() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setFormat(valueIfNotBlank((String) value));
-			}
-		},
-		unique() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setUnique((Boolean) value);
-			}
-		},
-		uniqueCombo() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setUniqueCombo((Boolean) value);
-			}
-		},
-		index() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setIndex((Boolean) value);
-			}
-		},
-		uniqueIndex() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setUniqueIndex((Boolean) value);
-			}
-		},
-		indexName() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setIndexName(valueIfNotBlank((String) value));
-			}
-		},
-		uniqueIndexName() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setUniqueIndexName(valueIfNotBlank((String) value));
-			}
-		},
-		foreignAutoRefresh() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setForeignAutoRefresh((Boolean) value);
-			}
-		},
-		maxForeignAutoRefreshLevel() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setMaxForeignAutoRefreshLevel((Integer) value);
-			}
-		},
-		persisterClass() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				@SuppressWarnings("unchecked")
-				Class<? extends DataPersister> clazz = (Class<? extends DataPersister>) value;
-				config.setPersisterClass(clazz);
-			}
-		},
-		allowGeneratedIdInsert() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setAllowGeneratedIdInsert((Boolean) value);
-			}
-		},
-		columnDefinition() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setColumnDefinition(valueIfNotBlank((String) value));
-			}
-		},
-		foreignAutoCreate() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setForeignAutoCreate((Boolean) value);
-			}
-		},
-		version() {
-			@Override
-			public void assignConfigField(DatabaseFieldConfig config, Field field, Object value) {
-				config.setVersion((Boolean) value);
-			}
-		},
-		// end
-		;
-
-		/**
-		 * Take the value from the annotation and assign it into the config.
-		 */
-		public abstract void assignConfigField(DatabaseFieldConfig config, Field field, Object value);
-
-		protected String valueIfNotBlank(String value) {
-			if (value == null || value.length() == 0) {
-				return null;
-			} else {
-				return value;
-			}
-		}
 	}
 }
