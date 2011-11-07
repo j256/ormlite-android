@@ -45,14 +45,14 @@ public class AndroidCompiledStatement implements CompiledStatement {
 
 	public DatabaseResults runQuery(ObjectCache objectCache) throws SQLException {
 		// this could come from DELETE or UPDATE, just not a SELECT
-		if (type != StatementType.SELECT) {
+		if (!type.isOkForQuery()) {
 			throw new IllegalArgumentException("Cannot call query on a " + type + " statement");
 		}
 		return new AndroidDatabaseResults(getCursor(), objectCache);
 	}
 
 	public int runUpdate() throws SQLException {
-		if (type == StatementType.SELECT) {
+		if (!type.isOkForUpdate()) {
 			throw new IllegalArgumentException("Cannot call update on a " + type + " statement");
 		}
 		String finalSql = null;
@@ -70,7 +70,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	}
 
 	public int runExecute() throws SQLException {
-		if (type != StatementType.EXECUTE) {
+		if (!type.isOkForExecute()) {
 			throw new IllegalArgumentException("Cannot call execute on a " + type + " statement");
 		}
 		try {
