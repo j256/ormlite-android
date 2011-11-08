@@ -201,16 +201,15 @@ public class DatabaseTableConfigUtil {
 
 		/*
 		 * This, unfortunately, we can't get around. This creates a AnnotationFactory, an array of AnnotationMember
-		 * fields, and possibly another array of AnnotationMember values. This creates a large number of GC'd objects.
+		 * fields, and possibly another array of AnnotationMember values. This creates a lot of GC'd objects.
 		 */
 		DatabaseField databaseField = field.getAnnotation(DatabaseField.class);
-		if (databaseField == null) {
-			return null;
-		}
 
 		DatabaseFieldConfig config = null;
 		try {
-			config = buildConfig(databaseField, tableName, field);
+			if (databaseField != null) {
+				config = buildConfig(databaseField, tableName, field);
+			}
 		} catch (Exception e) {
 			// ignored so we will configure normally below
 		}
