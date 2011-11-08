@@ -215,6 +215,11 @@ public class DatabaseTableConfigUtil {
 		}
 
 		if (config == null) {
+			/*
+			 * We configure this the old way because we might be using javax annotations, have a ForeignCollectionField,
+			 * or may still be using the deprecated annotations. At this point we know that there isn't a @DatabaseField
+			 * or we can't do our reflection hacks for some reason.
+			 */
 			return DatabaseFieldConfig.fromField(databaseType, tableName, field);
 		} else {
 			workedC++;
