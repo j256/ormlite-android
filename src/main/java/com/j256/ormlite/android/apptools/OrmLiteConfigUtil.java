@@ -23,6 +23,7 @@ import com.j256.ormlite.db.SqliteAndroidDatabaseType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.DatabaseFieldConfig;
 import com.j256.ormlite.field.DatabaseFieldSimple;
+import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.DatabaseTableConfig;
 import com.j256.ormlite.table.DatabaseTableConfigLoader;
@@ -93,7 +94,7 @@ public class OrmLiteConfigUtil {
 	 * Finds the annotated classes in the current directory or below and writes a configuration file to the file-name in
 	 * the raw folder.
 	 */
-	public static void writeConfigFile(String fileName) throws Exception {
+	public static void writeConfigFile(String fileName) throws SQLException, IOException {
 		File rawDir = findRawDir(new File("."));
 		if (rawDir == null) {
 			System.err.println("Could not find " + RAW_DIR_NAME + " directory");
@@ -106,7 +107,7 @@ public class OrmLiteConfigUtil {
 	/**
 	 * Finds the annotated classes in the current directory or below and writes a configuration file.
 	 */
-	public static void writeConfigFile(File configFile) throws Exception {
+	public static void writeConfigFile(File configFile) throws SQLException, IOException {
 		System.out.println("Writing configurations to " + configFile.getAbsolutePath());
 		BufferedWriter writer = new BufferedWriter(new FileWriter(configFile), 4096);
 		try {
@@ -121,7 +122,7 @@ public class OrmLiteConfigUtil {
 	/**
 	 * Writes a configuration fileName in the raw directory with the configuration for classes.
 	 */
-	public static void writeConfigFile(String fileName, Class<?>[] classes) throws Exception {
+	public static void writeConfigFile(String fileName, Class<?>[] classes) throws SQLException, IOException {
 		File rootDir = new File(".");
 		File rawDir = findRawDir(rootDir);
 		if (rawDir == null) {
@@ -135,7 +136,7 @@ public class OrmLiteConfigUtil {
 	/**
 	 * Write a configuration file with the configuration for classes.
 	 */
-	public static void writeConfigFile(File configFile, Class<?>[] classes) throws Exception {
+	public static void writeConfigFile(File configFile, Class<?>[] classes) throws SQLException, IOException {
 		System.out.println("Writing configurations to " + configFile.getAbsolutePath());
 		writeConfigFile(new FileOutputStream(configFile), classes);
 	}
@@ -143,7 +144,7 @@ public class OrmLiteConfigUtil {
 	/**
 	 * Write a configuration file to an output stream with the configuration for classes.
 	 */
-	public static void writeConfigFile(OutputStream outputStream, Class<?>[] classes) throws Exception {
+	public static void writeConfigFile(OutputStream outputStream, Class<?>[] classes) throws SQLException, IOException {
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream), 4096);
 		try {
 			writeHeader(writer);
@@ -161,7 +162,7 @@ public class OrmLiteConfigUtil {
 	 * Look for the resource-directory in the current directory or the directories above. Then look for the
 	 * raw-directory underneath the resource-directory.
 	 */
-	protected static File findRawDir(File dir) throws Exception {
+	protected static File findRawDir(File dir) {
 		for (int i = 0; dir != null && i < 20; i++) {
 			File rawDir = findResRawDir(dir);
 			if (rawDir != null) {
@@ -181,7 +182,8 @@ public class OrmLiteConfigUtil {
 		writer.newLine();
 	}
 
-	private static void findAnnotatedClasses(BufferedWriter writer, File dir, int level) throws Exception {
+	private static void findAnnotatedClasses(BufferedWriter writer, File dir, int level) throws SQLException,
+			IOException {
 		for (File file : dir.listFiles()) {
 			if (file.isDirectory()) {
 				// recurse if we aren't deep enough
@@ -258,7 +260,8 @@ public class OrmLiteConfigUtil {
 			}
 			for (Field field : fields) {
 				if (field.getAnnotation(DatabaseField.class) != null
-						|| field.getAnnotation(DatabaseFieldSimple.class) != null) {
+						|| field.getAnnotation(DatabaseFieldSimple.class) != null
+						|| field.getAnnotation(ForeignCollectionField.class) != null) {
 					return true;
 				}
 			}
@@ -299,10 +302,11 @@ public class OrmLiteConfigUtil {
 			reader.close();
 		}
 	}
+
 	/**
 	 * Look for the resource directory with raw beneath it.
 	 */
-	private static File findResRawDir(File dir) throws Exception {
+	private static File findResRawDir(File dir) {
 		for (File file : dir.listFiles()) {
 			if (file.getName().equals(RESOURCE_DIR_NAME) && file.isDirectory()) {
 				File[] rawFiles = file.listFiles(new FileFilter() {
