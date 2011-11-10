@@ -25,8 +25,15 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	private static final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 
 	public AndroidDatabaseResults(Cursor cursor, ObjectCache objectCache) {
+		this(cursor, true, objectCache);
+	}
+
+	/**
+	 * Constructor that allows you to inject a cursor that has already been configured with first-call set to false.
+	 */
+	public AndroidDatabaseResults(Cursor cursor, boolean firstCall, ObjectCache objectCache) {
 		this.cursor = cursor;
-		this.firstCall = true;
+		this.firstCall = firstCall;
 		this.objectCache = objectCache;
 	}
 
