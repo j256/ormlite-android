@@ -131,7 +131,6 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	public <T> Object queryForOne(String statement, Object[] args, FieldType[] argFieldTypes,
 			GenericRowMapper<T> rowMapper, ObjectCache objectCache) throws SQLException {
 		Cursor cursor = null;
-
 		try {
 			cursor = db.rawQuery(statement, toStrings(args));
 			AndroidDatabaseResults results = new AndroidDatabaseResults(cursor, objectCache);
@@ -164,6 +163,25 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} finally {
 			if (stmt != null) {
 				stmt.close();
+			}
+		}
+	}
+
+	public long queryForLong(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
+		Cursor cursor = null;
+		try {
+			cursor = db.rawQuery(statement, toStrings(args));
+			AndroidDatabaseResults results = new AndroidDatabaseResults(cursor, null);
+			if (results.next()) {
+				return results.getLong(0);
+			} else {
+				return 0L;
+			}
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("queryForLong from database failed: " + statement, e);
+		} finally {
+			if (cursor != null) {
+				cursor.close();
 			}
 		}
 	}
