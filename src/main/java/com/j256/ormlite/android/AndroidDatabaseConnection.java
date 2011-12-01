@@ -33,6 +33,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	public AndroidDatabaseConnection(SQLiteDatabase db, boolean readWrite) {
 		this.db = db;
 		this.readWrite = readWrite;
+		logger.trace("databased opened, read-write = {}: {}", readWrite, db);
 	}
 
 	public boolean isAutoCommitSupported() {
@@ -200,7 +201,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	public void close() throws SQLException {
 		try {
 			db.close();
-			logger.trace("database closed");
+			logger.trace("database closed: {}", db);
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("problems closing the database connection", e);
 		}
