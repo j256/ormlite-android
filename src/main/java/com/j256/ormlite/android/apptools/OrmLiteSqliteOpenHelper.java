@@ -36,7 +36,7 @@ import com.j256.ormlite.table.DatabaseTableConfigLoader;
 public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
-	private AndroidConnectionSource connectionSource = new AndroidConnectionSource(this);
+	protected AndroidConnectionSource connectionSource = new AndroidConnectionSource(this);
 	private volatile boolean isOpen = true;
 
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion) {
@@ -139,7 +139,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	public ConnectionSource getConnectionSource() {
 		if (!isOpen) {
 			// we don't throw this exception, but log it for debugging purposes
-			logger.error(new IllegalStateException(), "Getting connectionSource called after closed");
+			logger.warn(new IllegalStateException(), "Getting connectionSource was called after closed");
 		}
 		return connectionSource;
 	}
