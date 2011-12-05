@@ -40,7 +40,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		this.sqliteDatabase = sqliteDatabase;
 	}
 
-	public DatabaseConnection getReadOnlyConnection() throws SQLException {
+	public DatabaseConnection getReadOnlyConnection() {
 		/*
 		 * We have to use the read-write connection because getWritableDatabase() can call close on
 		 * getReadableDatabase() in the future. This has something to do with Android's SQLite connection management.
@@ -50,7 +50,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		return getReadWriteConnection();
 	}
 
-	public DatabaseConnection getReadWriteConnection() throws SQLException {
+	public DatabaseConnection getReadWriteConnection() {
 		DatabaseConnection conn = getSavedConnection();
 		if (conn != null) {
 			return conn;
@@ -65,7 +65,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		return connection;
 	}
 
-	public void releaseConnection(DatabaseConnection connection) throws SQLException {
+	public void releaseConnection(DatabaseConnection connection) {
 		// noop since connection management is handled by AndroidOS
 	}
 

@@ -217,7 +217,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
-	public boolean isTableExists(String tableName) throws SQLException {
+	public boolean isTableExists(String tableName) {
 		// NOTE: it is non trivial to do this check since the helper will auto-create if it doesn't exist
 		return true;
 	}
@@ -301,11 +301,11 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			this.name = name;
 		}
 
-		public int getSavepointId() throws SQLException {
+		public int getSavepointId() {
 			return 0;
 		}
 
-		public String getSavepointName() throws SQLException {
+		public String getSavepointName() {
 			return name;
 		}
 	}

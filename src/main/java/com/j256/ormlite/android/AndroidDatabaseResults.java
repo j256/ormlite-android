@@ -37,11 +37,11 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		this.objectCache = objectCache;
 	}
 
-	public int getColumnCount() throws SQLException {
+	public int getColumnCount() {
 		return cursor.getColumnCount();
 	}
 
-	public boolean next() throws SQLException {
+	public boolean next() {
 		boolean returnValue;
 		if (firstCall) {
 			returnValue = cursor.moveToFirst();
@@ -70,11 +70,11 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		return index;
 	}
 
-	public String getString(int columnIndex) throws SQLException {
+	public String getString(int columnIndex) {
 		return cursor.getString(columnIndex);
 	}
 
-	public boolean getBoolean(int columnIndex) throws SQLException {
+	public boolean getBoolean(int columnIndex) {
 		if (cursor.isNull(columnIndex) || cursor.getShort(columnIndex) == 0) {
 			return false;
 		} else {
@@ -93,31 +93,31 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		}
 	}
 
-	public byte getByte(int columnIndex) throws SQLException {
+	public byte getByte(int columnIndex) {
 		return (byte) getShort(columnIndex);
 	}
 
-	public byte[] getBytes(int columnIndex) throws SQLException {
+	public byte[] getBytes(int columnIndex) {
 		return cursor.getBlob(columnIndex);
 	}
 
-	public short getShort(int columnIndex) throws SQLException {
+	public short getShort(int columnIndex) {
 		return cursor.getShort(columnIndex);
 	}
 
-	public int getInt(int columnIndex) throws SQLException {
+	public int getInt(int columnIndex) {
 		return cursor.getInt(columnIndex);
 	}
 
-	public long getLong(int columnIndex) throws SQLException {
+	public long getLong(int columnIndex) {
 		return cursor.getLong(columnIndex);
 	}
 
-	public float getFloat(int columnIndex) throws SQLException {
+	public float getFloat(int columnIndex) {
 		return cursor.getFloat(columnIndex);
 	}
 
-	public double getDouble(int columnIndex) throws SQLException {
+	public double getDouble(int columnIndex) {
 		return cursor.getDouble(columnIndex);
 	}
 
@@ -125,11 +125,11 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		throw new SQLException("Android does not support timestamp.  Use JAVA_DATE_LONG or JAVA_DATE_STRING types");
 	}
 
-	public InputStream getBlobStream(int columnIndex) throws SQLException {
+	public InputStream getBlobStream(int columnIndex) {
 		return new ByteArrayInputStream(cursor.getBlob(columnIndex));
 	}
 
-	public boolean wasNull(int columnIndex) throws SQLException {
+	public boolean wasNull(int columnIndex) {
 		return cursor.isNull(columnIndex);
 	}
 
