@@ -277,7 +277,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	}
 
 	private String[] toStrings(Object[] args) {
-		if (args == null) {
+		if (args == null || args.length == 0) {
 			return null;
 		}
 		String[] strings = new String[args.length];
