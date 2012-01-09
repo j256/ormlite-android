@@ -2,6 +2,7 @@ package com.j256.ormlite.android;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
@@ -127,6 +128,10 @@ public class AndroidDatabaseResults implements DatabaseResults {
 
 	public InputStream getBlobStream(int columnIndex) {
 		return new ByteArrayInputStream(cursor.getBlob(columnIndex));
+	}
+
+	public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
+		throw new SQLException("Android does not support BigDecimal type.  Use BIG_DECIMAL or BIG_DECIMAL_STRING types");
 	}
 
 	public boolean wasNull(int columnIndex) {
