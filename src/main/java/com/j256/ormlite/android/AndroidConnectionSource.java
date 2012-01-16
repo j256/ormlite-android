@@ -10,6 +10,7 @@ import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.db.SqliteAndroidDatabaseType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
+import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.BaseConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
@@ -40,7 +41,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		this.sqliteDatabase = sqliteDatabase;
 	}
 
-	public DatabaseConnection getReadOnlyConnection() {
+	public DatabaseConnection getReadOnlyConnection() throws SQLException {
 		/*
 		 * We have to use the read-write connection because getWritableDatabase() can call close on
 		 * getReadableDatabase() in the future. This has something to do with Android's SQLite connection management.
@@ -50,14 +51,20 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		return getReadWriteConnection();
 	}
 
-	public DatabaseConnection getReadWriteConnection() {
+	public DatabaseConnection getReadWriteConnection() throws SQLException {
 		DatabaseConnection conn = getSavedConnection();
 		if (conn != null) {
 			return conn;
 		}
 		if (connection == null) {
 			if (sqliteDatabase == null) {
-				connection = new AndroidDatabaseConnection(helper.getWritableDatabase(), true);
+				SQLiteDatabase db;
+				try {
+					db = helper.getWritableDatabase();
+				} catch (android.database.SQLException e) {
+					throw SqlExceptionUtil.create("Getting a writable database from SQLiteOpenHelper failed", e);
+				}
+				connection = new AndroidDatabaseConnection(db, true);
 			} else {
 				connection = new AndroidDatabaseConnection(sqliteDatabase, true);
 			}
