@@ -218,8 +218,13 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	}
 
 	public boolean isTableExists(String tableName) {
-		// NOTE: it is non trivial to do this check since the helper will auto-create if it doesn't exist
-		return true;
+		Cursor cursor =
+				db.rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '" + tableName + "'", null);
+		if (cursor != null && cursor.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private int update(String statement, Object[] args, FieldType[] argFieldTypes, String label) throws SQLException {
