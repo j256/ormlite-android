@@ -22,35 +22,41 @@ public class AndroidDatabaseResults implements DatabaseResults {
 
 	private final Cursor cursor;
 	private final ObjectCache objectCache;
-	private boolean firstCall;
 	private static final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 
 	public AndroidDatabaseResults(Cursor cursor, ObjectCache objectCache) {
-		this(cursor, true, objectCache);
+		this.cursor = cursor;
+		this.objectCache = objectCache;
 	}
 
 	/**
 	 * Constructor that allows you to inject a cursor that has already been configured with first-call set to false.
+	 * 
+	 * @deprecated The firstCall is no longer needed since the library now calls first() and next on its own.
 	 */
+	@Deprecated
 	public AndroidDatabaseResults(Cursor cursor, boolean firstCall, ObjectCache objectCache) {
-		this.cursor = cursor;
-		this.firstCall = firstCall;
-		this.objectCache = objectCache;
+		this(cursor, objectCache);
 	}
 
 	public int getColumnCount() {
 		return cursor.getColumnCount();
 	}
 
+	public boolean first() {
+		return cursor.moveToFirst();
+	}
+
 	public boolean next() {
-		boolean returnValue;
-		if (firstCall) {
-			returnValue = cursor.moveToFirst();
-			firstCall = false;
-		} else {
-			returnValue = cursor.moveToNext();
-		}
-		return returnValue;
+		return cursor.moveToNext();
+	}
+
+	public boolean previous() {
+		return cursor.moveToPrevious();
+	}
+
+	public boolean moveRelative(int offset) {
+		return cursor.move(offset);
 	}
 
 	public int findColumn(String columnName) throws SQLException {

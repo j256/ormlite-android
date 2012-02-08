@@ -106,6 +106,12 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		return stmt;
 	}
 
+	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes,
+			int resultFlags) {
+		// resultFlags argument is not used in Android-land since the {@link Cursor} is bi-directional.
+		return compileStatement(statement, type, argFieldTypes);
+	}
+
 	public int insert(String statement, Object[] args, FieldType[] argFieldTypes, GeneratedKeyHolder keyHolder)
 			throws SQLException {
 		SQLiteStatement stmt = null;
@@ -143,7 +149,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			cursor = db.rawQuery(statement, toStrings(args));
 			AndroidDatabaseResults results = new AndroidDatabaseResults(cursor, objectCache);
 			logger.trace("queried for one result with {}", statement);
-			if (!results.next()) {
+			if (!results.first()) {
 				return null;
 			} else {
 				T first = rowMapper.mapRow(results);
@@ -184,7 +190,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			cursor = db.rawQuery(statement, toStrings(args));
 			AndroidDatabaseResults results = new AndroidDatabaseResults(cursor, null);
 			logger.trace("query for long raw query executed: {}", statement);
-			if (results.next()) {
+			if (results.first()) {
 				return results.getLong(0);
 			} else {
 				return 0L;
