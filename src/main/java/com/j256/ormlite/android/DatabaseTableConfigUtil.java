@@ -126,64 +126,96 @@ public class DatabaseTableConfigUtil {
 		}
 	}
 
+	/*
+	 * NOTE: we are doing this instead of an enum (which otherwise would be much better) because we don't want to take
+	 * the class-size hit that comes with each enum being its own class.
+	 */
+	private static final int COLUMN_NAME = 1;
+	private static final int DATA_TYPE = 2;
+	private static final int DEFAULT_VALUE = 3;
+	private static final int WIDTH = 4;
+	private static final int CAN_BE_NULL = 5;
+	private static final int ID = 6;
+	private static final int GENERATED_ID = 7;
+	private static final int GENERATED_ID_SEQUENCE = 8;
+	private static final int FOREIGN = 9;
+	private static final int USE_GET_SET = 10;
+	private static final int UNKNOWN_ENUM_NAME = 11;
+	private static final int THROW_IF_NULL = 12;
+	private static final int PERSISTED = 13;
+	private static final int FORMAT = 14;
+	private static final int UNIQUE = 15;
+	private static final int UNIQUE_COMBO = 16;
+	private static final int INDEX = 17;
+	private static final int UNIQUE_INDEX = 18;
+	private static final int INDEX_NAME = 19;
+	private static final int UNIQUE_INDEX_NAME = 20;
+	private static final int FOREIGN_AUTO_REFRESH = 21;
+	private static final int MAX_FOREIGN_AUTO_REFRESH_LEVEL = 22;
+	private static final int PERSISTER_CLASS = 23;
+	private static final int ALLOW_GENERATED_ID_INSERT = 24;
+	private static final int COLUMN_DEFINITON = 25;
+	private static final int FOREIGN_AUTO_CREATE = 26;
+	private static final int VERSION = 27;
+
 	/**
 	 * Convert the name of the @DatabaseField fields into a number for easy processing later.
 	 */
 	private static int configFieldNameToNum(String configName) {
 		if (configName.equals("columnName")) {
-			return 1;
+			return COLUMN_NAME;
 		} else if (configName.equals("dataType")) {
-			return 2;
+			return DATA_TYPE;
 		} else if (configName.equals("defaultValue")) {
-			return 3;
+			return DEFAULT_VALUE;
 		} else if (configName.equals("width")) {
-			return 4;
+			return WIDTH;
 		} else if (configName.equals("canBeNull")) {
-			return 5;
+			return CAN_BE_NULL;
 		} else if (configName.equals("id")) {
-			return 6;
+			return ID;
 		} else if (configName.equals("generatedId")) {
-			return 7;
+			return GENERATED_ID;
 		} else if (configName.equals("generatedIdSequence")) {
-			return 8;
+			return GENERATED_ID_SEQUENCE;
 		} else if (configName.equals("foreign")) {
-			return 9;
+			return FOREIGN;
 		} else if (configName.equals("useGetSet")) {
-			return 10;
+			return USE_GET_SET;
 		} else if (configName.equals("unknownEnumName")) {
-			return 11;
+			return UNKNOWN_ENUM_NAME;
 		} else if (configName.equals("throwIfNull")) {
-			return 12;
+			return THROW_IF_NULL;
 		} else if (configName.equals("persisted")) {
-			return 13;
+			return PERSISTED;
 		} else if (configName.equals("format")) {
-			return 14;
+			return FORMAT;
 		} else if (configName.equals("unique")) {
-			return 15;
+			return UNIQUE;
 		} else if (configName.equals("uniqueCombo")) {
-			return 16;
+			return UNIQUE_COMBO;
 		} else if (configName.equals("index")) {
-			return 17;
+			return INDEX;
 		} else if (configName.equals("uniqueIndex")) {
-			return 18;
+			return UNIQUE_INDEX;
 		} else if (configName.equals("indexName")) {
-			return 19;
+			return INDEX_NAME;
 		} else if (configName.equals("uniqueIndexName")) {
-			return 20;
+			return UNIQUE_INDEX_NAME;
 		} else if (configName.equals("foreignAutoRefresh")) {
-			return 21;
+			return FOREIGN_AUTO_REFRESH;
 		} else if (configName.equals("maxForeignAutoRefreshLevel")) {
-			return 22;
+			return MAX_FOREIGN_AUTO_REFRESH_LEVEL;
 		} else if (configName.equals("persisterClass")) {
-			return 23;
+			return PERSISTER_CLASS;
 		} else if (configName.equals("allowGeneratedIdInsert")) {
-			return 24;
+			return ALLOW_GENERATED_ID_INSERT;
 		} else if (configName.equals("columnDefinition")) {
-			return 25;
+			return COLUMN_DEFINITON;
 		} else if (configName.equals("foreignAutoCreate")) {
-			return 26;
+			return FOREIGN_AUTO_CREATE;
 		} else if (configName.equals("version")) {
-			return 27;
+			return VERSION;
 		} else {
 			throw new IllegalStateException("Could not find support for DatabaseField " + configName);
 		}
@@ -259,90 +291,90 @@ public class DatabaseTableConfigUtil {
 	 */
 	private static void assignConfigField(int configNum, DatabaseFieldConfig config, Field field, Object value) {
 		switch (configNum) {
-			case 1 :
+			case COLUMN_NAME :
 				config.setColumnName(valueIfNotBlank((String) value));
 				break;
-			case 2 :
+			case DATA_TYPE :
 				config.setDataType((DataType) value);
 				break;
-			case 3 :
+			case DEFAULT_VALUE :
 				String defaultValue = (String) value;
 				if (!(defaultValue == null || defaultValue.equals(DatabaseField.DEFAULT_STRING))) {
 					config.setDefaultValue(defaultValue);
 				}
 				break;
-			case 4 :
+			case WIDTH :
 				config.setWidth((Integer) value);
 				break;
-			case 5 :
+			case CAN_BE_NULL :
 				config.setCanBeNull((Boolean) value);
 				break;
-			case 6 :
+			case ID :
 				config.setId((Boolean) value);
 				break;
-			case 7 :
+			case GENERATED_ID :
 				config.setGeneratedId((Boolean) value);
 				break;
-			case 8 :
+			case GENERATED_ID_SEQUENCE :
 				config.setGeneratedIdSequence(valueIfNotBlank((String) value));
 				break;
-			case 9 :
+			case FOREIGN :
 				config.setForeign((Boolean) value);
 				break;
-			case 10 :
+			case USE_GET_SET :
 				config.setUseGetSet((Boolean) value);
 				break;
-			case 11 :
+			case UNKNOWN_ENUM_NAME :
 				config.setUnknownEnumValue(DatabaseFieldConfig.findMatchingEnumVal(field, (String) value));
 				break;
-			case 12 :
+			case THROW_IF_NULL :
 				config.setThrowIfNull((Boolean) value);
 				break;
-			case 13 :
+			case PERSISTED :
 				config.setPersisted((Boolean) value);
 				break;
-			case 14 :
+			case FORMAT :
 				config.setFormat(valueIfNotBlank((String) value));
 				break;
-			case 15 :
+			case UNIQUE :
 				config.setUnique((Boolean) value);
 				break;
-			case 16 :
+			case UNIQUE_COMBO :
 				config.setUniqueCombo((Boolean) value);
 				break;
-			case 17 :
+			case INDEX :
 				config.setIndex((Boolean) value);
 				break;
-			case 18 :
+			case UNIQUE_INDEX :
 				config.setUniqueIndex((Boolean) value);
 				break;
-			case 19 :
+			case INDEX_NAME :
 				config.setIndexName(valueIfNotBlank((String) value));
 				break;
-			case 20 :
+			case UNIQUE_INDEX_NAME :
 				config.setUniqueIndexName(valueIfNotBlank((String) value));
 				break;
-			case 21 :
+			case FOREIGN_AUTO_REFRESH :
 				config.setForeignAutoRefresh((Boolean) value);
 				break;
-			case 22 :
+			case MAX_FOREIGN_AUTO_REFRESH_LEVEL :
 				config.setMaxForeignAutoRefreshLevel((Integer) value);
 				break;
-			case 23 :
+			case PERSISTER_CLASS :
 				@SuppressWarnings("unchecked")
 				Class<? extends DataPersister> clazz = (Class<? extends DataPersister>) value;
 				config.setPersisterClass(clazz);
 				break;
-			case 24 :
+			case ALLOW_GENERATED_ID_INSERT :
 				config.setAllowGeneratedIdInsert((Boolean) value);
 				break;
-			case 25 :
+			case COLUMN_DEFINITON :
 				config.setColumnDefinition(valueIfNotBlank((String) value));
 				break;
-			case 26 :
+			case FOREIGN_AUTO_CREATE :
 				config.setForeignAutoCreate((Boolean) value);
 				break;
-			case 27 :
+			case VERSION :
 				config.setVersion((Boolean) value);
 				break;
 			default :
