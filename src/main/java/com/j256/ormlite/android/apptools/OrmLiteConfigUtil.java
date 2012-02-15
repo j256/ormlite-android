@@ -22,7 +22,6 @@ import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.db.SqliteAndroidDatabaseType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.DatabaseFieldConfig;
-import com.j256.ormlite.field.DatabaseFieldSimple;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.DatabaseTableConfig;
@@ -53,15 +52,8 @@ import com.j256.ormlite.table.DatabaseTableConfigLoader;
  * whenever you edit one of your database classes. There is no way that I know of to do this automagically.
  * </p>
  * 
- * <p>
- * <b>NOTE:</b> If you need the speed but are worried about the regeneration, then consider using the
- * {@link DatabaseFieldSimple} and other DatabaseField* annotations instead of {@link DatabaseField} which each contain
- * fewer methods and run a lot faster.
- * </p>
- * 
  * @author graywatson
  */
-@SuppressWarnings("deprecation")
 public class OrmLiteConfigUtil {
 
 	/**
@@ -260,7 +252,6 @@ public class OrmLiteConfigUtil {
 			}
 			for (Field field : fields) {
 				if (field.getAnnotation(DatabaseField.class) != null
-						|| field.getAnnotation(DatabaseFieldSimple.class) != null
 						|| field.getAnnotation(ForeignCollectionField.class) != null) {
 					return true;
 				}
