@@ -1,8 +1,13 @@
 package com.j256.ormlite.db;
 
+import java.sql.SQLException;
+
+import com.j256.ormlite.android.DatabaseTableConfigUtil;
 import com.j256.ormlite.field.DataPersister;
 import com.j256.ormlite.field.FieldConverter;
 import com.j256.ormlite.field.types.DateStringType;
+import com.j256.ormlite.support.ConnectionSource;
+import com.j256.ormlite.table.DatabaseTableConfig;
 
 /**
  * Sqlite database type information for the Android OS that makes native calls to the Android OS database APIs.
@@ -10,9 +15,6 @@ import com.j256.ormlite.field.types.DateStringType;
  * @author graywatson
  */
 public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements DatabaseType {
-
-	public SqliteAndroidDatabaseType() {
-	}
 
 	@Override
 	public void loadDriver() {
@@ -65,5 +67,11 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 	@Override
 	public boolean isBatchUseTransaction() {
 		return true;
+	}
+
+	@Override
+	public <T> DatabaseTableConfig<T> extractDatabaseTableConfig(ConnectionSource connectionSource, Class<T> clazz)
+			throws SQLException {
+		return DatabaseTableConfigUtil.fromClass(connectionSource, clazz);
 	}
 }
