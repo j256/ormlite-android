@@ -157,6 +157,7 @@ public class DatabaseTableConfigUtil {
 	private static final int COLUMN_DEFINITON = 25;
 	private static final int FOREIGN_AUTO_CREATE = 26;
 	private static final int VERSION = 27;
+	private static final int FOREIGN_COLUMN_NAME = 28;
 
 	/**
 	 * Convert the name of the @DatabaseField fields into a number for easy processing later.
@@ -216,6 +217,8 @@ public class DatabaseTableConfigUtil {
 			return FOREIGN_AUTO_CREATE;
 		} else if (configName.equals("version")) {
 			return VERSION;
+		} else if (configName.equals("foreignColumnName")) {
+			return FOREIGN_COLUMN_NAME;
 		} else {
 			throw new IllegalStateException("Could not find support for DatabaseField " + configName);
 		}
@@ -376,6 +379,9 @@ public class DatabaseTableConfigUtil {
 				break;
 			case VERSION :
 				config.setVersion((Boolean) value);
+				break;
+			case FOREIGN_COLUMN_NAME :
+				config.setForeignColumnName(valueIfNotBlank((String) value));
 				break;
 			default :
 				throw new IllegalStateException("Could not find support for DatabaseField number " + configNum);
