@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.database.Cursor;
 
@@ -20,12 +23,25 @@ import com.j256.ormlite.support.DatabaseResults;
  */
 public class AndroidDatabaseResults implements DatabaseResults {
 
+	private static final int MIN_NUM_COLUMN_NAMES_MAP = 8;
+
 	private final Cursor cursor;
+	private final String[] columnNames;
+	private final Map<String, Integer> columnNameMap;
 	private final ObjectCache objectCache;
 	private static final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 
 	public AndroidDatabaseResults(Cursor cursor, ObjectCache objectCache) {
 		this.cursor = cursor;
+		this.columnNames = cursor.getColumnNames();
+		if (this.columnNames.length >= MIN_NUM_COLUMN_NAMES_MAP) {
+			this.columnNameMap = new HashMap<String, Integer>();
+			for (int i = 0; i < this.columnNames.length; i++) {
+				this.columnNameMap.put(this.columnNames[i], i);
+			}
+		} else {
+			columnNameMap = null;
+		}
 		this.objectCache = objectCache;
 	}
 
@@ -60,21 +76,26 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	}
 
 	public int findColumn(String columnName) throws SQLException {
-		int index = cursor.getColumnIndex(columnName);
-		if (index < 0) {
-			/*
-			 * Hack here. It turns out that if we've asked for '*' then the field foo is in the cursor as foo. But if we
-			 * ask for a particular field list, which escapes the field names, with DISTINCT the fiend names are in the
-			 * cursor with the escaping. Ugly!!
-			 */
-			StringBuilder sb = new StringBuilder(columnName.length() + 4);
-			databaseType.appendEscapedEntityName(sb, columnName);
-			index = cursor.getColumnIndex(sb.toString());
-			if (index < 0) {
-				throw new SQLException("Unknown field '" + columnName + "' from the Android sqlite cursor");
-			}
+		int index = lookupColumn(columnName);
+		if (index >= 0) {
+			return index;
 		}
-		return index;
+
+		/*
+		 * Hack here. It turns out that if we've asked for '*' then the field foo is in the cursor as foo. But if we ask
+		 * for a particular field list with DISTINCT, which escapes the field names, they are in the cursor _with_ the
+		 * escaping. Ugly!!
+		 */
+		StringBuilder sb = new StringBuilder(columnName.length() + 4);
+		databaseType.appendEscapedEntityName(sb, columnName);
+		index = lookupColumn(sb.toString());
+		if (index >= 0) {
+			return index;
+		} else {
+			String[] columnNames = cursor.getColumnNames();
+			throw new SQLException("Unknown field '" + columnName + "' from the Android sqlite cursor, not in:"
+					+ Arrays.toString(columnNames));
+		}
 	}
 
 	public String getString(int columnIndex) {
@@ -153,5 +174,24 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	 */
 	public Cursor getRawCursor() {
 		return cursor;
+	}
+
+	private int lookupColumn(String columnName) {
+		// we either use linear search or our name map
+		if (columnNameMap == null) {
+			for (int i = 0; i < columnNames.length; i++) {
+				if (columnNames[i].equals(columnName)) {
+					return i;
+				}
+			}
+			return -1;
+		} else {
+			Integer index = columnNameMap.get(columnName);
+			if (index == null) {
+				return -1;
+			} else {
+				return index;
+			}
+		}
 	}
 }
