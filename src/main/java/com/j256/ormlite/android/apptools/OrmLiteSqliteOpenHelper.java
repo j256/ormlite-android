@@ -34,7 +34,7 @@ import com.j256.ormlite.table.DatabaseTableConfigLoader;
 public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 
 	// there should only be one so we can make this an instance variable
-	private Logger logger = LoggerFactory.getLogger(getClass());
+	protected static Logger logger = LoggerFactory.getLogger(OrmLiteSqliteOpenHelper.class);
 	protected AndroidConnectionSource connectionSource = new AndroidConnectionSource(this);
 	private volatile boolean isOpen = true;
 
