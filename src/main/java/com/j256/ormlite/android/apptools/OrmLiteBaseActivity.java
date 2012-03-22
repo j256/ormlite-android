@@ -82,7 +82,7 @@ public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> ext
 	protected H getHelperInternal(Context context) {
 		@SuppressWarnings({ "unchecked", "deprecation" })
 		H newHelper = (H) OpenHelperManager.getHelper(context);
-		logger.debug("got new helper {} from OpenHelperManager", helper);
+		logger.debug("got new helper {} from OpenHelperManager", newHelper);
 		return newHelper;
 	}
 
