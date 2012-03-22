@@ -7,6 +7,26 @@ import com.j256.ormlite.logger.LoggerFactory;
 /**
  * Implementation of our logger which delegates to the internal Android logger.
  * 
+ * <p>
+ * To see log messages you will do something like:
+ * 
+ * <pre>
+ * adb shell setprop log.tag.OrmLiteBaseActivity VERBOSE
+ * </pre>
+ * 
+ * </p>
+ * 
+ * <p>
+ * <b>NOTE:</b> Unfortunately, Android variables are limited in size so this class takes that last 23 (sic) characters
+ * of the class name if it is larger than 23 characters. For example, if the class is AndroidDatabaseConnection you
+ * would do:
+ * 
+ * <pre>
+ * adb shell setprop log.tag.droidDatabaseConnection VERBOSE
+ * </pre>
+ * 
+ * </p>
+ * 
  * @author graywatson
  */
 public class AndroidLog implements com.j256.ormlite.logger.Log {
