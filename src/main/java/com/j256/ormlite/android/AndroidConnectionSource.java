@@ -65,10 +65,15 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 					throw SqlExceptionUtil.create("Getting a writable database from SQLiteOpenHelper failed", e);
 				}
 				connection = new AndroidDatabaseConnection(db, true);
+				logger.trace("created connection {} for db {}, helper {}", connection, db, helper);
 			} else {
 				connection = new AndroidDatabaseConnection(sqliteDatabase, true);
+				logger.trace("returning read-write connection {} for helper {}", connection, helper);
+				logger.trace("created connection {} for sqliteDatabase {}, helper {}", connection, sqliteDatabase,
+						helper);
 			}
 		}
+		logger.trace("returning read-write connection {} for helper {}", connection, helper);
 		return connection;
 	}
 
