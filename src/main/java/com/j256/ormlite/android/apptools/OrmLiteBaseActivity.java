@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.support.ConnectionSource;
 
 /**
@@ -24,6 +26,7 @@ public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> ext
 	private volatile H helper;
 	private volatile boolean created = false;
 	private volatile boolean destroyed = false;
+	private static Logger logger = LoggerFactory.getLogger(OrmLiteBaseActivity.class);
 
 	/**
 	 * Get a helper for this action.
@@ -79,6 +82,7 @@ public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> ext
 	protected H getHelperInternal(Context context) {
 		@SuppressWarnings({ "unchecked", "deprecation" })
 		H newHelper = (H) OpenHelperManager.getHelper(context);
+		logger.debug("got new helper {} from OpenHelperManager", helper);
 		return newHelper;
 	}
 
@@ -93,6 +97,7 @@ public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> ext
 	 */
 	protected void releaseHelper(H helper) {
 		OpenHelperManager.releaseHelper();
+		logger.debug("helper {} was released in releaseHelper(), set to null", helper);
 		this.helper = null;
 	}
 }

@@ -45,7 +45,7 @@ public class OpenHelperManager {
 	 * If you are _not_ using the {@link OrmLiteBaseActivity} type classes then you will need to call this in a static
 	 * method in your code.
 	 */
-	public static void setOpenHelperClass(Class<? extends OrmLiteSqliteOpenHelper> openHelperClass) {
+	public static synchronized void setOpenHelperClass(Class<? extends OrmLiteSqliteOpenHelper> openHelperClass) {
 		if (openHelperClass == null) {
 			helperClass = null;
 		} else {
@@ -58,7 +58,7 @@ public class OpenHelperManager {
 	 * _really_ know what you are doing. If you do use it then it should be in a static {} initializing block to make
 	 * sure you have one helper instance for your application.
 	 */
-	public static void setHelper(OrmLiteSqliteOpenHelper helper) {
+	public static synchronized void setHelper(OrmLiteSqliteOpenHelper helper) {
 		OpenHelperManager.helper = helper;
 	}
 
@@ -123,16 +123,16 @@ public class OpenHelperManager {
 	 */
 	public static synchronized void releaseHelper() {
 		instanceCount--;
-		logger.debug("helper instance count = {}", instanceCount);
+		logger.debug("releasing helper {}, instance count = {}", helper, instanceCount);
 		if (instanceCount <= 0) {
 			if (helper != null) {
-				logger.debug("Zero instances.  Closing helper.");
+				logger.debug("zero instances, closing helper {}", helper);
 				helper.close();
 				helper = null;
 				wasClosed = true;
 			}
 			if (instanceCount < 0) {
-				logger.error("Too many calls to release helper.  Instance count = {}", instanceCount);
+				logger.error("too many calls to release helper, instance count = {}", instanceCount);
 			}
 		}
 	}
@@ -154,19 +154,19 @@ public class OpenHelperManager {
 		if (helper == null) {
 			if (wasClosed) {
 				// this can happen if you are calling get/release and then get again
-				logger.info("helper has already been closed and is being re-opened.");
+				logger.info("helper was already closed and is being re-opened");
 			}
 			if (context == null) {
 				throw new IllegalArgumentException("context argument is null");
 			}
 			Context appContext = context.getApplicationContext();
 			helper = constructHelper(appContext, helperClass);
-			logger.debug("Zero instances.  Created helper.");
+			logger.debug("zero instances, created helper {}", helper);
 			instanceCount = 0;
 		}
 
 		instanceCount++;
-		logger.debug("helper instance count = {} ", instanceCount);
+		logger.debug("returning helper {}, instance count = {} ", helper, instanceCount);
 		@SuppressWarnings("unchecked")
 		T castHelper = (T) helper;
 		return castHelper;
