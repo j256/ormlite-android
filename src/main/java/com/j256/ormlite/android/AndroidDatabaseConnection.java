@@ -102,7 +102,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 
 	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes) {
 		CompiledStatement stmt = new AndroidCompiledStatement(statement, db, type);
-		logger.trace("{}: compiled statement: {}", this, statement);
+		logger.trace("{}: compiled statement got {}: {}", this, stmt, statement);
 		return stmt;
 	}
 
@@ -123,6 +123,10 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 				keyHolder.addKey(rowId);
 			}
 			logger.trace("{}: insert statement is compiled and executed: {}", this, statement);
+			/*
+			 * I've decided to not do the CHANGES() statement here like we do down below in UPDATE because we know that
+			 * it worked (since it didn't throw) so we know that 1 is right.
+			 */
 			return 1;
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("inserting to database failed: " + statement, e);
@@ -244,15 +248,28 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			stmt = db.compileStatement(statement);
 			bindArgs(stmt, args, argFieldTypes);
 			stmt.execute();
-			logger.trace("{}: {} statement is compiled and executed: {}", this, label, statement);
-			return 1;
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("updating database failed: " + statement, e);
 		} finally {
 			if (stmt != null) {
 				stmt.close();
+				stmt = null;
 			}
 		}
+		int result;
+		try {
+			stmt = db.compileStatement("SELECT CHANGES()");
+			result = (int) stmt.simpleQueryForLong();
+		} catch (android.database.SQLException e) {
+			// ignore the exception and just return 1
+			result = 1;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		logger.trace("{} statement is compiled and executed, changed {}: {}", label, result, statement);
+		return result;
 	}
 
 	private void bindArgs(SQLiteStatement stmt, Object[] args, FieldType[] argFieldTypes) throws SQLException {

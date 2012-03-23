@@ -6,9 +6,12 @@ import java.util.List;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.SqlType;
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 import com.j256.ormlite.support.CompiledStatement;
@@ -21,12 +24,15 @@ import com.j256.ormlite.support.DatabaseResults;
  */
 public class AndroidCompiledStatement implements CompiledStatement {
 
+	private static Logger logger = LoggerFactory.getLogger(AndroidCompiledStatement.class);
+
 	private final String sql;
 	private final SQLiteDatabase db;
 	private final StatementType type;
+	private static final String[] NO_STRING_ARGS = new String[0];
 
 	private Cursor cursor;
-	private final List<Object> args = new ArrayList<Object>();
+	private List<Object> args;
 	private Integer max;
 
 	public AndroidCompiledStatement(String sql, SQLiteDatabase db, StatementType type) {
@@ -55,30 +61,20 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		if (!type.isOkForUpdate()) {
 			throw new IllegalArgumentException("Cannot call update on a " + type + " statement");
 		}
-		String finalSql = null;
-		try {
-			if (max == null) {
-				finalSql = sql;
-			} else {
-				finalSql = sql + " " + max;
-			}
-			db.execSQL(finalSql, args.toArray(new Object[args.size()]));
-		} catch (android.database.SQLException e) {
-			throw SqlExceptionUtil.create("Problems executing Android statement: " + finalSql, e);
+		String finalSql;
+		if (max == null) {
+			finalSql = sql;
+		} else {
+			finalSql = sql + " " + max;
 		}
-		return 1;
+		return execSql("runUpdate", finalSql);
 	}
 
 	public int runExecute() throws SQLException {
 		if (!type.isOkForExecute()) {
 			throw new IllegalArgumentException("Cannot call execute on a " + type + " statement");
 		}
-		try {
-			db.execSQL(sql, new Object[0]);
-		} catch (android.database.SQLException e) {
-			throw SqlExceptionUtil.create("Problems executing Android statement: " + sql, e);
-		}
-		return 0;
+		return execSql("runExecute", sql);
 	}
 
 	public void close() throws SQLException {
@@ -93,6 +89,9 @@ public class AndroidCompiledStatement implements CompiledStatement {
 
 	public void setObject(int parameterIndex, Object obj, SqlType sqlType) throws SQLException {
 		isInPrep();
+		if (args == null) {
+			args = new ArrayList<Object>();
+		}
 		if (obj == null) {
 			args.add(parameterIndex, null);
 		} else {
@@ -121,8 +120,9 @@ public class AndroidCompiledStatement implements CompiledStatement {
 				} else {
 					finalSql = sql + " " + max;
 				}
-				cursor = db.rawQuery(finalSql, args.toArray(new String[args.size()]));
+				cursor = db.rawQuery(finalSql, getStringArray());
 				cursor.moveToFirst();
+				logger.trace("{}: started rawQuery cursor for: {}", this, finalSql);
 			} catch (android.database.SQLException e) {
 				throw SqlExceptionUtil.create("Problems executing Android query: " + finalSql, e);
 			}
@@ -131,9 +131,56 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		return cursor;
 	}
 
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "@" + Integer.toHexString(super.hashCode());
+	}
+
 	private void isInPrep() throws SQLException {
 		if (cursor != null) {
 			throw new SQLException("Query already run. Cannot add argument values.");
+		}
+	}
+
+	private int execSql(String label, String finalSql) throws SQLException {
+		try {
+			db.execSQL(finalSql, getArgArray());
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("Problems executing " + label + " Android statement: " + finalSql, e);
+		}
+		int result;
+		SQLiteStatement stmt = null;
+		try {
+			// ask sqlite how many rows were just changed
+			stmt = db.compileStatement("SELECT CHANGES()");
+			result = (int) stmt.simpleQueryForLong();
+		} catch (android.database.SQLException e) {
+			// ignore the exception and just return 1 if it failed
+			result = 1;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
+		logger.trace("compiled statement {} changed {} rows: {}", label, result, finalSql);
+		return result;
+	}
+
+	private Object[] getArgArray() {
+		if (args == null) {
+			// this will work for Object[] as well as String[]
+			return NO_STRING_ARGS;
+		} else {
+			return args.toArray(new Object[args.size()]);
+		}
+	}
+
+	private String[] getStringArray() {
+		if (args == null) {
+			return NO_STRING_ARGS;
+		} else {
+			// we assume we have Strings in args
+			return args.toArray(new String[args.size()]);
 		}
 	}
 }
