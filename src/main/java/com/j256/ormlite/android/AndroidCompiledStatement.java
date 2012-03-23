@@ -104,6 +104,10 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		this.max = max;
 	}
 
+	public void setQueryTimeout(long millis) {
+		// as far as I could tell this is not supported by Android API
+	}
+
 	/***
 	 * This is mostly an internal class but is exposed for those people who need access to the Cursor itself.
 	 * 
