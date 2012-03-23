@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.j256.ormlite.dao.BaseDaoImpl;
+import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 
@@ -162,6 +164,27 @@ public class OpenHelperManager {
 			Context appContext = context.getApplicationContext();
 			helper = constructHelper(appContext, helperClass);
 			logger.debug("zero instances, created helper {}", helper);
+			/*
+			 * Ok, here we go. Filipe Leandro and I worked on this for like 6 hours straight. It's a doosey of a bug.
+			 * 
+			 * Each ForeignCollection has internal DAO objects that are holding a ConnectionSource. In Android-land each
+			 * ConnectionSource is tied to a particular database connection. What Filipe was seeing was that when his
+			 * application shutdown but WAS NOT FULLY KILLED, the first View.onCreate() method would open a new
+			 * connection to the database. Fine. But because the inner default cache had not been cleared since the
+			 * application was still in memory, there were objects with ForeignCollections with DAOs with old
+			 * ConnectionSource objects in them. Dealing with those cached collections would cause exceptions saying
+			 * that you were trying to work with a database that had already been close.
+			 * 
+			 * So whenever we create a new helper object, we must make sure that the internal object caches have been
+			 * cleared. This is a good lesson for anyone that is holding objects around after they have closed
+			 * connections to the database or re-created the DAOs on a different connection somehow.
+			 */
+			BaseDaoImpl.clearAllInternalObjectCaches();
+			/*
+			 * Might as well do this also since if the helper changes then the ConnectionSource will change so no one is
+			 * going to have a cache hit on the old DAOs anyway. All they are doing is holding memory.
+			 */
+			DaoManager.clearCache();
 			instanceCount = 0;
 		}
 
