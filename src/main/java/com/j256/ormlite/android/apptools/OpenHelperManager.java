@@ -165,7 +165,7 @@ public class OpenHelperManager {
 			helper = constructHelper(appContext, helperClass);
 			logger.debug("zero instances, created helper {}", helper);
 			/*
-			 * Ok, here we go. Filipe Leandro and I worked on this for like 6 hours straight. It's a doosey of a bug.
+			 * Ok, here we go. Filipe Leandro and I worked on this for like 10 hours straight. It's a doosey of a bug.
 			 * 
 			 * Each ForeignCollection has internal DAO objects that are holding a ConnectionSource. In Android-land each
 			 * ConnectionSource is tied to a particular database connection. What Filipe was seeing was that when his
