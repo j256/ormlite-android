@@ -125,10 +125,10 @@ public class OpenHelperManager {
 	 */
 	public static synchronized void releaseHelper() {
 		instanceCount--;
-		logger.debug("releasing helper {}, instance count = {}", helper, instanceCount);
+		logger.trace("releasing helper {}, instance count = {}", helper, instanceCount);
 		if (instanceCount <= 0) {
 			if (helper != null) {
-				logger.debug("zero instances, closing helper {}", helper);
+				logger.trace("zero instances, closing helper {}", helper);
 				helper.close();
 				helper = null;
 				wasClosed = true;
@@ -163,20 +163,21 @@ public class OpenHelperManager {
 			}
 			Context appContext = context.getApplicationContext();
 			helper = constructHelper(appContext, helperClass);
-			logger.debug("zero instances, created helper {}", helper);
+			logger.trace("zero instances, created helper {}", helper);
 			/*
-			 * Ok, here we go. Filipe Leandro and I worked on this for like 10 hours straight. It's a doosey of a bug.
+			 * Filipe Leandro and I worked on this bug for like 10 hours straight. It's a doosey.
 			 * 
-			 * Each ForeignCollection has internal DAO objects that are holding a ConnectionSource. In Android-land each
-			 * ConnectionSource is tied to a particular database connection. What Filipe was seeing was that when his
-			 * application shutdown but WAS NOT FULLY KILLED, the first View.onCreate() method would open a new
-			 * connection to the database. Fine. But because the inner default cache had not been cleared since the
-			 * application was still in memory, there were objects with ForeignCollections with DAOs with old
-			 * ConnectionSource objects in them. Dealing with those cached collections would cause exceptions saying
-			 * that you were trying to work with a database that had already been close.
+			 * Each ForeignCollection has internal DAO objects that are holding a ConnectionSource. Each Android
+			 * ConnectionSource is tied to a particular database connection. What Filipe was seeing was that when all of
+			 * his views we closed (onDestroy), but his application WAS NOT FULLY KILLED, the first View.onCreate()
+			 * method would open a new connection to the database. Fine. But because he application was still in memory,
+			 * the static BaseDaoImpl default cache had not been cleared and was containing cached objects with
+			 * ForeignCollections. The ForeignCollections still had references to the DAOs that had been opened with old
+			 * ConnectionSource objects and therefore the old database connection. Using those cached collections would
+			 * cause exceptions saying that you were trying to work with a database that had already been close.
 			 * 
-			 * So whenever we create a new helper object, we must make sure that the internal object caches have been
-			 * cleared. This is a good lesson for anyone that is holding objects around after they have closed
+			 * Now, whenever we create a new helper object, we must make sure that the internal object caches have been
+			 * fully cleared. This is a good lesson for anyone that is holding objects around after they have closed
 			 * connections to the database or re-created the DAOs on a different connection somehow.
 			 */
 			BaseDaoImpl.clearAllInternalObjectCaches();
@@ -189,7 +190,7 @@ public class OpenHelperManager {
 		}
 
 		instanceCount++;
-		logger.debug("returning helper {}, instance count = {} ", helper, instanceCount);
+		logger.trace("returning helper {}, instance count = {} ", helper, instanceCount);
 		@SuppressWarnings("unchecked")
 		T castHelper = (T) helper;
 		return castHelper;

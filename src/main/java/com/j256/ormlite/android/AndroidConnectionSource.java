@@ -57,23 +57,21 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 			return conn;
 		}
 		if (connection == null) {
+			SQLiteDatabase db;
 			if (sqliteDatabase == null) {
-				SQLiteDatabase db;
 				try {
 					db = helper.getWritableDatabase();
 				} catch (android.database.SQLException e) {
-					throw SqlExceptionUtil.create("Getting a writable database from SQLiteOpenHelper failed", e);
+					throw SqlExceptionUtil.create("Getting a writable database from helper " + helper + " failed", e);
 				}
-				connection = new AndroidDatabaseConnection(db, true);
-				logger.trace("created connection {} for db {}, helper {}", connection, db, helper);
 			} else {
-				connection = new AndroidDatabaseConnection(sqliteDatabase, true);
-				logger.trace("returning read-write connection {} for helper {}", connection, helper);
-				logger.trace("created connection {} for sqliteDatabase {}, helper {}", connection, sqliteDatabase,
-						helper);
+				db = sqliteDatabase;
 			}
+			connection = new AndroidDatabaseConnection(db, true);
+			logger.trace("created connection {} for db {}, helper {}", connection, db, helper);
+		} else {
+			logger.trace("{}: returning read-write connection {}, helper {}", this, connection, helper);
 		}
-		logger.trace("returning read-write connection {} for helper {}", connection, helper);
 		return connection;
 	}
 
@@ -100,5 +98,10 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 
 	public boolean isOpen() {
 		return isOpen;
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "@" + Integer.toHexString(super.hashCode());
 	}
 }

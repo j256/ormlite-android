@@ -39,7 +39,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion) {
 		super(context, databaseName, factory, databaseVersion);
-		logger.trace("constructed connectionSource {}", connectionSource);
+		logger.trace("{}: constructed connectionSource {}", this, connectionSource);
 	}
 
 	/**
@@ -140,7 +140,6 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 			// we don't throw this exception, but log it for debugging purposes
 			logger.warn(new IllegalStateException(), "Getting connectionSource was called after closed");
 		}
-		logger.trace("returning connectionSource {}", connectionSource);
 		return connectionSource;
 	}
 
@@ -260,6 +259,11 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		} catch (SQLException e) {
 			throw new RuntimeException("Could not create RuntimeExcepitionDao for class " + clazz, e);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "@" + Integer.toHexString(super.hashCode());
 	}
 
 	private static InputStream openFileId(Context context, int fileId) {

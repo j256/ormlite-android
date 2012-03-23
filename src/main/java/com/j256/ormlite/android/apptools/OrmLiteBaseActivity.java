@@ -82,7 +82,7 @@ public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> ext
 	protected H getHelperInternal(Context context) {
 		@SuppressWarnings({ "unchecked", "deprecation" })
 		H newHelper = (H) OpenHelperManager.getHelper(context);
-		logger.debug("got new helper {} from OpenHelperManager", newHelper);
+		logger.trace("{}: got new helper {} from OpenHelperManager", this, newHelper);
 		return newHelper;
 	}
 
@@ -97,7 +97,12 @@ public abstract class OrmLiteBaseActivity<H extends OrmLiteSqliteOpenHelper> ext
 	 */
 	protected void releaseHelper(H helper) {
 		OpenHelperManager.releaseHelper();
-		logger.debug("helper {} was released in releaseHelper(), set to null", helper);
+		logger.trace("{}: helper {} was released, set to null", this, helper);
 		this.helper = null;
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "@" + Integer.toHexString(super.hashCode());
 	}
 }
