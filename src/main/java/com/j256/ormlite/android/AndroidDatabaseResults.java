@@ -176,6 +176,11 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		return cursor;
 	}
 
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "@" + Integer.toHexString(super.hashCode());
+	}
+
 	private int lookupColumn(String columnName) {
 		// we either use linear search or our name map
 		if (columnNameMap == null) {

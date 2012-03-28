@@ -122,12 +122,13 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			if (keyHolder != null) {
 				keyHolder.addKey(rowId);
 			}
-			logger.trace("{}: insert statement is compiled and executed: {}", this, statement);
 			/*
 			 * I've decided to not do the CHANGES() statement here like we do down below in UPDATE because we know that
 			 * it worked (since it didn't throw) so we know that 1 is right.
 			 */
-			return 1;
+			int result = 1;
+			logger.trace("{}: insert statement is compiled and executed, changed {}: {}", this, result, statement);
+			return result;
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("inserting to database failed: " + statement, e);
 		} finally {
