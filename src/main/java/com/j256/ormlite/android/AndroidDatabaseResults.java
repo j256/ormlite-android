@@ -37,6 +37,7 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		if (this.columnNames.length >= MIN_NUM_COLUMN_NAMES_MAP) {
 			this.columnNameMap = new HashMap<String, Integer>();
 			for (int i = 0; i < this.columnNames.length; i++) {
+				// NOTE: this is case sensitive
 				this.columnNameMap.put(this.columnNames[i], i);
 			}
 		} else {
@@ -185,12 +186,14 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		// we either use linear search or our name map
 		if (columnNameMap == null) {
 			for (int i = 0; i < columnNames.length; i++) {
+				// NOTE: this is case sensitive
 				if (columnNames[i].equals(columnName)) {
 					return i;
 				}
 			}
 			return -1;
 		} else {
+			// NOTE: this is case sensitive
 			Integer index = columnNameMap.get(columnName);
 			if (index == null) {
 				return -1;
