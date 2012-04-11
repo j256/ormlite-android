@@ -184,8 +184,10 @@ public class OpenHelperManager {
 			/*
 			 * Might as well do this also since if the helper changes then the ConnectionSource will change so no one is
 			 * going to have a cache hit on the old DAOs anyway. All they are doing is holding memory.
+			 * 
+			 * NOTE: we don't want to clear the config map.
 			 */
-			DaoManager.clearCache();
+			DaoManager.clearDaoCache();
 			instanceCount = 0;
 		}
 
