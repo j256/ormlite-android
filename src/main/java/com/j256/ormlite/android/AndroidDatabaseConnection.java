@@ -40,7 +40,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		return false;
 	}
 
-	public boolean getAutoCommit() throws SQLException {
+	public boolean isAutoCommit() throws SQLException {
 		try {
 			boolean inTransaction = db.inTransaction();
 			logger.trace("{}: in transaction is {}", this, inTransaction);
