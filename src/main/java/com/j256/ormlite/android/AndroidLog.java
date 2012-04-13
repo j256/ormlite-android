@@ -27,6 +27,13 @@ import com.j256.ormlite.logger.LoggerFactory;
  * 
  * </p>
  * 
+ * <p>
+ * To see all ORMLite log messages use:
+ * 
+ * <pre>
+ * adb shell setprop log.tag.ORMLite DEBUG
+ * </pre>
+ * 
  * @author graywatson
  */
 public class AndroidLog implements com.j256.ormlite.logger.Log {
