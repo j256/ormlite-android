@@ -94,8 +94,35 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		}
 		if (obj == null) {
 			args.add(parameterIndex, null);
-		} else {
-			args.add(parameterIndex, obj.toString());
+			return;
+		}
+
+		switch (sqlType) {
+			case STRING :
+			case LONG_STRING :
+			case DATE :
+			case BOOLEAN :
+			case CHAR :
+			case BYTE :
+			case SHORT :
+			case INTEGER :
+			case LONG :
+			case FLOAT :
+			case DOUBLE :
+				args.add(parameterIndex, obj.toString());
+				break;
+			case BYTE_ARRAY :
+			case SERIALIZABLE :
+				args.add(parameterIndex, obj);
+				break;
+			case BLOB :
+				// this is only for derby serializable
+			case BIG_DECIMAL :
+				// this should be handled as a STRING
+				throw new SQLException("Invalid Android type: " + sqlType);
+			case UNKNOWN :
+			default :
+				throw new SQLException("Unknown sql argument type: " + sqlType);
 		}
 	}
 
