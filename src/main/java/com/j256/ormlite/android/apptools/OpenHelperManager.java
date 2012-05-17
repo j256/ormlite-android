@@ -208,7 +208,8 @@ public class OpenHelperManager {
 			constructor = openHelperClass.getConstructor(Context.class);
 		} catch (Exception e) {
 			throw new IllegalStateException(
-					"Could not find constructor that takes a Context argument for helper class " + openHelperClass, e);
+					"Could not find constructor that hast just a (Context) argument for helper class "
+							+ openHelperClass, e);
 		}
 		try {
 			return (OrmLiteSqliteOpenHelper) constructor.newInstance(context);
