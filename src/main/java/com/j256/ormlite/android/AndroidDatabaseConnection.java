@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.FieldType;
+import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.misc.SqlExceptionUtil;
@@ -282,10 +283,11 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			if (arg == null) {
 				stmt.bindNull(i + 1);
 			} else {
-				switch (argFieldTypes[i].getSqlType()) {
-					case CHAR :
+				SqlType sqlType = argFieldTypes[i].getSqlType();
+				switch (sqlType) {
 					case STRING :
 					case LONG_STRING :
+					case CHAR :
 						stmt.bindString(i + 1, arg.toString());
 						break;
 					case BOOLEAN :
@@ -303,8 +305,16 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 					case SERIALIZABLE :
 						stmt.bindBlob(i + 1, (byte[]) arg);
 						break;
+					case DATE :
+						// this is mapped to a STRING under Android
+					case BLOB :
+						// this is only for derby serializable
+					case BIG_DECIMAL :
+						// this should be handled as a STRING
+						throw new SQLException("Invalid Android type: " + sqlType);
+					case UNKNOWN :
 					default :
-						throw new SQLException("Unknown sql argument type " + argFieldTypes[i].getSqlType());
+						throw new SQLException("Unknown sql argument type: " + sqlType);
 				}
 			}
 		}
