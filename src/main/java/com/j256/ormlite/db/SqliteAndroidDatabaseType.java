@@ -6,6 +6,7 @@ import com.j256.ormlite.android.DatabaseTableConfigUtil;
 import com.j256.ormlite.field.DataPersister;
 import com.j256.ormlite.field.FieldConverter;
 import com.j256.ormlite.field.types.DateStringType;
+import com.j256.ormlite.misc.VersionUtils;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTableConfig;
 
@@ -15,6 +16,11 @@ import com.j256.ormlite.table.DatabaseTableConfig;
  * @author graywatson
  */
 public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements DatabaseType {
+
+	public SqliteAndroidDatabaseType() {
+		// verifies that we have the right version
+		VersionUtils.checkCoreVersusAndroidVersions();
+	}
 
 	@Override
 	public void loadDriver() {
