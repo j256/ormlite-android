@@ -38,7 +38,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	}
 
 	public boolean isAutoCommitSupported() {
-		return false;
+		return true;
 	}
 
 	public boolean isAutoCommit() throws SQLException {
@@ -53,7 +53,20 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	}
 
 	public void setAutoCommit(boolean autoCommit) {
-		// always in auto-commit mode
+		/*
+		 * Sqlite does not support auto-commit. The various JDBC drivers seem to implement it with the use of a
+		 * transaction. That's what we are doing here.
+		 */
+		if (autoCommit) {
+			if (db.inTransaction()) {
+				db.setTransactionSuccessful();
+				db.endTransaction();
+			}
+		} else {
+			if (!db.inTransaction()) {
+				db.beginTransaction();
+			}
+		}
 	}
 
 	public Savepoint setSavePoint(String name) throws SQLException {
