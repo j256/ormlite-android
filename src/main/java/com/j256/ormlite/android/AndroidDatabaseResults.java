@@ -68,12 +68,34 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		return cursor.moveToNext();
 	}
 
+	public boolean last() {
+		return cursor.moveToLast();
+	}
+
 	public boolean previous() {
 		return cursor.moveToPrevious();
 	}
 
 	public boolean moveRelative(int offset) {
 		return cursor.move(offset);
+	}
+
+	public boolean moveAbsolute(int position) {
+		return cursor.moveToPosition(position);
+	}
+
+	/**
+	 * Returns the count of results from the cursor.
+	 */
+	public int getCount() {
+		return cursor.getCount();
+	}
+
+	/**
+	 * Returns the position of the cursor in the list of results.
+	 */
+	public int getPosition() {
+		return cursor.getPosition();
 	}
 
 	public int findColumn(String columnName) throws SQLException {
