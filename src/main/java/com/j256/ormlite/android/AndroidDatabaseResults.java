@@ -192,6 +192,14 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		return objectCache;
 	}
 
+	public void close() {
+		cursor.close();
+	}
+
+	public void closeQuietly() {
+		close();
+	}
+
 	/***
 	 * Returns the underlying Android cursor object. This should not be used unless you know what you are doing.
 	 */
