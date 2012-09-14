@@ -92,6 +92,10 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		isOpen = false;
 	}
 
+	public void closeQuietly() {
+		close();
+	}
+
 	public DatabaseType getDatabaseType() {
 		return databaseType;
 	}

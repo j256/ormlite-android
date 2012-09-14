@@ -234,6 +234,14 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	public void closeQuietly() {
+		try {
+			close();
+		} catch (SQLException e) {
+			// ignored
+		}
+	}
+
 	public boolean isClosed() throws SQLException {
 		try {
 			boolean isOpen = db.isOpen();
