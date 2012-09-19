@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import com.j256.ormlite.android.DatabaseTableConfigUtil;
 import com.j256.ormlite.field.DataPersister;
 import com.j256.ormlite.field.FieldConverter;
+import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.types.DateStringType;
 import com.j256.ormlite.misc.VersionUtils;
 import com.j256.ormlite.support.ConnectionSource;
@@ -43,15 +44,15 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements
 	}
 
 	@Override
-	protected void appendDateType(StringBuilder sb, int fieldWidth) {
+	protected void appendDateType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		// default is to store the date as a string
-		appendStringType(sb, fieldWidth);
+		appendStringType(sb, fieldType, fieldWidth);
 	}
 
 	@Override
-	protected void appendBooleanType(StringBuilder sb, int fieldWidth) {
+	protected void appendBooleanType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		// we have to convert booleans to numbers
-		appendShortType(sb, fieldWidth);
+		appendShortType(sb, fieldType, fieldWidth);
 	}
 
 	@Override
