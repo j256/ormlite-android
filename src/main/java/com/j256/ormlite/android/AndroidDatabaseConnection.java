@@ -27,6 +27,7 @@ import com.j256.ormlite.support.GeneratedKeyHolder;
 public class AndroidDatabaseConnection implements DatabaseConnection {
 
 	private static Logger logger = LoggerFactory.getLogger(AndroidDatabaseConnection.class);
+	private static final String[] NO_STRING_ARGS = new String[0];
 
 	private final SQLiteDatabase db;
 	private final boolean readWrite;
@@ -112,6 +113,10 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("problems rolling back transaction " + savepoint.getSavepointName(), e);
 		}
+	}
+
+	public int executeStatement(String statementStr, int resultFlags) throws SQLException {
+		return AndroidCompiledStatement.execSql(db, statementStr, statementStr, NO_STRING_ARGS);
 	}
 
 	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes) {

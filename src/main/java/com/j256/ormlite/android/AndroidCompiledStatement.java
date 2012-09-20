@@ -67,14 +67,14 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		} else {
 			finalSql = sql + " " + max;
 		}
-		return execSql("runUpdate", finalSql);
+		return execSql(db, "runUpdate", finalSql, getArgArray());
 	}
 
 	public int runExecute() throws SQLException {
 		if (!type.isOkForExecute()) {
 			throw new IllegalArgumentException("Cannot call execute on a " + type + " statement");
 		}
-		return execSql("runExecute", sql);
+		return execSql(db, "runExecute", sql, getArgArray());
 	}
 
 	public void close() throws SQLException {
@@ -175,15 +175,12 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		return getClass().getSimpleName() + "@" + Integer.toHexString(super.hashCode());
 	}
 
-	private void isInPrep() throws SQLException {
-		if (cursor != null) {
-			throw new SQLException("Query already run. Cannot add argument values.");
-		}
-	}
-
-	private int execSql(String label, String finalSql) throws SQLException {
+	/**
+	 * Execute some SQL on the database and return the number of rows changed.
+	 */
+	static int execSql(SQLiteDatabase db, String label, String finalSql, Object[] argArray) throws SQLException {
 		try {
-			db.execSQL(finalSql, getArgArray());
+			db.execSQL(finalSql, argArray);
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("Problems executing " + label + " Android statement: " + finalSql, e);
 		}
@@ -201,8 +198,14 @@ public class AndroidCompiledStatement implements CompiledStatement {
 				stmt.close();
 			}
 		}
-		logger.trace("compiled statement {} changed {} rows: {}", label, result, finalSql);
+		logger.trace("executing statement {} changed {} rows: {}", label, result, finalSql);
 		return result;
+	}
+
+	private void isInPrep() throws SQLException {
+		if (cursor != null) {
+			throw new SQLException("Query already run. Cannot add argument values.");
+		}
 	}
 
 	private Object[] getArgArray() {
