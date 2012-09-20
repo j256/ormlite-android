@@ -60,6 +60,15 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		return cursor.getColumnCount();
 	}
 
+	public String[] getColumnNames() {
+		int colN = getColumnCount();
+		String[] columnNames = new String[colN];
+		for (int colC = 0; colC < colN; colC++) {
+			columnNames[colC] = cursor.getColumnName(colC);
+		}
+		return columnNames;
+	}
+
 	public boolean first() {
 		return cursor.moveToFirst();
 	}
