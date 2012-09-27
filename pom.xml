@@ -22,10 +22,9 @@
 		<version>2</version>
 	</parent>
 	<scm>
-		<url>http://ormlite.svn.sourceforge.net/viewvc/ormlite/ormlite-android/trunk/</url>
-		<connection>scm:svn:https://ormlite.svn.sourceforge.net/svnroot/ormlite/ormlite-android/trunk</connection>
-		<developerConnection>scm:svn:https://ormlite.svn.sourceforge.net/svnroot/ormlite/ormlite-android/trunk
-		</developerConnection>
+		<url>https://svn.code.sf.net/p/ormlite/code/ormlite-android/trunk</url>
+		<connection>scm:svn:https://svn.code.sf.net/p/ormlite/code/ormlite-android/trunk</connection>
+		<developerConnection>scm:svn:https://svn.code.sf.net/p/ormlite/code/ormlite-android/trunk</developerConnection>
 	</scm>
 	<developers>
 		<developer>
