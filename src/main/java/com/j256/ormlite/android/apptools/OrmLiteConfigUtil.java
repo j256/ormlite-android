@@ -216,13 +216,19 @@ public class OrmLiteConfigUtil {
 		String tableName = DatabaseTableConfig.extractTableName(clazz);
 		List<DatabaseFieldConfig> fieldConfigs = new ArrayList<DatabaseFieldConfig>();
 		// walk up the classes finding the fields
-		for (Class<?> working = clazz; working != null; working = working.getSuperclass()) {
-			for (Field field : working.getDeclaredFields()) {
-				DatabaseFieldConfig fieldConfig = DatabaseFieldConfig.fromField(databaseType, tableName, field);
-				if (fieldConfig != null) {
-					fieldConfigs.add(fieldConfig);
+		try {
+			for (Class<?> working = clazz; working != null; working = working.getSuperclass()) {
+				for (Field field : working.getDeclaredFields()) {
+					DatabaseFieldConfig fieldConfig = DatabaseFieldConfig.fromField(databaseType, tableName, field);
+					if (fieldConfig != null) {
+						fieldConfigs.add(fieldConfig);
+					}
 				}
 			}
+		} catch (Error e) {
+			System.err.println("Skipping " + clazz + " because we got an error finding its definition: "
+					+ e.getMessage());
+			return;
 		}
 		if (fieldConfigs.isEmpty()) {
 			System.out.println("Skipping " + clazz + " because no annotated fields found");
