@@ -206,8 +206,14 @@ public class OrmLiteConfigUtil {
 				System.err.println("     " + t);
 				continue;
 			}
-			if (classHasAnnotations(clazz)) {
+			if (!classHasAnnotations(clazz)) {
 				writeConfigForTable(writer, clazz);
+			}
+			// handle inner classes
+			for (Class<?> innerClazz : clazz.getDeclaredClasses()) {
+				if (!classHasAnnotations(innerClazz)) {
+					writeConfigForTable(writer, innerClazz);
+				}
 			}
 		}
 	}
