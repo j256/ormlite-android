@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -87,36 +86,15 @@ public class OrmLiteConfigUtil {
 	 * the raw folder.
 	 */
 	public static void writeConfigFile(String fileName) throws SQLException, IOException {
-		File rawDir = findRawDir(new File("."));
-		if (rawDir == null) {
-			System.err.println("Could not find " + RAW_DIR_NAME + " directory");
-		} else {
-			File configFile = new File(rawDir, fileName);
-			writeConfigFile(configFile);
-		}
-	}
-
-	/**
-	 * Finds the annotated classes in the current directory or below and writes a configuration file.
-	 */
-	public static void writeConfigFile(File configFile) throws SQLException, IOException {
-		System.out.println("Writing configurations to " + configFile.getAbsolutePath());
-		BufferedWriter writer = new BufferedWriter(new FileWriter(configFile), 4096);
-		try {
-			writeHeader(writer);
-			findAnnotatedClasses(writer, new File("."), 0);
-			System.out.println("Done.");
-		} finally {
-			writer.close();
-		}
+		List<Class<?>> classList = findAnnotatedClasses(new File("."), 0);
+		writeConfigFile(fileName, classList.toArray(new Class[classList.size()]));
 	}
 
 	/**
 	 * Writes a configuration fileName in the raw directory with the configuration for classes.
 	 */
 	public static void writeConfigFile(String fileName, Class<?>[] classes) throws SQLException, IOException {
-		File rootDir = new File(".");
-		File rawDir = findRawDir(rootDir);
+		File rawDir = findRawDir(new File("."));
 		if (rawDir == null) {
 			System.err.println("Could not find " + RAW_DIR_NAME + " directory");
 		} else {
@@ -126,11 +104,34 @@ public class OrmLiteConfigUtil {
 	}
 
 	/**
+	 * Finds the annotated classes in the current directory or below and writes a configuration file.
+	 */
+	public static void writeConfigFile(File configFile) throws SQLException, IOException {
+		writeConfigFile(configFile, new File("."));
+	}
+
+	/**
+	 * Finds the annotated classes in the specified search directory or below and writes a configuration file.
+	 */
+	public static void writeConfigFile(File configFile, File searchDir) throws SQLException, IOException {
+		List<Class<?>> classList = findAnnotatedClasses(searchDir, 0);
+		writeConfigFile(configFile, classList.toArray(new Class[classList.size()]));
+	}
+
+	/**
 	 * Write a configuration file with the configuration for classes.
 	 */
 	public static void writeConfigFile(File configFile, Class<?>[] classes) throws SQLException, IOException {
 		System.out.println("Writing configurations to " + configFile.getAbsolutePath());
 		writeConfigFile(new FileOutputStream(configFile), classes);
+	}
+
+	/**
+	 * Write a configuration file to an output stream with the configuration for classes.
+	 */
+	public static void writeConfigFile(OutputStream outputStream, File searchDir) throws SQLException, IOException {
+		List<Class<?>> classList = findAnnotatedClasses(searchDir, 0);
+		writeConfigFile(outputStream, classList.toArray(new Class[classList.size()]));
 	}
 
 	/**
@@ -174,13 +175,13 @@ public class OrmLiteConfigUtil {
 		writer.newLine();
 	}
 
-	private static void findAnnotatedClasses(BufferedWriter writer, File dir, int level) throws SQLException,
-			IOException {
+	private static List<Class<?>> findAnnotatedClasses(File dir, int level) throws SQLException, IOException {
+		List<Class<?>> classList = new ArrayList<Class<?>>();
 		for (File file : dir.listFiles()) {
 			if (file.isDirectory()) {
 				// recurse if we aren't deep enough
 				if (level < maxFindSourceLevel) {
-					findAnnotatedClasses(writer, file, level + 1);
+					findAnnotatedClasses(file, level + 1);
 				}
 				continue;
 			}
@@ -206,16 +207,17 @@ public class OrmLiteConfigUtil {
 				System.err.println("     " + t);
 				continue;
 			}
-			if (!classHasAnnotations(clazz)) {
-				writeConfigForTable(writer, clazz);
+			if (classHasAnnotations(clazz)) {
+				classList.add(clazz);
 			}
 			// handle inner classes
 			for (Class<?> innerClazz : clazz.getDeclaredClasses()) {
-				if (!classHasAnnotations(innerClazz)) {
-					writeConfigForTable(writer, innerClazz);
+				if (classHasAnnotations(innerClazz)) {
+					classList.add(innerClazz);
 				}
 			}
 		}
+		return classList;
 	}
 
 	private static void writeConfigForTable(BufferedWriter writer, Class<?> clazz) throws SQLException, IOException {

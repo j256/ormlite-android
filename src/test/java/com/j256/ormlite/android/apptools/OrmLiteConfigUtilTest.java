@@ -3,6 +3,7 @@ package com.j256.ormlite.android.apptools;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.Collection;
 
 import org.junit.Test;
@@ -16,6 +17,14 @@ public class OrmLiteConfigUtilTest {
 	public void testBasic() throws Exception {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		OrmLiteConfigUtil.writeConfigFile(output, new Class[] { Foo.class });
+		String result = output.toString();
+		assertTrue(result, result.contains("\nfieldName=id\nid=true\n"));
+	}
+
+	@Test
+	public void testCurrentDir() throws Exception {
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		OrmLiteConfigUtil.writeConfigFile(output, new File("src/test/java/com/j256/ormlite/android/apptools/"));
 		String result = output.toString();
 		assertTrue(result, result.contains("\nfieldName=id\nid=true\n"));
 	}
