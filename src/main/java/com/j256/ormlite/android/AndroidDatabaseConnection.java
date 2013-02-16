@@ -13,6 +13,7 @@ import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.misc.SqlExceptionUtil;
+import com.j256.ormlite.misc.VersionUtils;
 import com.j256.ormlite.stmt.GenericRowMapper;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 import com.j256.ormlite.support.CompiledStatement;
@@ -26,11 +27,17 @@ import com.j256.ormlite.support.GeneratedKeyHolder;
  */
 public class AndroidDatabaseConnection implements DatabaseConnection {
 
+	private static final String ANDROID_VERSION = "VERSION__4.44-SNAPSHOT__";
+
 	private static Logger logger = LoggerFactory.getLogger(AndroidDatabaseConnection.class);
 	private static final String[] NO_STRING_ARGS = new String[0];
 
 	private final SQLiteDatabase db;
 	private final boolean readWrite;
+
+	static {
+		VersionUtils.checkCoreVersusAndroidVersions(ANDROID_VERSION);
+	}
 
 	public AndroidDatabaseConnection(SQLiteDatabase db, boolean readWrite) {
 		this.db = db;
