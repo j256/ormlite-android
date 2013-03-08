@@ -1,5 +1,3 @@
----------------------------------------------------------------------------------------------
-
 BACKGROUND:
 
 This package provides the Android specific functionality.  You will also need to download the
@@ -10,7 +8,10 @@ For more information, see the online documentation on the home page:
 
    http://ormlite.com/
 
+Sources can be found online via Github:
+
+   https://github.com/j256/ormlite-android
+
 Enjoy,
 Gray Watson
 
----------------------------------------------------------------------------------------------
