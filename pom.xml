@@ -23,9 +23,9 @@
 		<version>7</version>
 	</parent>
 	<scm>
-		<url>https://svn.code.sf.net/p/ormlite/code/ormlite-android/trunk</url>
-		<connection>scm:svn:https://svn.code.sf.net/p/ormlite/code/ormlite-android/trunk</connection>
-		<developerConnection>scm:svn:https://svn.code.sf.net/p/ormlite/code/ormlite-android/trunk</developerConnection>
+		<url>https://github.com/j256/ormlite-android</url>
+		<connection>scm:git:ssh://git@github.com/j256/ormlite-android.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/j256/ormlite-android.git</developerConnection>
 	</scm>
 	<developers>
 		<developer>
