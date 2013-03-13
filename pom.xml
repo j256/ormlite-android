@@ -196,6 +196,12 @@
 							<goal>replace</goal>
 						</goals>
 					</execution>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+					</execution>
 				</executions>
 				<configuration>
 					<ignoreMissingFile>false</ignoreMissingFile>
