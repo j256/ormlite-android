@@ -191,12 +191,14 @@
 				<version>1.5.0</version>
 				<executions>
 					<execution>
+						<id>compile</id>
 						<phase>compile</phase>
 						<goals>
 							<goal>replace</goal>
 						</goals>
 					</execution>
 					<execution>
+						<id>prepare-package</id>
 						<phase>prepare-package</phase>
 						<goals>
 							<goal>replace</goal>
