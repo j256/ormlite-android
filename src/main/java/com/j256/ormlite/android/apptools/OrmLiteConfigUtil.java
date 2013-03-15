@@ -211,10 +211,17 @@ public class OrmLiteConfigUtil {
 				classList.add(clazz);
 			}
 			// handle inner classes
-			for (Class<?> innerClazz : clazz.getDeclaredClasses()) {
-				if (classHasAnnotations(innerClazz)) {
-					classList.add(innerClazz);
+			try {
+				for (Class<?> innerClazz : clazz.getDeclaredClasses()) {
+					if (classHasAnnotations(innerClazz)) {
+						classList.add(innerClazz);
+					}
 				}
+			} catch (Throwable t) {
+				// amazingly, this sometimes throws an Error
+				System.err.println("Could not load inner classes for: " + clazz);
+				System.err.println("     " + t);
+				continue;
 			}
 		}
 		return classList;
