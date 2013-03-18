@@ -86,7 +86,8 @@ public class OrmLiteConfigUtil {
 	 * the raw folder.
 	 */
 	public static void writeConfigFile(String fileName) throws SQLException, IOException {
-		List<Class<?>> classList = findAnnotatedClasses(new File("."), 0);
+		List<Class<?>> classList = new ArrayList<Class<?>>();
+		findAnnotatedClasses(classList, new File("."), 0);
 		writeConfigFile(fileName, classList.toArray(new Class[classList.size()]));
 	}
 
@@ -114,7 +115,8 @@ public class OrmLiteConfigUtil {
 	 * Finds the annotated classes in the specified search directory or below and writes a configuration file.
 	 */
 	public static void writeConfigFile(File configFile, File searchDir) throws SQLException, IOException {
-		List<Class<?>> classList = findAnnotatedClasses(searchDir, 0);
+		List<Class<?>> classList = new ArrayList<Class<?>>();
+		findAnnotatedClasses(classList, searchDir, 0);
 		writeConfigFile(configFile, classList.toArray(new Class[classList.size()]));
 	}
 
@@ -130,7 +132,8 @@ public class OrmLiteConfigUtil {
 	 * Write a configuration file to an output stream with the configuration for classes.
 	 */
 	public static void writeConfigFile(OutputStream outputStream, File searchDir) throws SQLException, IOException {
-		List<Class<?>> classList = findAnnotatedClasses(searchDir, 0);
+		List<Class<?>> classList = new ArrayList<Class<?>>();
+		findAnnotatedClasses(classList, searchDir, 0);
 		writeConfigFile(outputStream, classList.toArray(new Class[classList.size()]));
 	}
 
@@ -175,13 +178,13 @@ public class OrmLiteConfigUtil {
 		writer.newLine();
 	}
 
-	private static List<Class<?>> findAnnotatedClasses(File dir, int level) throws SQLException, IOException {
-		List<Class<?>> classList = new ArrayList<Class<?>>();
+	private static void findAnnotatedClasses(List<Class<?>> classList, File dir, int level) throws SQLException,
+			IOException {
 		for (File file : dir.listFiles()) {
 			if (file.isDirectory()) {
 				// recurse if we aren't deep enough
 				if (level < maxFindSourceLevel) {
-					findAnnotatedClasses(file, level + 1);
+					findAnnotatedClasses(classList, file, level + 1);
 				}
 				continue;
 			}
@@ -224,7 +227,6 @@ public class OrmLiteConfigUtil {
 				continue;
 			}
 		}
-		return classList;
 	}
 
 	private static void writeConfigForTable(BufferedWriter writer, Class<?> clazz) throws SQLException, IOException {
