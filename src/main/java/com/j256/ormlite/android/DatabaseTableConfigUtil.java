@@ -158,6 +158,7 @@ public class DatabaseTableConfigUtil {
 	private static final int FOREIGN_AUTO_CREATE = 26;
 	private static final int VERSION = 27;
 	private static final int FOREIGN_COLUMN_NAME = 28;
+	private static final int READ_ONLY = 29;
 
 	/**
 	 * Convert the name of the @DatabaseField fields into a number for easy processing later.
@@ -219,6 +220,8 @@ public class DatabaseTableConfigUtil {
 			return VERSION;
 		} else if (configName.equals("foreignColumnName")) {
 			return FOREIGN_COLUMN_NAME;
+		} else if (configName.equals("readOnly")) {
+			return READ_ONLY;
 		} else {
 			throw new IllegalStateException("Could not find support for DatabaseField " + configName);
 		}
@@ -382,6 +385,9 @@ public class DatabaseTableConfigUtil {
 				break;
 			case FOREIGN_COLUMN_NAME :
 				config.setForeignColumnName(valueIfNotBlank((String) value));
+				break;
+			case READ_ONLY :
+				config.setReadOnly((Boolean) value);
 				break;
 			default :
 				throw new IllegalStateException("Could not find support for DatabaseField number " + configNum);
