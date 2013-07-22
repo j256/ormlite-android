@@ -37,6 +37,17 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	protected AndroidConnectionSource connectionSource = new AndroidConnectionSource(this);
 	private volatile boolean isOpen = true;
 
+	/**
+	 * @param context
+	 *            Associated content from the application. This is needed to locate the database.
+	 * @param databaseName
+	 *            Name of the database we are opening.
+	 * @param factory
+	 *            Cursor factory or null if none.
+	 * @param databaseVersion
+	 *            Version of the database we are opening. This causes {@link #onUpgrade(SQLiteDatabase, int, int)} to be
+	 *            called if the stored database is a different version.
+	 */
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion) {
 		super(context, databaseName, factory, databaseVersion);
 		logger.trace("{}: constructed connectionSource {}", this, connectionSource);
@@ -46,6 +57,15 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 * Same as the other constructor with the addition of a file-id of the table config-file. See
 	 * {@link OrmLiteConfigUtil} for details.
 	 * 
+	 * @param context
+	 *            Associated content from the application. This is needed to locate the database.
+	 * @param databaseName
+	 *            Name of the database we are opening.
+	 * @param factory
+	 *            Cursor factory or null if none.
+	 * @param databaseVersion
+	 *            Version of the database we are opening. This causes {@link #onUpgrade(SQLiteDatabase, int, int)} to be
+	 *            called if the stored database is a different version.
 	 * @param configFileId
 	 *            file-id which probably should be a R.raw.ormlite_config.txt or some static value.
 	 */
@@ -57,6 +77,15 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	/**
 	 * Same as the other constructor with the addition of a config-file. See {@link OrmLiteConfigUtil} for details.
 	 * 
+	 * @param context
+	 *            Associated content from the application. This is needed to locate the database.
+	 * @param databaseName
+	 *            Name of the database we are opening.
+	 * @param factory
+	 *            Cursor factory or null if none.
+	 * @param databaseVersion
+	 *            Version of the database we are opening. This causes {@link #onUpgrade(SQLiteDatabase, int, int)} to be
+	 *            called if the stored database is a different version.
 	 * @param configFile
 	 *            Configuration file to be loaded.
 	 */
@@ -69,6 +98,15 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 * Same as the other constructor with the addition of a input stream to the table config-file. See
 	 * {@link OrmLiteConfigUtil} for details.
 	 * 
+	 * @param context
+	 *            Associated content from the application. This is needed to locate the database.
+	 * @param databaseName
+	 *            Name of the database we are opening.
+	 * @param factory
+	 *            Cursor factory or null if none.
+	 * @param databaseVersion
+	 *            Version of the database we are opening. This causes {@link #onUpgrade(SQLiteDatabase, int, int)} to be
+	 *            called if the stored database is a different version.
 	 * @param stream
 	 *            Stream opened to the configuration file to be loaded.
 	 */
