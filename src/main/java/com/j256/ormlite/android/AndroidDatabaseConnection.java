@@ -27,7 +27,7 @@ import com.j256.ormlite.support.GeneratedKeyHolder;
  */
 public class AndroidDatabaseConnection implements DatabaseConnection {
 
-	private static final String ANDROID_VERSION = "VERSION__4.45__";
+	private static final String ANDROID_VERSION = "VERSION__4.46__";
 
 	private static Logger logger = LoggerFactory.getLogger(AndroidDatabaseConnection.class);
 	private static final String[] NO_STRING_ARGS = new String[0];
