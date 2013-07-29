@@ -190,8 +190,8 @@
 				<version>1.5.0</version>
 				<executions>
 					<execution>
-						<id>compile</id>
-						<phase>compile</phase>
+						<id>validate</id>
+						<phase>validate</phase>
 						<goals>
 							<goal>replace</goal>
 						</goals>
