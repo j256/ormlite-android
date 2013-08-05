@@ -77,7 +77,6 @@ public class DatabaseTableConfigUtil {
 			annotationFactoryClazz = Class.forName("org.apache.harmony.lang.annotation.AnnotationFactory");
 			annotationMemberClazz = Class.forName("org.apache.harmony.lang.annotation.AnnotationMember");
 			annotationMemberArrayClazz = Class.forName("[Lorg.apache.harmony.lang.annotation.AnnotationMember;");
-			annotationMemberClazz = Class.forName("org.apache.harmony.lang.annotation.AnnotationMember");
 		} catch (ClassNotFoundException e) {
 			return null;
 		}
