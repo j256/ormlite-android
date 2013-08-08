@@ -104,7 +104,11 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 				logger.trace("{}: transaction {} is successfuly ended", this, savepoint.getSavepointName());
 			}
 		} catch (android.database.SQLException e) {
-			throw SqlExceptionUtil.create("problems commiting transaction " + savepoint.getSavepointName(), e);
+			if (savepoint == null) {
+				throw SqlExceptionUtil.create("problems commiting transaction", e);
+			} else {
+				throw SqlExceptionUtil.create("problems commiting transaction " + savepoint.getSavepointName(), e);
+			}
 		}
 	}
 
@@ -118,7 +122,11 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 				logger.trace("{}: transaction {} is ended, unsuccessfuly", this, savepoint.getSavepointName());
 			}
 		} catch (android.database.SQLException e) {
-			throw SqlExceptionUtil.create("problems rolling back transaction " + savepoint.getSavepointName(), e);
+			if (savepoint == null) {
+				throw SqlExceptionUtil.create("problems rolling back transaction", e);
+			} else {
+				throw SqlExceptionUtil.create("problems rolling back transaction " + savepoint.getSavepointName(), e);
+			}
 		}
 	}
 
@@ -269,7 +277,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 				db.rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '" + tableName + "'", null);
 		try {
 			boolean result;
-			if (cursor != null && cursor.getCount() > 0) {
+			if (cursor.getCount() > 0) {
 				result = true;
 			} else {
 				result = false;
