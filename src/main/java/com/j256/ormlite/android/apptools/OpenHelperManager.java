@@ -71,6 +71,9 @@ public class OpenHelperManager {
 	 * around until it is shutting down when {@link #releaseHelper()} should be called.
 	 */
 	public static synchronized <T extends OrmLiteSqliteOpenHelper> T getHelper(Context context, Class<T> openHelperClass) {
+		if (openHelperClass == null) {
+			throw new IllegalArgumentException("openHelperClass argument is null");
+		}
 		innerSetHelperClass(openHelperClass);
 		return loadHelper(context, openHelperClass);
 	}
@@ -144,7 +147,9 @@ public class OpenHelperManager {
 	 */
 	private static void innerSetHelperClass(Class<? extends OrmLiteSqliteOpenHelper> openHelperClass) {
 		// make sure if that there are not 2 helper classes in an application
-		if (helperClass == null) {
+		if (openHelperClass == null) {
+			throw new IllegalStateException("Helper class was trying to be reset to null");
+		} else if (helperClass == null) {
 			helperClass = openHelperClass;
 		} else if (helperClass != openHelperClass) {
 			throw new IllegalStateException("Helper class was " + helperClass + " but is trying to be reset to "
@@ -162,7 +167,7 @@ public class OpenHelperManager {
 				throw new IllegalArgumentException("context argument is null");
 			}
 			Context appContext = context.getApplicationContext();
-			helper = constructHelper(appContext, helperClass);
+			helper = constructHelper(appContext, openHelperClass);
 			logger.trace("zero instances, created helper {}", helper);
 			/*
 			 * Filipe Leandro and I worked on this bug for like 10 hours straight. It's a doosey.
