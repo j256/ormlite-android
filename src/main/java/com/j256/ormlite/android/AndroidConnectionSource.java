@@ -14,6 +14,7 @@ import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.BaseConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
+import com.j256.ormlite.support.DatabaseConnectionProxyFactory;
 
 /**
  * Android version of the connection source. Takes a standard Android {@link SQLiteOpenHelper}. For best results, use
@@ -27,9 +28,10 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 
 	private final SQLiteOpenHelper helper;
 	private final SQLiteDatabase sqliteDatabase;
-	private AndroidDatabaseConnection connection = null;
+	private DatabaseConnection connection = null;
 	private volatile boolean isOpen = true;
 	private final DatabaseType databaseType = new SqliteAndroidDatabaseType();
+	private static DatabaseConnectionProxyFactory connectionProxyFactory;
 
 	public AndroidConnectionSource(SQLiteOpenHelper helper) {
 		this.helper = helper;
@@ -68,6 +70,9 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 				db = sqliteDatabase;
 			}
 			connection = new AndroidDatabaseConnection(db, true);
+			if (connectionProxyFactory != null) {
+				connection = connectionProxyFactory.createProxy(connection);
+			}
 			logger.trace("created connection {} for db {}, helper {}", connection, db, helper);
 		} else {
 			logger.trace("{}: returning read-write connection {}, helper {}", this, connection, helper);
@@ -102,6 +107,13 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 
 	public boolean isOpen() {
 		return isOpen;
+	}
+
+	/**
+	 * Set to enable connection proxying. Set to null to disable.
+	 */
+	public static void setDatabaseConnectionProxyFactory(DatabaseConnectionProxyFactory connectionProxyFactory) {
+		AndroidConnectionSource.connectionProxyFactory = connectionProxyFactory;
 	}
 
 	@Override
