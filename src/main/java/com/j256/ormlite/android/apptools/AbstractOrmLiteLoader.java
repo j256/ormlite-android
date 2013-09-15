@@ -34,6 +34,9 @@ public abstract class AbstractOrmLiteLoader<T, ID> extends AsyncTaskLoader<List<
     /* Runs on the UI thread */
     @Override
     public void deliverResult(List<T> result) {
+        if (isReset()) {
+            return;
+        }
         if (isStarted()) {
             super.deliverResult(result);
         }
@@ -68,9 +71,12 @@ public abstract class AbstractOrmLiteLoader<T, ID> extends AsyncTaskLoader<List<
     @Override
     protected void onReset() {
         super.onReset();
-
         // Ensure the loader is stopped
         onStopLoading();
+        if (cachedResult != null) {
+            cachedResult.clear();
+            cachedResult = null;
+        }
     }
 
     public void setDao(Dao<T, ID> dao) {
