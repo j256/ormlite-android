@@ -15,7 +15,7 @@ import com.j256.ormlite.table.DatabaseTableConfig;
  * 
  * @author graywatson
  */
-public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType implements DatabaseType {
+public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType {
 
 	@Override
 	public void loadDriver() {
