@@ -26,10 +26,11 @@ public class AndroidCompiledStatement implements CompiledStatement {
 
 	private static Logger logger = LoggerFactory.getLogger(AndroidCompiledStatement.class);
 
+	private static final String[] NO_STRING_ARGS = new String[0];
+
 	private final String sql;
 	private final SQLiteDatabase db;
 	private final StatementType type;
-	private static final String[] NO_STRING_ARGS = new String[0];
 
 	private Cursor cursor;
 	private List<Object> args;
@@ -93,6 +94,10 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		} catch (SQLException e) {
 			// ignored
 		}
+	}
+
+	public void cancel() {
+		// noop
 	}
 
 	public void setObject(int parameterIndex, Object obj, SqlType sqlType) throws SQLException {
