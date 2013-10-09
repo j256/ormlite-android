@@ -250,6 +250,7 @@
 		<surefire.argLine />
 
 		<android-version>2.1.2</android-version>
+		<!-- <android-version>4.1.1.4</android-version> -->
 		<!-- external test package versions -->
 		<easymock-version>2.3</easymock-version>
 		<h2-version>1.2.128</h2-version>

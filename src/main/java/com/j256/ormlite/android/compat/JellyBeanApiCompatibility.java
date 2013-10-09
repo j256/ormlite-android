@@ -7,6 +7,10 @@ import android.os.CancellationSignal;
 /**
  * Basic class which provides no-op methods for all Android version.
  * 
+ * <p>
+ * <b>NOTE:</b> Will show as in error if compiled with previous Android versions.
+ * </p>
+ * 
  * @author graywatson
  */
 public class JellyBeanApiCompatibility extends BasicApiCompatibility {
