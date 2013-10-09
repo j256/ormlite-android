@@ -32,6 +32,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 	private volatile boolean isOpen = true;
 	private final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 	private static DatabaseConnectionProxyFactory connectionProxyFactory;
+	private boolean cancelQueriesEnabled = false;
 
 	public AndroidConnectionSource(SQLiteOpenHelper helper) {
 		this.helper = helper;
@@ -69,7 +70,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 			} else {
 				db = sqliteDatabase;
 			}
-			connection = new AndroidDatabaseConnection(db, true);
+			connection = new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
 			if (connectionProxyFactory != null) {
 				connection = connectionProxyFactory.createProxy(connection);
 			}
@@ -114,6 +115,22 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 	 */
 	public static void setDatabaseConnectionProxyFactory(DatabaseConnectionProxyFactory connectionProxyFactory) {
 		AndroidConnectionSource.connectionProxyFactory = connectionProxyFactory;
+	}
+
+	public boolean isCancelQueriesEnabled() {
+		return cancelQueriesEnabled;
+	}
+
+	/**
+	 * Set to true to enable the canceling of queries.
+	 * 
+	 * <p>
+	 * <b>NOTE:</b> This will incur a slight memory increase for all Cursor based queries -- even if cancel is not
+	 * called for them.
+	 * </p>
+	 */
+	public void setCancelQueriesEnabled(boolean cancelQueriesEnabled) {
+		this.cancelQueriesEnabled = cancelQueriesEnabled;
 	}
 
 	@Override

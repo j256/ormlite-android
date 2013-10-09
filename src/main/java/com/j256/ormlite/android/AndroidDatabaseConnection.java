@@ -34,14 +34,20 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 
 	private final SQLiteDatabase db;
 	private final boolean readWrite;
+	private final boolean cancelQueriesEnabled;
 
 	static {
 		VersionUtils.checkCoreVersusAndroidVersions(ANDROID_VERSION);
 	}
 
 	public AndroidDatabaseConnection(SQLiteDatabase db, boolean readWrite) {
+		this(db, readWrite, false);
+	}
+
+	public AndroidDatabaseConnection(SQLiteDatabase db, boolean readWrite, boolean cancelQueriesEnabled) {
 		this.db = db;
 		this.readWrite = readWrite;
+		this.cancelQueriesEnabled = cancelQueriesEnabled;
 		logger.trace("{}: db {} opened, read-write = {}", this, db, readWrite);
 	}
 
@@ -137,7 +143,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes,
 			int resultFlags) {
 		// resultFlags argument is not used in Android-land since the {@link Cursor} is bi-directional.
-		CompiledStatement stmt = new AndroidCompiledStatement(statement, db, type);
+		CompiledStatement stmt = new AndroidCompiledStatement(statement, db, type, cancelQueriesEnabled);
 		logger.trace("{}: compiled statement got {}: {}", this, stmt, statement);
 		return stmt;
 	}

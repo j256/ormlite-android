@@ -8,6 +8,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
+import com.j256.ormlite.android.compat.ApiCompatibility;
+import com.j256.ormlite.android.compat.ApiCompatibility.CancellationHook;
+import com.j256.ormlite.android.compat.ApiCompatibilityUtils;
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.logger.Logger;
@@ -27,19 +30,23 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	private static Logger logger = LoggerFactory.getLogger(AndroidCompiledStatement.class);
 
 	private static final String[] NO_STRING_ARGS = new String[0];
+	private static final ApiCompatibility apiCompatibility = ApiCompatibilityUtils.getCompatibility();
 
 	private final String sql;
 	private final SQLiteDatabase db;
 	private final StatementType type;
+	private final boolean cancelQueriesEnabled;
 
 	private Cursor cursor;
 	private List<Object> args;
 	private Integer max;
+	private CancellationHook cancellationHook;
 
-	public AndroidCompiledStatement(String sql, SQLiteDatabase db, StatementType type) {
+	public AndroidCompiledStatement(String sql, SQLiteDatabase db, StatementType type, boolean cancelQueriesEnabled) {
 		this.sql = sql;
 		this.db = db;
 		this.type = type;
+		this.cancelQueriesEnabled = cancelQueriesEnabled;
 	}
 
 	public int getColumnCount() throws SQLException {
@@ -86,6 +93,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 				throw SqlExceptionUtil.create("Problems closing Android cursor", e);
 			}
 		}
+		cancellationHook = null;
 	}
 
 	public void closeQuietly() {
@@ -97,7 +105,9 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	}
 
 	public void cancel() {
-		// noop
+		if (cancellationHook != null) {
+			cancellationHook.cancel();
+		}
 	}
 
 	public void setObject(int parameterIndex, Object obj, SqlType sqlType) throws SQLException {
@@ -164,7 +174,10 @@ public class AndroidCompiledStatement implements CompiledStatement {
 				} else {
 					finalSql = sql + " " + max;
 				}
-				cursor = db.rawQuery(finalSql, getStringArray());
+				if (cancelQueriesEnabled) {
+					cancellationHook = apiCompatibility.createCancellationHook();
+				}
+				cursor = apiCompatibility.rawQuery(db, finalSql, getStringArray(), cancellationHook);
 				cursor.moveToFirst();
 				logger.trace("{}: started rawQuery cursor for: {}", this, finalSql);
 			} catch (android.database.SQLException e) {
