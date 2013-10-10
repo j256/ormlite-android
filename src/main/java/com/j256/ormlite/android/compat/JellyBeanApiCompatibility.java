@@ -17,7 +17,11 @@ public class JellyBeanApiCompatibility extends BasicApiCompatibility {
 
 	@Override
 	public Cursor rawQuery(SQLiteDatabase db, String sql, String[] selectionArgs, CancellationHook cancellationHook) {
-		return db.rawQuery(sql, selectionArgs, ((JellyBeanCancellationHook) cancellationHook).cancellationSignal);
+		if (cancellationHook == null) {
+			return db.rawQuery(sql, selectionArgs);
+		} else {
+			return db.rawQuery(sql, selectionArgs, ((JellyBeanCancellationHook) cancellationHook).cancellationSignal);
+		}
 	}
 
 	@Override
