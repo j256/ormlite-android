@@ -197,7 +197,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		DatabaseConnection conn = cs.getSpecialConnection();
 		boolean clearSpecial = false;
 		if (conn == null) {
-			conn = new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
+			conn = newDatabaseConnection(db);
 			try {
 				cs.saveSpecialConnection(conn);
 				clearSpecial = true;
@@ -214,7 +214,11 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		}
 	}
 
-	/**
+    protected AndroidDatabaseConnection newDatabaseConnection(SQLiteDatabase db) {
+        return new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
+    }
+
+    /**
 	 * Satisfies the {@link SQLiteOpenHelper#onUpgrade(SQLiteDatabase, int, int)} interface method.
 	 */
 	@Override
@@ -228,7 +232,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		DatabaseConnection conn = cs.getSpecialConnection();
 		boolean clearSpecial = false;
 		if (conn == null) {
-			conn = new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
+			conn = newDatabaseConnection(db);
 			try {
 				cs.saveSpecialConnection(conn);
 				clearSpecial = true;
