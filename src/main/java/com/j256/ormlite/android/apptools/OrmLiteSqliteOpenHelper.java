@@ -34,9 +34,9 @@ import com.j256.ormlite.table.DatabaseTableConfigLoader;
 public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 
 	protected static Logger logger = LoggerFactory.getLogger(OrmLiteSqliteOpenHelper.class);
-	protected AndroidConnectionSource connectionSource = new AndroidConnectionSource(this);
+	protected AndroidConnectionSource connectionSource = newConnectionSource();
 
-	protected boolean cancelQueriesEnabled;
+    protected boolean cancelQueriesEnabled;
 	private volatile boolean isOpen = true;
 
 	/**
@@ -213,6 +213,10 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 			}
 		}
 	}
+
+    protected AndroidConnectionSource newConnectionSource() {
+        return new AndroidConnectionSource(this);
+    }
 
     protected AndroidDatabaseConnection newDatabaseConnection(SQLiteDatabase db) {
         return new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
