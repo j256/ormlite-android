@@ -17,7 +17,8 @@ public interface ApiCompatibility {
 
 	/**
 	 * Return a cancellation hook object that will be passed to the
-	 * {@link #rawQuery(SQLiteDatabase, String, String[], Object)}. If not supported then this will return null.
+	 * {@link #rawQuery(SQLiteDatabase, String, String[], CancellationHook)}. If not supported then this will return
+	 * null.
 	 */
 	public CancellationHook createCancellationHook();
 
