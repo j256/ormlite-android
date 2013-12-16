@@ -97,7 +97,8 @@ public class OrmLiteConfigUtil {
 	public static void writeConfigFile(String fileName, Class<?>[] classes) throws SQLException, IOException {
 		File rawDir = findRawDir(new File("."));
 		if (rawDir == null) {
-			System.err.println("Could not find " + RAW_DIR_NAME + " directory");
+			System.err.println("Could not find " + RAW_DIR_NAME + " directory which is typically in the "
+					+ RESOURCE_DIR_NAME + " directory");
 		} else {
 			File configFile = new File(rawDir, fileName);
 			writeConfigFile(configFile, classes);
