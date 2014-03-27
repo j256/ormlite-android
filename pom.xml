@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<!-- ormlite configuration file for Maven (http://maven.apache.org/) -->
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.j256.ormlite.emmby</groupId>
+	<groupId>com.j256.ormlite</groupId>
 	<artifactId>ormlite-android</artifactId>
-	<version>4.49-SNAPSHOT</version>
+	<version>4.48-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>ORMLite Android</name>
 	<url>http://ormlite.sourceforge.net/</url>
@@ -162,6 +162,24 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.1</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<!-- j256 Releases (Code releases for j256.com) <j256@256.com> -->
+					<keyname>D3412AC1</keyname>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>2.4</version>
@@ -231,9 +249,8 @@
 			and have any other characters where this is used, it'll get replaced with string "null" -->
 		<surefire.argLine />
 
-		<!--<android-version>2.1.2</android-version>-->
-		 <android-version>4.1.1.4</android-version>
-        <android-support-version>19</android-support-version>
+		<android-version>2.1.2</android-version>
+		<!-- <android-version>4.1.1.4</android-version> -->
 		<!-- external test package versions -->
 		<easymock-version>2.3</easymock-version>
 		<h2-version>1.2.128</h2-version>
@@ -246,7 +263,7 @@
 		<!-- =================================================================== -->
 		<!-- main dependencies -->
 		<dependency>
-			<groupId>com.j256.ormlite.emmby</groupId>
+			<groupId>com.j256.ormlite</groupId>
 			<artifactId>ormlite-core</artifactId>
 			<version>${ormlite-version}</version>
 		</dependency>
@@ -257,18 +274,10 @@
 			<version>${android-version}</version>
 			<optional>true</optional>
 		</dependency>
-        <dependency>
-            <groupId>android.support</groupId>
-            <artifactId>compatibility-v4</artifactId>
-            <version>${android-support-version}</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-
 		<!-- =================================================================== -->
 		<!-- test dependencies -->
 		<dependency>
-			<groupId>com.j256.ormlite.emmby</groupId>
+			<groupId>com.j256.ormlite</groupId>
 			<artifactId>ormlite-core</artifactId>
 			<version>${ormlite-version}</version>
 			<classifier>tests</classifier>
