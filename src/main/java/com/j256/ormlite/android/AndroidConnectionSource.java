@@ -32,7 +32,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 	private volatile boolean isOpen = true;
 	private final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 	private static DatabaseConnectionProxyFactory connectionProxyFactory;
-	protected boolean cancelQueriesEnabled = false;
+	private boolean cancelQueriesEnabled = false;
 
 	public AndroidConnectionSource(SQLiteOpenHelper helper) {
 		this.helper = helper;
@@ -70,7 +70,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 			} else {
 				db = sqliteDatabase;
 			}
-			connection = newDatabaseConnection(db);
+			connection = new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
 			if (connectionProxyFactory != null) {
 				connection = connectionProxyFactory.createProxy(connection);
 			}
@@ -81,11 +81,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		return connection;
 	}
 
-    protected AndroidDatabaseConnection newDatabaseConnection(SQLiteDatabase db) {
-        return new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
-    }
-
-    public void releaseConnection(DatabaseConnection connection) {
+	public void releaseConnection(DatabaseConnection connection) {
 		// noop since connection management is handled by AndroidOS
 	}
 
