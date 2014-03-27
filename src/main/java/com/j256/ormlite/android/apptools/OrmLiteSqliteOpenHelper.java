@@ -34,9 +34,9 @@ import com.j256.ormlite.table.DatabaseTableConfigLoader;
 public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 
 	protected static Logger logger = LoggerFactory.getLogger(OrmLiteSqliteOpenHelper.class);
-	protected AndroidConnectionSource connectionSource = newConnectionSource();
+	protected AndroidConnectionSource connectionSource = new AndroidConnectionSource(this);
 
-    protected boolean cancelQueriesEnabled;
+	protected boolean cancelQueriesEnabled;
 	private volatile boolean isOpen = true;
 
 	/**
@@ -197,7 +197,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		DatabaseConnection conn = cs.getSpecialConnection();
 		boolean clearSpecial = false;
 		if (conn == null) {
-			conn = newDatabaseConnection(db);
+			conn = new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
 			try {
 				cs.saveSpecialConnection(conn);
 				clearSpecial = true;
@@ -214,15 +214,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		}
 	}
 
-    protected AndroidConnectionSource newConnectionSource() {
-        return new AndroidConnectionSource(this);
-    }
-
-    protected AndroidDatabaseConnection newDatabaseConnection(SQLiteDatabase db) {
-        return new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
-    }
-
-    /**
+	/**
 	 * Satisfies the {@link SQLiteOpenHelper#onUpgrade(SQLiteDatabase, int, int)} interface method.
 	 */
 	@Override
@@ -236,7 +228,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		DatabaseConnection conn = cs.getSpecialConnection();
 		boolean clearSpecial = false;
 		if (conn == null) {
-			conn = newDatabaseConnection(db);
+			conn = new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
 			try {
 				cs.saveSpecialConnection(conn);
 				clearSpecial = true;
