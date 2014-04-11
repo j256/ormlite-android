@@ -59,11 +59,7 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	}
 
     public ResultSet getResultSet() throws SQLException {
-        return null;
-    }
-
-    public ResultSetMetaData getResultSetMetaData() throws SQLException {
-        return null;
+        throw new UnsupportedOperationException("Android database results are not supporting ResultSet.");
     }
 
     public int getColumnCount() {
