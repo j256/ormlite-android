@@ -3,6 +3,8 @@ package com.j256.ormlite.android;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -56,7 +58,15 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		this(cursor, objectCache);
 	}
 
-	public int getColumnCount() {
+    public ResultSet getResultSet() throws SQLException {
+        return null;
+    }
+
+    public ResultSetMetaData getResultSetMetaData() throws SQLException {
+        return null;
+    }
+
+    public int getColumnCount() {
 		return cursor.getColumnCount();
 	}
 
