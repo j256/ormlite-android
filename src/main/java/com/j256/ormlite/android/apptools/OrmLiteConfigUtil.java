@@ -63,6 +63,10 @@ public class OrmLiteConfigUtil {
 	 * Raw directory name that we are looking for.
 	 */
 	protected static final String RAW_DIR_NAME = "raw";
+    /**
+     * Build directory name that we are _not_ looking for.
+     */
+    protected static final String BUILD_DIR_NAME = "build";
 
 	/**
 	 * Maximum recursion level while we are looking for source files.
@@ -318,22 +322,22 @@ public class OrmLiteConfigUtil {
 		}
 	}
 
-	/**
-	 * Look for the resource directory with raw beneath it.
-	 */
-	private static File findResRawDir(File dir) {
-		for (File file : dir.listFiles()) {
-			if (file.getName().equals(RESOURCE_DIR_NAME) && file.isDirectory()) {
-				File[] rawFiles = file.listFiles(new FileFilter() {
-					public boolean accept(File file) {
-						return file.getName().equals(RAW_DIR_NAME) && file.isDirectory();
-					}
-				});
-				if (rawFiles.length == 1) {
-					return rawFiles[0];
-				}
-			}
-		}
-		return null;
-	}
+    /**
+     * Look for the resource directory with raw in our project.
+     */
+    private static File findResRawDir(File dir) {
+        if (dir.getName().equals(RAW_DIR_NAME) && dir.getParentFile().getName().equals(RESOURCE_DIR_NAME)) {
+            return dir;
+        }
+
+        for (File file : dir.listFiles()) {
+            if (file.isDirectory() && !file.getAbsolutePath().contains(BUILD_DIR_NAME)) {
+                File result = findResRawDir(file);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return null;
+    }
 }
