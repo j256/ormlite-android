@@ -405,7 +405,6 @@ public class DatabaseTableConfigUtil {
 	 * Class used to investigate the @DatabaseField annotation.
 	 */
 	private static class DatabaseFieldSample {
-		@SuppressWarnings("unused")
 		@DatabaseField
 		String field;
 	}

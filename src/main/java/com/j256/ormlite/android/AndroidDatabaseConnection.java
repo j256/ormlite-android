@@ -1,5 +1,6 @@
 package com.j256.ormlite.android;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
@@ -12,6 +13,7 @@ import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
+import com.j256.ormlite.misc.IOUtils;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.misc.VersionUtils;
 import com.j256.ormlite.stmt.GenericRowMapper;
@@ -227,9 +229,10 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 
 	public long queryForLong(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
 		Cursor cursor = null;
+		AndroidDatabaseResults results = null;
 		try {
 			cursor = db.rawQuery(statement, toStrings(args));
-			AndroidDatabaseResults results = new AndroidDatabaseResults(cursor, null);
+			results = new AndroidDatabaseResults(cursor, null);
 			long result;
 			if (results.first()) {
 				result = results.getLong(0);
@@ -241,27 +244,22 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("queryForLong from database failed: " + statement, e);
 		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
+			IOUtils.closeQuietly(cursor);
+			IOUtils.closeQuietly(results);
 		}
 	}
 
-	public void close() throws SQLException {
+	public void close() throws IOException {
 		try {
 			db.close();
 			logger.trace("{}: db {} closed", this, db);
 		} catch (android.database.SQLException e) {
-			throw SqlExceptionUtil.create("problems closing the database connection", e);
+			throw new IOException("problems closing the database connection", e);
 		}
 	}
 
 	public void closeQuietly() {
-		try {
-			close();
-		} catch (SQLException e) {
-			// ignored
-		}
+		IOUtils.closeQuietly(this);
 	}
 
 	public boolean isClosed() throws SQLException {

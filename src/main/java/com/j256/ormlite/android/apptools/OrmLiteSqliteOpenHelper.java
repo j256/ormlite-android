@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
@@ -21,6 +20,7 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
+import com.j256.ormlite.misc.IOUtils;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.table.DatabaseTableConfigLoader;
@@ -110,7 +110,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 *            Version of the database we are opening. This causes {@link #onUpgrade(SQLiteDatabase, int, int)} to be
 	 *            called if the stored database is a different version.
 	 * @param stream
-	 *            Stream opened to the configuration file to be loaded.
+	 *            Stream opened to the configuration file to be loaded. It will be closed when this method returns.
 	 */
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion,
 			InputStream stream) {
@@ -120,18 +120,16 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		}
 
 		// if a config file-id was specified then load it into the DaoManager
+		BufferedReader reader = null;
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(stream), 4096);
+			reader = new BufferedReader(new InputStreamReader(stream), 4096);
+			stream = null;
 			DaoManager.addCachedDatabaseConfigs(DatabaseTableConfigLoader.loadDatabaseConfigFromReader(reader));
 		} catch (SQLException e) {
 			throw new IllegalStateException("Could not load object config file", e);
 		} finally {
-			try {
-				// we close the stream here because we may not get a reader
-				stream.close();
-			} catch (IOException e) {
-				// ignore close errors
-			}
+			IOUtils.closeQuietly(reader);
+			IOUtils.closeQuietly(stream);
 		}
 	}
 

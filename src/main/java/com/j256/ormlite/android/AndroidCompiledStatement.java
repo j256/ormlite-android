@@ -1,5 +1,6 @@
 package com.j256.ormlite.android;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
+import com.j256.ormlite.misc.IOUtils;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 import com.j256.ormlite.support.CompiledStatement;
@@ -85,23 +87,19 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		return execSql(db, "runExecute", sql, getArgArray());
 	}
 
-	public void close() throws SQLException {
+	public void close() throws IOException {
 		if (cursor != null) {
 			try {
 				cursor.close();
 			} catch (android.database.SQLException e) {
-				throw SqlExceptionUtil.create("Problems closing Android cursor", e);
+				throw new IOException("Problems closing Android cursor", e);
 			}
 		}
 		cancellationHook = null;
 	}
 
 	public void closeQuietly() {
-		try {
-			close();
-		} catch (SQLException e) {
-			// ignored
-		}
+		IOUtils.closeQuietly(cursor);
 	}
 
 	public void cancel() {
