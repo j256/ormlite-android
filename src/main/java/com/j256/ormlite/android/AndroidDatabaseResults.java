@@ -38,7 +38,7 @@ public class AndroidDatabaseResults implements DatabaseResults {
 			this.columnNameMap = new HashMap<String, Integer>();
 			for (int i = 0; i < this.columnNames.length; i++) {
 				// NOTE: this is case sensitive
-				this.columnNameMap.put(this.columnNames[i], i);
+				this.columnNameMap.put(this.columnNames[i].toLowerCase(), i);
 			}
 		} else {
 			columnNameMap = null;
@@ -226,14 +226,14 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		if (columnNameMap == null) {
 			for (int i = 0; i < columnNames.length; i++) {
 				// NOTE: this is case sensitive
-				if (columnNames[i].equals(columnName)) {
+				if (columnNames[i].toLowerCase().equals(columnName.toLowerCase())) {
 					return i;
 				}
 			}
 			return -1;
 		} else {
 			// NOTE: this is case sensitive
-			Integer index = columnNameMap.get(columnName);
+			Integer index = columnNameMap.get(columnName.toLowerCase());
 			if (index == null) {
 				return -1;
 			} else {
