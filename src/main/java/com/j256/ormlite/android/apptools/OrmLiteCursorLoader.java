@@ -1,111 +1,120 @@
 package com.j256.ormlite.android.apptools;
 
-import android.content.AsyncTaskLoader;
-import android.content.Context;
-import android.database.Cursor;
-import com.j256.ormlite.android.AndroidCompiledStatement;
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.support.DatabaseConnection;
+import static com.j256.ormlite.stmt.StatementBuilder.StatementType.SELECT;
 
 import java.sql.SQLException;
 
-import static com.j256.ormlite.stmt.StatementBuilder.StatementType.SELECT;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
+import android.database.Cursor;
 
-public class OrmLiteCursorLoader<T> extends AsyncTaskLoader<Cursor> implements Dao.Observer {
+import com.j256.ormlite.android.AndroidCompiledStatement;
+import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.Dao.DaoObserver;
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.support.DatabaseConnection;
 
-    protected Dao<T, ?> dao;
-    protected PreparedQuery<T> query;
-    protected Cursor cursor;
+/**
+ * Cursor loader supported by later Android APIs that allows asynchronous content loading.
+ * 
+ * @author emmby
+ */
+public class OrmLiteCursorLoader<T> extends AsyncTaskLoader<Cursor> implements DaoObserver {
 
-    public OrmLiteCursorLoader(Context context, Dao<T, ?> dao, PreparedQuery<T> query) {
-        super(context);
-        this.dao = dao;
-        this.query = query;
-        dao.registerContentObserver(this);
-    }
+	protected Dao<T, ?> dao;
+	protected PreparedQuery<T> query;
+	protected Cursor cursor;
 
-    @Override
-    public Cursor loadInBackground() {
-        final Cursor cursor;
-        try {
-            final DatabaseConnection connection = dao.getConnectionSource().getReadOnlyConnection();
-            cursor = ((AndroidCompiledStatement) query.compile(connection, SELECT)).getCursor();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+	public OrmLiteCursorLoader(Context context, Dao<T, ?> dao, PreparedQuery<T> query) {
+		super(context);
+		this.dao = dao;
+		this.query = query;
+		dao.registerObserver(this);
+	}
 
-        // Fill the cursor
-        cursor.getCount();
+	@Override
+	public Cursor loadInBackground() {
+		Cursor cursor;
+		try {
+			DatabaseConnection connection = dao.getConnectionSource().getReadOnlyConnection();
+			cursor = ((AndroidCompiledStatement) query.compile(connection, SELECT)).getCursor();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 
-        return cursor;
-    }
+		// fill the cursor with results
+		cursor.getCount();
+		return cursor;
+	}
 
-    @Override
-    public void deliverResult(Cursor newCursor) {
-        if (isReset()) {
-            // An async query came in while the loader is stopped
-            if (newCursor != null)
-                newCursor.close();
+	@Override
+	public void deliverResult(Cursor newCursor) {
+		if (isReset()) {
+			// an async query came in while the loader is stopped
+			if (newCursor != null) {
+				newCursor.close();
+			}
+			return;
+		}
 
-            return;
-        }
+		Cursor oldCursor = cursor;
+		cursor = newCursor;
 
-        final Cursor oldCursor = cursor;
-        cursor = newCursor;
+		if (isStarted()) {
+			super.deliverResult(newCursor);
+		}
 
-        if (isStarted())
-            super.deliverResult(newCursor);
+		// close the old cursor if necessary
+		if (oldCursor != null && oldCursor != newCursor && !oldCursor.isClosed()) {
+			oldCursor.close();
+		}
+	}
 
-        if (oldCursor != null && oldCursor != newCursor && !oldCursor.isClosed())
-            oldCursor.close();
+	@Override
+	protected void onStartLoading() {
+		if (cursor == null) {
+			forceLoad();
+		} else {
+			deliverResult(cursor);
+			if (takeContentChanged()) {
+				forceLoad();
+			}
+		}
+	}
 
-    }
+	@Override
+	protected void onStopLoading() {
+		cancelLoad();
+	}
 
-    @Override
-    protected void onStartLoading() {
-        if (cursor != null)
-            deliverResult(cursor);
+	@Override
+	public void onCanceled(Cursor cursor) {
+		if (cursor != null && !cursor.isClosed()) {
+			cursor.close();
+		}
+	}
 
-        if (takeContentChanged() || cursor == null)
-            forceLoad();
-    }
+	@Override
+	protected void onReset() {
+		super.onReset();
+		onStopLoading();
+		if (cursor != null) {
+			if (!cursor.isClosed()) {
+				cursor.close();
+			}
+			cursor = null;
+		}
+	}
 
-    @Override
-    protected void onStopLoading() {
-        cancelLoad();
-    }
+	public void onChange() {
+		onContentChanged();
+	}
 
-    @Override
-    public void onCanceled(Cursor cursor) {
-        if (cursor != null && !cursor.isClosed())
-            cursor.close();
-    }
+	public PreparedQuery<T> getQuery() {
+		return query;
+	}
 
-    @Override
-    protected void onReset() {
-        super.onReset();
-        
-        onStopLoading();
-
-        if (cursor != null && !cursor.isClosed())
-            cursor.close();
-
-        cursor = null;
-    }
-
-    public void onContentUpdated() {
-        onContentChanged();
-    }
-
-    public PreparedQuery<T> getQuery()
-    {
-        return query;
-    }
-
-    public void setQuery(PreparedQuery<T> mQuery)
-    {
-        this.query = mQuery;
-    }
-
+	public void setQuery(PreparedQuery<T> mQuery) {
+		this.query = mQuery;
+	}
 }
