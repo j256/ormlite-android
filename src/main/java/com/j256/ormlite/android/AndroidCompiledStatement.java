@@ -16,7 +16,6 @@ import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
-import com.j256.ormlite.misc.IOUtils;
 import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 import com.j256.ormlite.support.CompiledStatement;
@@ -99,7 +98,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	}
 
 	public void closeQuietly() {
-		IOUtils.closeQuietly(cursor);
+		apiCompatibility.closeCursor(cursor);
 	}
 
 	public void cancel() {

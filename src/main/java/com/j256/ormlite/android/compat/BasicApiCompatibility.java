@@ -18,4 +18,11 @@ public class BasicApiCompatibility implements ApiCompatibility {
 	public CancellationHook createCancellationHook() {
 		return null;
 	}
+
+	@SuppressWarnings("deprecation")
+	public void closeCursor(Cursor cursor) {
+		if (cursor != null) {
+			cursor.deactivate();
+		}
+	}
 }
