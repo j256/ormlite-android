@@ -23,6 +23,11 @@ public interface ApiCompatibility {
 	public CancellationHook createCancellationHook();
 
 	/**
+	 * Close the cursor.
+	 */
+	public void closeCursor(Cursor cursor);
+
+	/**
 	 * Cancellation hook class returned by {@link ApiCompatibility#createCancellationHook()}.
 	 */
 	public interface CancellationHook {
