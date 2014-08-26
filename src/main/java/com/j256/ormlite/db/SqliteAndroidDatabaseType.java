@@ -51,9 +51,9 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType {
 	}
 
 	@Override
-	public DataPersister getDataPersister(DataPersister defaultPersister) {
+	public DataPersister getDataPersister(DataPersister defaultPersister, FieldType fieldType) {
 		if (defaultPersister == null) {
-			return super.getDataPersister(null);
+			return super.getDataPersister(defaultPersister, fieldType);
 		}
 		// we are only overriding certain types
 		switch (defaultPersister.getSqlType()) {
@@ -64,7 +64,7 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType {
 					return DateStringType.getSingleton();
 				}
 			default :
-				return super.getDataPersister(defaultPersister);
+				return super.getDataPersister(defaultPersister, fieldType);
 		}
 	}
 
