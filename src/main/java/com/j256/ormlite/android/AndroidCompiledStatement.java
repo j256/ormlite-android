@@ -98,7 +98,9 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	}
 
 	public void closeQuietly() {
-		apiCompatibility.closeCursor(cursor);
+		if (cursor != null) {
+			cursor.close();
+		}
 	}
 
 	public void cancel() {

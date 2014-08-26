@@ -8,8 +8,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.j256.ormlite.android.compat.ApiCompatibility;
-import com.j256.ormlite.android.compat.ApiCompatibilityUtils;
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
@@ -35,7 +33,6 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 
 	private static Logger logger = LoggerFactory.getLogger(AndroidDatabaseConnection.class);
 	private static final String[] NO_STRING_ARGS = new String[0];
-	private static final ApiCompatibility apiCompatibility = ApiCompatibilityUtils.getCompatibility();
 
 	private final SQLiteDatabase db;
 	private final boolean readWrite;
@@ -173,7 +170,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("inserting to database failed: " + statement, e);
 		} finally {
-			apiCompatibility.closeStatement(stmt);
+			closeQuietly(stmt);
 		}
 	}
 
@@ -206,7 +203,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("queryForOne from database failed: " + statement, e);
 		} finally {
-			apiCompatibility.closeCursor(cursor);
+			closeQuietly(cursor);
 		}
 	}
 
@@ -220,7 +217,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("queryForLong from database failed: " + statement, e);
 		} finally {
-			apiCompatibility.closeStatement(stmt);
+			closeQuietly(stmt);
 		}
 	}
 
@@ -241,7 +238,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("queryForLong from database failed: " + statement, e);
 		} finally {
-			apiCompatibility.closeCursor(cursor);
+			closeQuietly(cursor);
 			IOUtils.closeQuietly(results);
 		}
 	}
@@ -295,7 +292,8 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("updating database failed: " + statement, e);
 		} finally {
-			apiCompatibility.closeStatement(stmt);
+			closeQuietly(stmt);
+			stmt = null;
 		}
 		int result;
 		try {
@@ -305,7 +303,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			// ignore the exception and just return 1
 			result = 1;
 		} finally {
-			apiCompatibility.closeStatement(stmt);
+			closeQuietly(stmt);
 		}
 		logger.trace("{} statement is compiled and executed, changed {}: {}", label, result, statement);
 		return result;
@@ -377,6 +375,24 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "@" + Integer.toHexString(super.hashCode());
+	}
+
+	/**
+	 * We can't use IOUtils here because older versions didn't implement Closeable.
+	 */
+	private void closeQuietly(Cursor cursor) {
+		if (cursor != null) {
+			cursor.close();
+		}
+	}
+
+	/**
+	 * We can't use IOUtils here because older versions didn't implement Closeable.
+	 */
+	private void closeQuietly(SQLiteStatement statement) {
+		if (statement != null) {
+			statement.close();
+		}
 	}
 
 	private static class OurSavePoint implements Savepoint {
