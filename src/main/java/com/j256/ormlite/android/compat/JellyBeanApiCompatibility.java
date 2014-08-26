@@ -2,6 +2,7 @@ package com.j256.ormlite.android.compat;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.os.CancellationSignal;
 
 import com.j256.ormlite.misc.IOUtils;
@@ -34,6 +35,11 @@ public class JellyBeanApiCompatibility extends BasicApiCompatibility {
 	@Override
 	public void closeCursor(Cursor cursor) {
 		IOUtils.closeQuietly(cursor);
+	}
+	
+	@Override
+	public void closeStatement(SQLiteStatement statement) {
+		IOUtils.closeQuietly(statement);
 	}
 
 	protected static class JellyBeanCancellationHook implements CancellationHook {

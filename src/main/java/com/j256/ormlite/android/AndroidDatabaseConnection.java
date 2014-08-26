@@ -173,7 +173,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("inserting to database failed: " + statement, e);
 		} finally {
-			IOUtils.closeQuietly(stmt);
+			apiCompatibility.closeStatement(stmt);
 		}
 	}
 
@@ -220,7 +220,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("queryForLong from database failed: " + statement, e);
 		} finally {
-			IOUtils.closeQuietly(stmt);
+			apiCompatibility.closeStatement(stmt);
 		}
 	}
 
@@ -295,7 +295,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("updating database failed: " + statement, e);
 		} finally {
-			IOUtils.closeQuietly(stmt);
+			apiCompatibility.closeStatement(stmt);
 		}
 		int result;
 		try {
@@ -305,7 +305,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			// ignore the exception and just return 1
 			result = 1;
 		} finally {
-			IOUtils.closeQuietly(stmt);
+			apiCompatibility.closeStatement(stmt);
 		}
 		logger.trace("{} statement is compiled and executed, changed {}: {}", label, result, statement);
 		return result;
