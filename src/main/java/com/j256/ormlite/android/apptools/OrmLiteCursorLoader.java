@@ -29,7 +29,6 @@ public class OrmLiteCursorLoader<T> extends AsyncTaskLoader<Cursor> implements D
 		super(context);
 		this.dao = dao;
 		this.query = query;
-		dao.registerObserver(this);
 	}
 
 	@Override
@@ -72,6 +71,9 @@ public class OrmLiteCursorLoader<T> extends AsyncTaskLoader<Cursor> implements D
 
 	@Override
 	protected void onStartLoading() {
+		// start watching for dataset changes		
+		dao.registerObserver(this);
+
 		if (cursor == null) {
 			forceLoad();
 		} else {
@@ -104,6 +106,9 @@ public class OrmLiteCursorLoader<T> extends AsyncTaskLoader<Cursor> implements D
 			}
 			cursor = null;
 		}
+		
+		// stop watching for changes
+		dao.unregisterObserver(this);
 	}
 
 	public void onChange() {
