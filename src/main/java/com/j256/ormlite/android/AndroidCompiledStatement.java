@@ -87,7 +87,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	}
 
 	public void close() throws IOException {
-		if (cursor != null) {
+		if (cursor != null && !cursor.isClosed()) {
 			try {
 				cursor.close();
 			} catch (android.database.SQLException e) {
