@@ -51,23 +51,6 @@ public abstract class OrmLiteCursorAdapter<T, ViewType extends View> extends Cur
 			throw new RuntimeException(e);
 		}
 	}
-	
-	
-	protected T cursorToObject(Cursor cursor) throws SQLException {
-		return preparedQuery.mapRow(new AndroidDatabaseResults(cursor, null));
-	}
-	
-	/**
-	 * Return a T object instead a Cursor	
-	 */
-        @Override
-	public T getItem(int position) {
-		try {
-			return cursorToObject((Cursor) super.getItem(position));
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	/**
 	 * Show not be used. Instead use {@link #changeCursor(Cursor, PreparedQuery)}
