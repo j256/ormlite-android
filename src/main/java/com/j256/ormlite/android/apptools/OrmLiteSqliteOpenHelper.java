@@ -268,7 +268,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 * Get a DAO for our class. This uses the {@link DaoManager} to cache the DAO for future gets.
 	 * 
 	 * <p>
-	 * NOTE: This routing does not return Dao<T, ID> because of casting issues if we are assigning it to a custom DAO.
+	 * NOTE: This routing does not return {@code Dao<T, ID>} because of casting issues if we are assigning it to a custom DAO.
 	 * Grumble.
 	 * </p>
 	 */
@@ -284,7 +284,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 * Get a RuntimeExceptionDao for our class. This uses the {@link DaoManager} to cache the DAO for future gets.
 	 * 
 	 * <p>
-	 * NOTE: This routing does not return RuntimeExceptionDao<T, ID> because of casting issues if we are assigning it to
+	 * NOTE: This routing does not return {@code RuntimeExceptionDao<T, ID>} because of casting issues if we are assigning it to
 	 * a custom DAO. Grumble.
 	 * </p>
 	 */

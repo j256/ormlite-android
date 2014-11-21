@@ -84,12 +84,12 @@ public class OpenHelperManager {
 	 * classes such as {@link OrmLiteBaseActivity}. Either that or the helper class needs to be set in the strings.xml.
 	 * 
 	 * <p>
-	 * To find the helper class, this does the following: <br />
+	 * To find the helper class, this does the following: <br>
 	 * 1) If the class has been set with a call to {@link #setOpenHelperClass(Class)}, it will be used to construct a
-	 * helper. <br />
-	 * 2) If the resource class name is configured in the strings.xml file it will be used. <br />
+	 * helper. <br>
+	 * 2) If the resource class name is configured in the strings.xml file it will be used. <br>
 	 * 3) The context class hierarchy is walked looking at the generic parameters for a class extending
-	 * OrmLiteSqliteOpenHelper. This is used by the {@link OrmLiteBaseActivity} and other base classes. <br />
+	 * OrmLiteSqliteOpenHelper. This is used by the {@link OrmLiteBaseActivity} and other base classes. <br>
 	 * 4) An exception is thrown saying that it was not able to set the helper class.
 	 * </p>
 	 * 
