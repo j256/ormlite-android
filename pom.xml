@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+
+	<repositories>
+		<repository>
+			<id>bintray</id>
+			<url>http://dl.bintray.com/guitcastro/maven</url>
+		</repository>
+	</repositories>
+
 	<!-- ormlite configuration file for Maven (http://maven.apache.org/) -->
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.j256.ormlite</groupId>
+	<groupId>com.g2l2</groupId>
 	<artifactId>ormlite-android</artifactId>
-	<version>4.49-SNAPSHOT</version>
+	<version>4.49</version>
 	<packaging>jar</packaging>
 	<name>ORMLite Android</name>
 	<url>http://ormlite.sourceforge.net/</url>
@@ -17,102 +26,16 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
-	<scm>
-		<url>https://github.com/j256/ormlite-android</url>
-		<connection>scm:git:ssh://git@github.com/j256/ormlite-android.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/j256/ormlite-android.git</developerConnection>
-	</scm>
-	<developers>
-		<developer>
-			<id>gray</id>
-			<name>Gray Watson</name>
-			<url>http://256.com/gray/</url>
-			<organization>256.com</organization>
-			<organizationUrl>http://256.com/</organizationUrl>
-			<roles>
-				<role>architect</role>
-				<role>developer</role>
-			</roles>
-			<timezone>-5</timezone>
-		</developer>
-	</developers>
 	<profiles>
-		<profile>
-			<id>sf</id>
-			<distributionManagement>
-				<repository>
-					<id>sourceforge</id>
-					<name>SourceForge</name>
-					<url>sftp://graywatson,ormlite@frs.sourceforge.net:/home/frs/project/o/or/ormlite/releases</url>
-				</repository>
-				<snapshotRepository>
-					<id>sourceforge</id>
-					<name>SourceForge</name>
-					<url>sftp://graywatson,ormlite@frs.sourceforge.net:/home/frs/project/o/or/ormlite/snapshots</url>
-				</snapshotRepository>
-			</distributionManagement>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.1</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>${gpgPhase}</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<keyname>D3412AC1</keyname>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 		<profile>
 			<id>st</id>
 			<distributionManagement>
 				<repository>
-					<id>sonatype-nexus-staging</id>
-					<name>Nexus Release Repository</name>
-					<url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+					<id>bintray-guitcastro-maven-com.g2l2.ormlite-android</id>
+					<name>guitcastro-maven-com.g2l2.ormlite-android</name>
+					<url>https://api.bintray.com/maven/guitcastro/maven/com.g2l2.ormlite-android</url>
 				</repository>
-				<snapshotRepository>
-					<id>sonatype-nexus-snapshots</id>
-					<name>Sonatype Nexus Snapshots</name>
-					<url>http://oss.sonatype.org/content/repositories/snapshots/</url>
-				</snapshotRepository>
 			</distributionManagement>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.1</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>${gpgPhase}</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<keyname>D3412AC1</keyname>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 	</profiles>
 	<build>
@@ -122,22 +45,7 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
-		<testResources>
-			<testResource>
-				<directory>src/test/resources</directory>
-			</testResource>
-		</testResources>
 		<plugins>
-			<!-- copied from the sonatype stuff so we can override the params -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<configuration>
-					<mavenExecutorId>forked-path</mavenExecutorId>
-					<useReleaseProfile>false</useReleaseProfile>
-					<arguments>-Psonatype-oss-release -DgpgPhase=${gpgPhase} -Dgpg.passphrase=${gpg.passphrase}</arguments>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -160,40 +68,9 @@
 					<execution>
 						<goals>
 							<goal>jar</goal>
-							<goal>test-jar</goal>
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-							<showPackage>false</showPackage>
-							<additionalparam>-tag inheritDoc:X</additionalparam>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<bottom>
-						This documentation is licensed by Gray Watson under the
-						&lt;a
-						href="http://creativecommons.org/licenses/by-sa/3.0/" &gt;Creative Commons Attribution-Share Alike 3.0 License.
-						&lt;/a&gt; </bottom>
-					<showPackage>false</showPackage>
-					<additionalparam>-tag inheritDoc:X</additionalparam>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.8</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -206,13 +83,6 @@
 						</manifestEntries>
 					</archive>
 				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -249,58 +119,18 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>com.google.code.maven-replacer-plugin</groupId>
-										<artifactId>replacer</artifactId>
-										<versionRange>[1.5.0,)</versionRange>
-										<goals>
-											<goal>replace</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 	<properties>
-		<!-- default empty string that can be overridden on command line. due to surefire's parser bug, if we don't have this here 
-			and have any other characters where this is used, it'll get replaced with string "null" -->
-		<surefire.argLine />
 
-		<!-- <android-version>2.3.3</android-version>-->
 		<android-version>4.1.1.4</android-version>
-		<!-- external test package versions -->
-		<easymock-version>2.3</easymock-version>
-		<h2-version>1.2.128</h2-version>
-		<commons-logging-version>1.1.1</commons-logging-version>
-		<junit-version>4.8.1</junit-version>
-		<log4j-version>1.2.15</log4j-version>
-		<ormlite-version>${project.version}</ormlite-version>
 	</properties>
 	<dependencies>
-		<!-- =================================================================== -->
+
 		<!-- main dependencies -->
 		<dependency>
-			<groupId>com.j256.ormlite</groupId>
+			<groupId>com.g2l2</groupId>
 			<artifactId>ormlite-core</artifactId>
-			<version>${ormlite-version}</version>
+			<version>4.49</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.android</groupId>
@@ -309,60 +139,6 @@
 			<version>${android-version}</version>
 			<optional>true</optional>
 		</dependency>
-		<!-- =================================================================== -->
-		<!-- test dependencies -->
-		<dependency>
-			<groupId>com.j256.ormlite</groupId>
-			<artifactId>ormlite-core</artifactId>
-			<version>${ormlite-version}</version>
-			<classifier>tests</classifier>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>${commons-logging-version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>${log4j-version}</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun.jmx</groupId>
-					<artifactId>jmxri</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.jdmk</groupId>
-					<artifactId>jmxtools</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.activation</groupId>
-					<artifactId>activation</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.jms</groupId>
-					<artifactId>jms</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.mail</groupId>
-					<artifactId>mail</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit-version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.easymock</groupId>
-			<artifactId>easymock</artifactId>
-			<version>${easymock-version}</version>
-			<scope>test</scope>
-		</dependency>
+
 	</dependencies>
 </project>
