@@ -28,6 +28,12 @@ import com.j256.ormlite.table.DatabaseTableConfig;
  */
 public class DatabaseTableConfigUtil {
 
+	/**
+	 * Set this system property to any value to disable the annotations hack which seems to cause problems on certain
+	 * operating systems.
+	 */
+	public static final String DISABLE_ANNOTATION_HACK_SYSTEM_PROPERTY = "ormlite.annotation.hack.disable";
+
 	private static Class<?> annotationFactoryClazz;
 	private static Field elementsField;
 	private static Class<?> annotationMemberClazz;
@@ -35,7 +41,19 @@ public class DatabaseTableConfigUtil {
 	private static Field valueField;
 	private static int workedC = 0;
 
-	private static final int[] configFieldNums = lookupClasses();
+	private static final int[] configFieldNums;
+
+	static {
+		/*
+		 * If we are dealing with older versions of the OS and if we've not disabled the annotation hack...
+		 */
+		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH
+				&& System.getProperty(DISABLE_ANNOTATION_HACK_SYSTEM_PROPERTY) == null) {
+			configFieldNums = lookupClasses();
+		} else {
+			configFieldNums = null;
+		}
+	}
 
 	/**
 	 * Build our list table config from a class using some annotation fu around.
