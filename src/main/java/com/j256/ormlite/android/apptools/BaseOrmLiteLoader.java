@@ -77,9 +77,13 @@ public abstract class BaseOrmLiteLoader<T, ID> extends AsyncTaskLoader<List<T>> 
 			cachedResults.clear();
 			cachedResults = null;
 		}
-		
+
 		// stop watching for changes
 		dao.unregisterObserver(this);
+	}
+
+	public void onChange() {
+		onContentChanged();
 	}
 
 	public void setDao(Dao<T, ID> dao) {
