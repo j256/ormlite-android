@@ -13,7 +13,7 @@ import com.j256.ormlite.dao.Dao;
  * 
  * @author EgorAnd
  */
-public abstract class BaseOrmLiteLoader<T, ID> extends AsyncTaskLoader<List<T>> {
+public abstract class BaseOrmLiteLoader<T, ID> extends AsyncTaskLoader<List<T>> implements DaoObserver {
 
 	/**
 	 * A Dao which will be queried for the data.
@@ -28,6 +28,7 @@ public abstract class BaseOrmLiteLoader<T, ID> extends AsyncTaskLoader<List<T>> 
 	public BaseOrmLiteLoader(Context context, Dao<T, ID> dao) {
 		super(context);
 		this.dao = dao;
+		dao.registerObserver(this);
 	}
 
 	@Override
@@ -75,6 +76,9 @@ public abstract class BaseOrmLiteLoader<T, ID> extends AsyncTaskLoader<List<T>> 
 			cachedResults.clear();
 			cachedResults = null;
 		}
+		
+		// stop watching for changes
+		dao.unregisterObserver(this);
 	}
 
 	public void setDao(Dao<T, ID> dao) {
