@@ -110,6 +110,10 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		return isOpen;
 	}
 
+	public boolean isSingleConnection() {
+		return true;
+	}
+
 	/**
 	 * Set to enable connection proxying. Set to null to disable.
 	 */
