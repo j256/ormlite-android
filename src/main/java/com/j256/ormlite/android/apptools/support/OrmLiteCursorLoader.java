@@ -17,6 +17,11 @@ import com.j256.ormlite.support.DatabaseConnection;
 /**
  * Cursor loader supported by later Android APIs that allows asynchronous content loading.
  * 
+ * <p>
+ * <b>NOTE:</b> This should be the <i>same</i> as {@link com.j256.ormlite.android.apptools.OrmLiteCursorLoader} but this
+ * should import the support library version of the {@link AsyncTaskLoader}.
+ * </p>
+ * 
  * @author emmby
  */
 public class OrmLiteCursorLoader<T> extends AsyncTaskLoader<Cursor> implements DaoObserver {
