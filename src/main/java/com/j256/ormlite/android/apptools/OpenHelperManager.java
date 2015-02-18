@@ -79,19 +79,24 @@ public class OpenHelperManager {
 	}
 
 	/**
+	 * <p>
 	 * Similar to {@link #getHelper(Context, Class)} (which is recommended) except we have to find the helper class
 	 * through other means. This method requires that the Context be a class that extends one of ORMLite's Android base
 	 * classes such as {@link OrmLiteBaseActivity}. Either that or the helper class needs to be set in the strings.xml.
+	 * </p>
 	 * 
 	 * <p>
-	 * To find the helper class, this does the following: <br />
-	 * 1) If the class has been set with a call to {@link #setOpenHelperClass(Class)}, it will be used to construct a
-	 * helper. <br />
-	 * 2) If the resource class name is configured in the strings.xml file it will be used. <br />
-	 * 3) The context class hierarchy is walked looking at the generic parameters for a class extending
-	 * OrmLiteSqliteOpenHelper. This is used by the {@link OrmLiteBaseActivity} and other base classes. <br />
-	 * 4) An exception is thrown saying that it was not able to set the helper class.
+	 * To find the helper class, this does the following:
 	 * </p>
+	 * 
+	 * <ol>
+	 * <li>If the class has been set with a call to {@link #setOpenHelperClass(Class)}, it will be used to construct a
+	 * helper.</li>
+	 * <li>If the resource class name is configured in the strings.xml file it will be used.</li>
+	 * <li>The context class hierarchy is walked looking at the generic parameters for a class extending
+	 * OrmLiteSqliteOpenHelper. This is used by the {@link OrmLiteBaseActivity} and other base classes.</li>
+	 * <li>An exception is thrown saying that it was not able to set the helper class.</li>
+	 * </ol>
 	 * 
 	 * @deprecated Should use {@link #getHelper(Context, Class)}
 	 */
