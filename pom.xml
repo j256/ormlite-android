@@ -284,8 +284,9 @@
 			and have any other characters where this is used, it'll get replaced with string "null" -->
 		<surefire.argLine />
 
-		<!-- <android-version>2.3.3</android-version>-->
+		<!-- <android-version>2.3.3</android-version> -->
 		<android-version>4.1.1.4</android-version>
+		<android-support-version>r6</android-support-version>
 		<!-- external test package versions -->
 		<easymock-version>2.3</easymock-version>
 		<h2-version>1.2.128</h2-version>
@@ -309,6 +310,14 @@
 			<version>${android-version}</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>com.google.android</groupId>
+			<artifactId>support-v4</artifactId>
+			<scope>provided</scope>
+			<version>${android-support-version}</version>
+			<optional>true</optional>
+		</dependency>
+
 		<!-- =================================================================== -->
 		<!-- test dependencies -->
 		<dependency>
