@@ -29,7 +29,6 @@ public abstract class BaseOrmLiteLoader<T, ID> extends AsyncTaskLoader<List<T>> 
 	public BaseOrmLiteLoader(Context context, Dao<T, ID> dao) {
 		super(context);
 		this.dao = dao;
-		dao.registerObserver(this);
 	}
 
 	@Override
@@ -56,6 +55,8 @@ public abstract class BaseOrmLiteLoader<T, ID> extends AsyncTaskLoader<List<T>> 
 		if (takeContentChanged() || cachedResults == null) {
 			forceLoad();
 		}
+		// watch for data changes
+		dao.registerObserver(this);
 	}
 
 	/**
