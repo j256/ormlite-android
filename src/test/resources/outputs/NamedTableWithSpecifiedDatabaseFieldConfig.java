@@ -6,9 +6,6 @@ import java.util.List;
 import com.j256.ormlite.field.DatabaseFieldConfig;
 import com.j256.ormlite.table.DatabaseTableConfig;
 
-import javax.annotation.Generated;
-
-@Generated("com.j256.ormlite.android.apptools.OrmLiteAnnotationProcessor")
 public final class NamedTableWithSpecifiedDatabaseFieldConfig {
 	private NamedTableWithSpecifiedDatabaseFieldConfig() {
 	}

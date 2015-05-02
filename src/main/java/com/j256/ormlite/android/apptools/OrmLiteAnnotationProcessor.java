@@ -29,6 +29,7 @@ import javax.tools.JavaFileObject;
 //TODO: add error messages
 //TODO: understand when/if columns need to be uppercased
 //TODO: handle non-public entities (put generated files in same package)
+//TODO: add @Generated annotation to generated files
 
 /**
  * Class that is automatically run when compiling client code that automatically
@@ -156,10 +157,6 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 		writer.write("import com.j256.ormlite.field.DatabaseFieldConfig;\n");
 		writer.write("import com.j256.ormlite.table.DatabaseTableConfig;\n");
 		writer.write("\n");
-		writer.write("import javax.annotation.Generated;\n");
-		writer.write("\n");
-		writer.write(String.format("@Generated(\"%s\")\n", getClass()
-				.getCanonicalName()));
 		writer.write("public final class " + table.simpleClassName + SUFFIX
 				+ " {\n");
 		writer.write("\tprivate " + table.simpleClassName + SUFFIX + "() {\n");
