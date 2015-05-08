@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.sql.SQLException;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 
 import com.j256.ormlite.android.annotations.Database;
@@ -13,6 +14,7 @@ import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
+import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseResults;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -150,6 +152,19 @@ class NamedTableWithSpecifiedDatabaseField {
 		OpenHelper(Context context, String databaseName, CursorFactory factory,
 				int databaseVersion) {
 			super(context, databaseName, factory, databaseVersion);
+			NamedTableWithSpecifiedDatabaseField_OpenHelper_TableConfig
+					.cacheTableConfigurations();
+		}
+
+		@Override
+		public void onCreate(SQLiteDatabase database,
+				ConnectionSource connectionSource) {
+			try {
+				NamedTableWithSpecifiedDatabaseField_OpenHelper_TableConfig
+						.createTables(connectionSource);
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 }

@@ -20,7 +20,9 @@ public class OrmLiteAnnotationProcessorTest {
 				.and()
 				.generatesSources(
 						JavaFileObjects
-								.forResource("outputs/UnnamedTableWithDefaultDatabaseField_TableConfig.java"));
+								.forResource("outputs/UnnamedTableWithDefaultDatabaseField_TableConfig.java"),
+						JavaFileObjects
+								.forResource("outputs/UnnamedTableWithDefaultDatabaseField_OpenHelper_TableConfig.java"));
 	}
 
 	@Test
@@ -34,7 +36,9 @@ public class OrmLiteAnnotationProcessorTest {
 				.and()
 				.generatesSources(
 						JavaFileObjects
-								.forResource("outputs/NamedTableWithSpecifiedDatabaseField_TableConfig.java"));
+								.forResource("outputs/NamedTableWithSpecifiedDatabaseField_TableConfig.java"),
+						JavaFileObjects
+								.forResource("outputs/NamedTableWithSpecifiedDatabaseField_OpenHelper_TableConfig.java"));
 	}
 
 	@Test
@@ -48,7 +52,9 @@ public class OrmLiteAnnotationProcessorTest {
 				.and()
 				.generatesSources(
 						JavaFileObjects
-								.forResource("outputs/UnnamedTableWithDefaultForeignCollectionField_TableConfig.java"));
+								.forResource("outputs/UnnamedTableWithDefaultForeignCollectionField_TableConfig.java"),
+						JavaFileObjects
+								.forResource("outputs/UnnamedTableWithDefaultForeignCollectionField_OpenHelper_TableConfig.java"));
 	}
 
 	@Test
@@ -62,7 +68,9 @@ public class OrmLiteAnnotationProcessorTest {
 				.and()
 				.generatesSources(
 						JavaFileObjects
-								.forResource("outputs/NamedTableWithSpecifiedForeignCollectionField_TableConfig.java"));
+								.forResource("outputs/NamedTableWithSpecifiedForeignCollectionField_TableConfig.java"),
+						JavaFileObjects
+								.forResource("outputs/NamedTableWithSpecifiedForeignCollectionField_OpenHelper_TableConfig.java"));
 	}
 
 	@Test
@@ -78,6 +86,8 @@ public class OrmLiteAnnotationProcessorTest {
 						JavaFileObjects
 								.forResource("outputs/InnerClassTable_InnerClass_TableConfig.java"),
 						JavaFileObjects
-								.forResource("outputs/InnerClassTable_OtherInnerClass_TableConfig.java"));
+								.forResource("outputs/InnerClassTable_OtherInnerClass_TableConfig.java"),
+						JavaFileObjects
+								.forResource("outputs/InnerClassTable_OpenHelper_TableConfig.java"));
 	}
 }
