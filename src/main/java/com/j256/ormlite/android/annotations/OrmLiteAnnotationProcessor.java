@@ -1,4 +1,4 @@
-package com.j256.ormlite.android.apptools;
+package com.j256.ormlite.android.annotations;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
@@ -9,6 +9,7 @@ import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.type.MirroredTypeException;
@@ -28,31 +30,69 @@ import javax.tools.JavaFileObject;
 //TODO: make sure no generated code is added to ormlite.android jar (and optimize pom)
 //TODO: add error messages
 //TODO: understand when/if columns need to be uppercased
-//TODO: handle non-public entities (put generated files in same package)
-//TODO: add @Generated annotation to generated files
+//TODO: automatically call the generated code
 
 /**
  * Class that is automatically run when compiling client code that automatically
- * generates an OrmLiteSqliteOpenHelper class that has inline code to generate
- * the arguments for DaoManager.addCachedDatabaseConfigs() without needing a
- * config file.
+ * generates code to call DaoManager.addCachedDatabaseConfigs() without needing
+ * a config file.
  * 
  * @author nathancrouther
  */
 // TODO: understand this
 @SuppressWarnings("restriction")
 public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
-	private static final String PACKAGE = "com.j256.ormlite.android.apptools.tableconfigs";
-	private static final String SUFFIX = "Config";
-
 	private static final String FQCN_Object = "java.lang.Object";
 	private static final String FQCN_Class = "java.lang.Class";
 
 	static final class TableModel {
-		String fullyQualifiedClassName;
-		String simpleClassName;
+		String packageName;
+		List<String> nestedClasses = new ArrayList<String>();
 		DatabaseTable annotation;
 		List<FieldModel> fields = new ArrayList<FieldModel>();
+
+		String getInputFullyQualifiedClassName() {
+			StringBuilder sb = new StringBuilder();
+			if (!packageName.isEmpty()) {
+				sb.append(packageName);
+				sb.append('.');
+			}
+			for (int i = 0; i < nestedClasses.size(); ++i) {
+				if (i != 0) {
+					sb.append('.');
+				}
+				sb.append(nestedClasses.get(i));
+			}
+			return sb.toString();
+		}
+
+		String getInputSimpleClassName() {
+			return nestedClasses.get(nestedClasses.size() - 1);
+		}
+
+		String getGeneratedClassName() {
+			final String SUFFIX = "_TableConfig";
+
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < nestedClasses.size(); ++i) {
+				if (i != 0) {
+					sb.append('_');
+				}
+				sb.append(nestedClasses.get(i));
+			}
+			sb.append(SUFFIX);
+			return sb.toString();
+		}
+
+		String getGeneratedFullyQualifiedClassName() {
+			StringBuilder sb = new StringBuilder();
+			if (!packageName.isEmpty()) {
+				sb.append(packageName);
+				sb.append('.');
+			}
+			sb.append(getGeneratedClassName());
+			return sb.toString();
+		}
 	}
 
 	static final class FieldModel {
@@ -79,17 +119,13 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 			RoundEnvironment env) {
 		for (Element element : env
 				.getElementsAnnotatedWith(DatabaseTable.class)) {
-			TypeElement tableClassElement = (TypeElement) element;
 
 			TableModel table = new TableModel();
-			table.fullyQualifiedClassName = tableClassElement
-					.getQualifiedName().toString();
-			table.simpleClassName = tableClassElement.getSimpleName()
-					.toString();
-			table.annotation = tableClassElement
-					.getAnnotation(DatabaseTable.class);
+			extractPackageAndNestedClasses(element, table);
+			table.annotation = element.getAnnotation(DatabaseTable.class);
 
 			// get all fields from this and all parents until we hit Object
+			TypeElement tableClassElement = (TypeElement) element;
 			do {
 				for (Element child : tableClassElement.getEnclosedElements()) {
 					if (child.getKind().isField()) {
@@ -131,11 +167,24 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 		return true;
 	}
 
+	private void extractPackageAndNestedClasses(Element element,
+			TableModel table) {
+		Element enclosingElement = element;
+		do {
+			table.nestedClasses
+					.add(enclosingElement.getSimpleName().toString());
+			enclosingElement = enclosingElement.getEnclosingElement();
+		} while (enclosingElement.getKind().isClass());
+		Collections.reverse(table.nestedClasses);
+		table.packageName = ((PackageElement) enclosingElement)
+				.getQualifiedName().toString();
+	}
+
 	private void createSourceFile(TableModel table) {
 		try {
 			JavaFileObject javaFileObject = processingEnv.getFiler()
 					.createSourceFile(
-							PACKAGE + "." + table.simpleClassName + SUFFIX);
+							table.getGeneratedFullyQualifiedClassName());
 
 			Writer writer = javaFileObject.openWriter();
 			try {
@@ -149,21 +198,23 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 	}
 
 	private void writeTable(Writer writer, TableModel table) throws IOException {
-		writer.write("package " + PACKAGE + ";\n");
-		writer.write("\n");
+		if (!table.packageName.isEmpty()) {
+			writer.write("package " + table.packageName + ";\n");
+			writer.write("\n");
+		}
 		writer.write("import java.util.ArrayList;\n");
 		writer.write("import java.util.List;\n");
 		writer.write("\n");
 		writer.write("import com.j256.ormlite.field.DatabaseFieldConfig;\n");
 		writer.write("import com.j256.ormlite.table.DatabaseTableConfig;\n");
 		writer.write("\n");
-		writer.write("public final class " + table.simpleClassName + SUFFIX
+		writer.write("public final class " + table.getGeneratedClassName()
 				+ " {\n");
-		writer.write("\tprivate " + table.simpleClassName + SUFFIX + "() {\n");
+		writer.write("\tprivate " + table.getGeneratedClassName() + "() {\n");
 		writer.write("\t}\n");
 		writer.write("\n");
 		writer.write("\tpublic static final DatabaseTableConfig<"
-				+ table.fullyQualifiedClassName + "> CONFIG;\n");
+				+ table.getInputFullyQualifiedClassName() + "> CONFIG;\n");
 		writer.write("\n");
 		writer.write("\tstatic {\n");
 		writer.write("\t\tList<DatabaseFieldConfig> databaseFieldConfigs = new ArrayList<DatabaseFieldConfig>();\n");
@@ -326,13 +377,13 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 				&& table.annotation.tableName().length() > 0) {
 			tableName = table.annotation.tableName();
 		} else {
-			tableName = table.simpleClassName.toLowerCase();
+			tableName = table.getInputSimpleClassName().toLowerCase();
 		}
 
 		writer.write(String
 				.format("\t\tCONFIG = new DatabaseTableConfig<%s>(%s.class, \"%s\", databaseFieldConfigs);\n",
-						table.fullyQualifiedClassName,
-						table.fullyQualifiedClassName, tableName));
+						table.getInputFullyQualifiedClassName(),
+						table.getInputFullyQualifiedClassName(), tableName));
 		writer.write("\t}\n");
 		writer.write("}\n");
 	}

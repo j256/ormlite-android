@@ -1,4 +1,4 @@
-package com.j256.ormlite.android.apptools;
+package com.j256.ormlite.android.annotations;
 
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
@@ -20,7 +20,7 @@ public class OrmLiteAnnotationProcessorTest {
 				.and()
 				.generatesSources(
 						JavaFileObjects
-								.forResource("outputs/UnnamedTableWithDefaultDatabaseFieldConfig.java"));
+								.forResource("outputs/UnnamedTableWithDefaultDatabaseField_TableConfig.java"));
 	}
 
 	@Test
@@ -34,9 +34,9 @@ public class OrmLiteAnnotationProcessorTest {
 				.and()
 				.generatesSources(
 						JavaFileObjects
-								.forResource("outputs/NamedTableWithSpecifiedDatabaseFieldConfig.java"));
+								.forResource("outputs/NamedTableWithSpecifiedDatabaseField_TableConfig.java"));
 	}
-	
+
 	@Test
 	public void testForeignCollectionFieldAllDefaults() {
 		assert_()
@@ -48,9 +48,9 @@ public class OrmLiteAnnotationProcessorTest {
 				.and()
 				.generatesSources(
 						JavaFileObjects
-								.forResource("outputs/UnnamedTableWithDefaultForeignCollectionFieldConfig.java"));
+								.forResource("outputs/UnnamedTableWithDefaultForeignCollectionField_TableConfig.java"));
 	}
-	
+
 	@Test
 	public void testForeignCollectionFieldAllSpecified() {
 		assert_()
@@ -62,6 +62,22 @@ public class OrmLiteAnnotationProcessorTest {
 				.and()
 				.generatesSources(
 						JavaFileObjects
-								.forResource("outputs/NamedTableWithSpecifiedForeignCollectionFieldConfig.java"));
+								.forResource("outputs/NamedTableWithSpecifiedForeignCollectionField_TableConfig.java"));
+	}
+
+	@Test
+	public void testInnerClasses() {
+		assert_()
+				.about(javaSource())
+				.that(JavaFileObjects
+						.forResource("inputs/InnerClassTable.java"))
+				.processedWith(new OrmLiteAnnotationProcessor())
+				.compilesWithoutError()
+				.and()
+				.generatesSources(
+						JavaFileObjects
+								.forResource("outputs/InnerClassTable_InnerClass_TableConfig.java"),
+						JavaFileObjects
+								.forResource("outputs/InnerClassTable_OtherInnerClass_TableConfig.java"));
 	}
 }

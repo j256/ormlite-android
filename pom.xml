@@ -146,24 +146,24 @@
 					<source>1.5</source>
 					<target>1.5</target>
 				</configuration>
-                <executions>
-                    <execution>
-                        <id>default-compile</id>
-                        <configuration>
-                            <compilerArgument>-proc:none</compilerArgument>
-                            <includes>
-                                <include>com/j256/ormlite/android/apptools/OrmLiteAnnotationProcessor.java</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>compile-everything-else</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
+				<executions>
+					<execution>
+						<id>default-compile</id>
+						<configuration>
+							<compilerArgument>-proc:none</compilerArgument>
+							<includes>
+								<include>com/j256/ormlite/android/annotations/OrmLiteAnnotationProcessor.java</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>compile-everything-else</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

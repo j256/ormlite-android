@@ -1,4 +1,4 @@
-package com.j256.ormlite.android.apptools.tableconfigs;
+package inputs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,8 +6,8 @@ import java.util.List;
 import com.j256.ormlite.field.DatabaseFieldConfig;
 import com.j256.ormlite.table.DatabaseTableConfig;
 
-public final class NamedTableWithSpecifiedDatabaseFieldConfig {
-	private NamedTableWithSpecifiedDatabaseFieldConfig() {
+public final class NamedTableWithSpecifiedDatabaseField_TableConfig {
+	private NamedTableWithSpecifiedDatabaseField_TableConfig() {
 	}
 
 	public static final DatabaseTableConfig<inputs.NamedTableWithSpecifiedDatabaseField> CONFIG;

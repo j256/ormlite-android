@@ -12,7 +12,7 @@ import com.j256.ormlite.support.DatabaseResults;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "table")
-public class NamedTableWithSpecifiedDatabaseField {
+class NamedTableWithSpecifiedDatabaseField {
 
 	public static enum FieldTypeEnum {
 		VALUE, OTHER_VALUE;
@@ -135,8 +135,8 @@ public class NamedTableWithSpecifiedDatabaseField {
 	}
 
 	@DatabaseField(columnName = "column", dataType = DataType.ENUM_INTEGER, defaultValue = "VALUE", width = 100, canBeNull = false, id = true, generatedId = true, generatedIdSequence = "id_sequence", foreign = true, useGetSet = true, unknownEnumName = "OTHER_VALUE", throwIfNull = true, format = "%f", unique = true, uniqueCombo = true, index = true, uniqueIndex = true, indexName = "index", uniqueIndexName = "unique_index", foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 5, persisterClass = CustomPersister.class, allowGeneratedIdInsert = true, columnDefinition = "INT NOT NULL", foreignAutoCreate = true, version = true, foreignColumnName = "foreign", readOnly = true)
-	public FieldTypeEnum field;
+	FieldTypeEnum field;
 
 	@DatabaseField(persisted = false)
-	public int ignored;
+	int ignored;
 }
