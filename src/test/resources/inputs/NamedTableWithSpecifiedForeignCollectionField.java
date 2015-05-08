@@ -2,6 +2,7 @@ package inputs;
 
 import java.util.List;
 
+import com.j256.ormlite.android.annotations.DatabaseTables;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -12,4 +13,8 @@ class NamedTableWithSpecifiedForeignCollectionField {
 
 	@ForeignCollectionField(maxEagerForeignCollectionLevel = 5, foreignColumnName = "foreign_field")
 	List<Integer> numbers_deprecated;
+	
+	@DatabaseTables(NamedTableWithSpecifiedForeignCollectionField.class)
+	static class Main {
+	}
 }

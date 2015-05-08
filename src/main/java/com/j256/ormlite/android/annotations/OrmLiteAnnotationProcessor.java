@@ -10,6 +10,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,8 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.MirroredTypesException;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
@@ -44,6 +47,9 @@ import javax.tools.JavaFileObject;
 public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 	private static final String FQCN_Object = "java.lang.Object";
 	private static final String FQCN_Class = "java.lang.Class";
+
+	private Set<TypeElement> declaredTables = new HashSet<TypeElement>();
+	private Set<TypeElement> foundTables = new HashSet<TypeElement>();
 
 	static final class TableModel {
 		String packageName;
@@ -106,6 +112,7 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 	public Set<String> getSupportedAnnotationTypes() {
 		Set<String> types = new LinkedHashSet<String>();
 		types.add(DatabaseTable.class.getCanonicalName());
+		types.add(DatabaseTables.class.getCanonicalName());
 		return types;
 	}
 
@@ -119,6 +126,9 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 			RoundEnvironment env) {
 		for (Element element : env
 				.getElementsAnnotatedWith(DatabaseTable.class)) {
+			if (element.getAnnotation(DatabaseTable.class) == null) {
+				continue;
+			}
 
 			TableModel table = new TableModel();
 			extractPackageAndNestedClasses(element, table);
@@ -126,6 +136,7 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 
 			// get all fields from this and all parents until we hit Object
 			TypeElement tableClassElement = (TypeElement) element;
+			foundTables.add(tableClassElement);
 			do {
 				for (Element child : tableClassElement.getEnclosedElements()) {
 					if (child.getKind().isField()) {
@@ -162,6 +173,58 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 					.equals(FQCN_Object));
 
 			createSourceFile(table);
+		}
+
+		Set<? extends Element> tablesCollectionElements = env
+				.getElementsAnnotatedWith(DatabaseTables.class);
+		for (Element element : tablesCollectionElements) {
+			DatabaseTables annotation = element
+					.getAnnotation(DatabaseTables.class);
+			if (annotation == null) {
+				continue;
+			}
+			try {
+				Class<?>[] classes = annotation.value();
+				for (int i = 0; i < classes.length; ++i) {
+					TypeElement typeElement;
+					try {
+						typeElement = processingEnv.getElementUtils()
+								.getTypeElement(classes[i].getCanonicalName());
+					} catch (MirroredTypeException mte) {
+						typeElement = (TypeElement) processingEnv
+								.getTypeUtils().asElement(mte.getTypeMirror());
+					}
+					declaredTables.add(typeElement);
+				}
+			} catch (MirroredTypesException mte) {
+				for (TypeMirror m : mte.getTypeMirrors()) {
+					declaredTables.add((TypeElement) processingEnv
+							.getTypeUtils().asElement(m));
+				}
+			}
+
+			// TODO: generate class for database that creates tables and loads
+			// the cached field info
+		}
+
+		if (env.processingOver()) {
+			for (TypeElement declared : declaredTables) {
+				if (foundTables.contains(declared)) {
+					foundTables.remove(declared);
+				} else {
+					// TODO: tag the declaration annotation with an error
+				}
+			}
+
+			for (TypeElement undeclared : foundTables) {
+				// TODO: make warning
+				raiseError(
+						String.format(
+								"Class annotated with %s is not declared in any %s annotation",
+								DatabaseTable.class.getSimpleName(),
+								DatabaseTables.class.getSimpleName()),
+						undeclared);
+			}
 		}
 
 		return true;

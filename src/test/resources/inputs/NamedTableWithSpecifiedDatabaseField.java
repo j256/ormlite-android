@@ -3,6 +3,7 @@ package inputs;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 
+import com.j256.ormlite.android.annotations.DatabaseTables;
 import com.j256.ormlite.field.DataPersister;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
@@ -139,4 +140,8 @@ class NamedTableWithSpecifiedDatabaseField {
 
 	@DatabaseField(persisted = false)
 	int ignored;
+
+	@DatabaseTables(NamedTableWithSpecifiedDatabaseField.class)
+	static class Main {
+	}
 }
