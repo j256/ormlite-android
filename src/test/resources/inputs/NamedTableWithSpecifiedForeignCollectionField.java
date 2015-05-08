@@ -18,7 +18,7 @@ class NamedTableWithSpecifiedForeignCollectionField {
 	@ForeignCollectionField(maxEagerForeignCollectionLevel = 5, foreignColumnName = "foreign_field")
 	List<Integer> numbers_deprecated;
 	
-	@Database(NamedTableWithSpecifiedForeignCollectionField.class)
+	@Database({ NamedTableWithSpecifiedForeignCollectionField.class })
 	static abstract class OpenHelper extends OrmLiteSqliteOpenHelper {
 		OpenHelper(Context context, String databaseName, CursorFactory factory,
 				int databaseVersion) {

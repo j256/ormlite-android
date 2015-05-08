@@ -15,7 +15,7 @@ class UnnamedTableWithDefaultForeignCollectionField {
 	@ForeignCollectionField
 	List<Integer> numbers;
 
-	@Database(UnnamedTableWithDefaultForeignCollectionField.class)
+	@Database({ UnnamedTableWithDefaultForeignCollectionField.class })
 	static abstract class OpenHelper extends OrmLiteSqliteOpenHelper {
 		OpenHelper(Context context, String databaseName, CursorFactory factory,
 				int databaseVersion) {

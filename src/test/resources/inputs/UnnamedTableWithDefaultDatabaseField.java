@@ -13,7 +13,7 @@ class UnnamedTableWithDefaultDatabaseField {
 	@DatabaseField
 	int field;
 	
-	@Database(UnnamedTableWithDefaultDatabaseField.class)
+	@Database({ UnnamedTableWithDefaultDatabaseField.class })
 	static abstract class OpenHelper extends OrmLiteSqliteOpenHelper {
 		OpenHelper(Context context, String databaseName, CursorFactory factory,
 				int databaseVersion) {

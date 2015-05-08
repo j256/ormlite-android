@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.FilerException;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
@@ -216,7 +217,6 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 			List<TypeElement> tableTypes = new ArrayList<TypeElement>();
 			try {
 				Class<?>[] classes = annotation.value();
-				// TODO: understand why this is ever null
 				if (classes != null) {
 					for (int i = 0; i < classes.length; ++i) {
 						TypeElement typeElement;
@@ -231,6 +231,13 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 						}
 						tableTypes.add(typeElement);
 					}
+				} else {
+					// eclipse populates this with null if annotation populated
+					// with scalar (no {}) even though this is a legal shortcut
+					raiseError(String.format(
+							"%s annotation must enclose values array with {}",
+							Database.class.getSimpleName()), element);
+					continue;
 				}
 			} catch (MirroredTypesException mte) {
 				for (TypeMirror m : mte.getTypeMirrors()) {
@@ -264,9 +271,12 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 		}
 
 		if (env.processingOver()) {
+			Set<TypeElement> undeclaredFoundTables = new HashSet<TypeElement>(
+					foundTables);
+
 			for (TypeElement declared : declaredTables) {
 				if (foundTables.contains(declared)) {
-					foundTables.remove(declared);
+					undeclaredFoundTables.remove(declared);
 				} else {
 					for (TypeElement database : declaredTableToDatabaseMap
 							.get(declared)) {
@@ -280,7 +290,7 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 				}
 			}
 
-			for (TypeElement undeclared : foundTables) {
+			for (TypeElement undeclared : undeclaredFoundTables) {
 				raiseWarning(
 						String.format(
 								"Class annotated with %s is not included in any %s annotation",
@@ -318,12 +328,21 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 			} finally {
 				writer.close();
 			}
+		} catch (FilerException e) {
+			// if multiple classes are in the same file (e.g. inner/nested
+			// classes), eclipse will do an incremental compilation for all of
+			// them. The unchanged ones' generated files will not be deleted, so
+			// we can ignore this benign error.
+			raiseNote(String
+					.format("Skipping file generation for %s since file already exists",
+							table.getGeneratedFullyQualifiedClassName()));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void writeTable(Writer writer, TableModel table) throws IOException {
+	private static void writeTable(Writer writer, TableModel table)
+			throws IOException {
 		if (!table.packageName.isEmpty()) {
 			writer.write("package " + table.packageName + ";\n");
 			writer.write("\n");
@@ -579,6 +598,10 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 			Writer writer) throws IOException {
 		writer.write(String.format("\t\t\tdatabaseFieldConfig." + setterCall
 				+ ";\n", value));
+	}
+
+	private void raiseNote(String message) {
+		this.processingEnv.getMessager().printMessage(Kind.NOTE, message);
 	}
 
 	private void raiseWarning(String message, Element element) {

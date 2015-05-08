@@ -145,7 +145,7 @@ class NamedTableWithSpecifiedDatabaseField {
 	@DatabaseField(persisted = false)
 	int ignored;
 
-	@Database(NamedTableWithSpecifiedDatabaseField.class)
+	@Database({ NamedTableWithSpecifiedDatabaseField.class })
 	static abstract class OpenHelper extends OrmLiteSqliteOpenHelper {
 		OpenHelper(Context context, String databaseName, CursorFactory factory,
 				int databaseVersion) {
