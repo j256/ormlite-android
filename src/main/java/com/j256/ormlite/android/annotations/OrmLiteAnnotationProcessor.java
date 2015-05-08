@@ -10,9 +10,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -28,12 +30,7 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
 //TODO: handle javax.persistance annotations
-//TODO: add note that this must be updated to Annotation classes
 //TODO: analyze if this should be part of core (and if config file stuff can be removed)
-//TODO: make sure no generated code is added to ormlite.android jar (and optimize pom)
-//TODO: add error messages
-//TODO: understand when/if columns need to be uppercased
-//TODO: automatically call the generated code
 
 /**
  * Class that is automatically run when compiling client code that automatically
@@ -48,7 +45,12 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 	private static final String FQCN_Object = "java.lang.Object";
 	private static final String FQCN_Class = "java.lang.Class";
 
+	// TODO: understand why reading these from Class throws exception
+	private static final String FQCN_OpenHelper = "com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper";
+	private static final String CN_OpenHelper = "OrmLiteSqliteOpenHelper";
+
 	private Set<TypeElement> declaredTables = new HashSet<TypeElement>();
+	private Map<TypeElement, List<TypeElement>> declaredTableToDatabaseMap = new HashMap<TypeElement, List<TypeElement>>();
 	private Set<TypeElement> foundTables = new HashSet<TypeElement>();
 
 	static final class TableModel {
@@ -112,7 +114,7 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 	public Set<String> getSupportedAnnotationTypes() {
 		Set<String> types = new LinkedHashSet<String>();
 		types.add(DatabaseTable.class.getCanonicalName());
-		types.add(DatabaseTables.class.getCanonicalName());
+		types.add(Database.class.getCanonicalName());
 		return types;
 	}
 
@@ -172,35 +174,89 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 			} while (!tableClassElement.getQualifiedName().toString()
 					.equals(FQCN_Object));
 
-			createSourceFile(table);
+			if (table.fields.isEmpty()) {
+				raiseWarning(
+						String.format(
+								"No fields annotated with %s found for class annotated with %s",
+								DatabaseField.class.getSimpleName(),
+								DatabaseTable.class.getSimpleName()), element);
+			}
+
+			createSourceFile(table, element);
 		}
 
 		Set<? extends Element> tablesCollectionElements = env
-				.getElementsAnnotatedWith(DatabaseTables.class);
+				.getElementsAnnotatedWith(Database.class);
 		for (Element element : tablesCollectionElements) {
-			DatabaseTables annotation = element
-					.getAnnotation(DatabaseTables.class);
+			Database annotation = element.getAnnotation(Database.class);
 			if (annotation == null) {
 				continue;
 			}
+
+			boolean derivedFromOpenHelper = false;
+			TypeElement annotatedClassElement = (TypeElement) element;
+			do {
+				if (annotatedClassElement.getQualifiedName().toString()
+						.equals(FQCN_OpenHelper)) {
+					derivedFromOpenHelper = true;
+				}
+				annotatedClassElement = (TypeElement) processingEnv
+						.getTypeUtils().asElement(
+								annotatedClassElement.getSuperclass());
+			} while (!annotatedClassElement.getQualifiedName().toString()
+					.equals(FQCN_Object));
+			if (!derivedFromOpenHelper) {
+				raiseError(
+						String.format(
+								"%s annotation must be applied to a class deriving from %s",
+								Database.class.getSimpleName(), CN_OpenHelper),
+						element);
+			}
+
+			List<TypeElement> tableTypes = new ArrayList<TypeElement>();
 			try {
 				Class<?>[] classes = annotation.value();
-				for (int i = 0; i < classes.length; ++i) {
-					TypeElement typeElement;
-					try {
-						typeElement = processingEnv.getElementUtils()
-								.getTypeElement(classes[i].getCanonicalName());
-					} catch (MirroredTypeException mte) {
-						typeElement = (TypeElement) processingEnv
-								.getTypeUtils().asElement(mte.getTypeMirror());
+				// TODO: understand why this is ever null
+				if (classes != null) {
+					for (int i = 0; i < classes.length; ++i) {
+						TypeElement typeElement;
+						try {
+							typeElement = processingEnv.getElementUtils()
+									.getTypeElement(
+											classes[i].getCanonicalName());
+						} catch (MirroredTypeException mte) {
+							typeElement = (TypeElement) processingEnv
+									.getTypeUtils().asElement(
+											mte.getTypeMirror());
+						}
+						tableTypes.add(typeElement);
 					}
-					declaredTables.add(typeElement);
 				}
 			} catch (MirroredTypesException mte) {
 				for (TypeMirror m : mte.getTypeMirrors()) {
-					declaredTables.add((TypeElement) processingEnv
-							.getTypeUtils().asElement(m));
+					tableTypes.add((TypeElement) processingEnv.getTypeUtils()
+							.asElement(m));
 				}
+			}
+
+			if (tableTypes.isEmpty()) {
+				raiseError(
+						String.format(
+								"%s annotation must contain at least one class annotated with %s",
+								Database.class.getSimpleName(),
+								DatabaseTable.class.getSimpleName()), element);
+			}
+
+			for (TypeElement tableType : tableTypes) {
+				List<TypeElement> databases = declaredTableToDatabaseMap
+						.get(tableType);
+				if (databases == null) {
+					databases = new ArrayList<TypeElement>();
+					declaredTableToDatabaseMap.put(tableType, databases);
+				}
+				databases.add((TypeElement) element);
+
+				declaredTables.add(tableType);
 			}
 
 			// TODO: generate class for database that creates tables and loads
@@ -212,18 +268,24 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 				if (foundTables.contains(declared)) {
 					foundTables.remove(declared);
 				} else {
-					// TODO: tag the declaration annotation with an error
+					for (TypeElement database : declaredTableToDatabaseMap
+							.get(declared)) {
+						raiseError(
+								String.format(
+										"%s annotation must contain only classes annotated with %s",
+										Database.class.getSimpleName(),
+										DatabaseTable.class.getSimpleName()),
+								database);
+					}
 				}
 			}
 
 			for (TypeElement undeclared : foundTables) {
-				// TODO: make warning
-				raiseError(
+				raiseWarning(
 						String.format(
-								"Class annotated with %s is not declared in any %s annotation",
+								"Class annotated with %s is not included in any %s annotation",
 								DatabaseTable.class.getSimpleName(),
-								DatabaseTables.class.getSimpleName()),
-						undeclared);
+								Database.class.getSimpleName()), undeclared);
 			}
 		}
 
@@ -243,11 +305,12 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 				.getQualifiedName().toString();
 	}
 
-	private void createSourceFile(TableModel table) {
+	private void createSourceFile(TableModel table, Element tableClassElement) {
 		try {
 			JavaFileObject javaFileObject = processingEnv.getFiler()
 					.createSourceFile(
-							table.getGeneratedFullyQualifiedClassName());
+							table.getGeneratedFullyQualifiedClassName(),
+							tableClassElement);
 
 			Writer writer = javaFileObject.openWriter();
 			try {
@@ -516,6 +579,11 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 			Writer writer) throws IOException {
 		writer.write(String.format("\t\t\tdatabaseFieldConfig." + setterCall
 				+ ";\n", value));
+	}
+
+	private void raiseWarning(String message, Element element) {
+		this.processingEnv.getMessager().printMessage(Kind.WARNING, message,
+				element);
 	}
 
 	private void raiseError(String message, Element element) {

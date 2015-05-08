@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
-public @interface DatabaseTables {
+public @interface Database {
 	Class<?>[] value();
 }

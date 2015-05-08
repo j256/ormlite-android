@@ -3,7 +3,11 @@ package inputs;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 
-import com.j256.ormlite.android.annotations.DatabaseTables;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+
+import com.j256.ormlite.android.annotations.Database;
+import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.field.DataPersister;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
@@ -141,7 +145,11 @@ class NamedTableWithSpecifiedDatabaseField {
 	@DatabaseField(persisted = false)
 	int ignored;
 
-	@DatabaseTables(NamedTableWithSpecifiedDatabaseField.class)
-	static class Main {
+	@Database(NamedTableWithSpecifiedDatabaseField.class)
+	static abstract class OpenHelper extends OrmLiteSqliteOpenHelper {
+		OpenHelper(Context context, String databaseName, CursorFactory factory,
+				int databaseVersion) {
+			super(context, databaseName, factory, databaseVersion);
+		}
 	}
 }

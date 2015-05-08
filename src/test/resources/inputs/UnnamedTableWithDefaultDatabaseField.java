@@ -1,6 +1,10 @@
 package inputs;
 
-import com.j256.ormlite.android.annotations.DatabaseTables;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+
+import com.j256.ormlite.android.annotations.Database;
+import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -9,7 +13,11 @@ class UnnamedTableWithDefaultDatabaseField {
 	@DatabaseField
 	int field;
 	
-	@DatabaseTables(UnnamedTableWithDefaultDatabaseField.class)
-	static class Main {
+	@Database(UnnamedTableWithDefaultDatabaseField.class)
+	static abstract class OpenHelper extends OrmLiteSqliteOpenHelper {
+		OpenHelper(Context context, String databaseName, CursorFactory factory,
+				int databaseVersion) {
+			super(context, databaseName, factory, databaseVersion);
+		}
 	}
 }

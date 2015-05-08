@@ -2,7 +2,11 @@ package inputs;
 
 import java.util.List;
 
-import com.j256.ormlite.android.annotations.DatabaseTables;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+
+import com.j256.ormlite.android.annotations.Database;
+import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -14,7 +18,11 @@ class NamedTableWithSpecifiedForeignCollectionField {
 	@ForeignCollectionField(maxEagerForeignCollectionLevel = 5, foreignColumnName = "foreign_field")
 	List<Integer> numbers_deprecated;
 	
-	@DatabaseTables(NamedTableWithSpecifiedForeignCollectionField.class)
-	static class Main {
+	@Database(NamedTableWithSpecifiedForeignCollectionField.class)
+	static abstract class OpenHelper extends OrmLiteSqliteOpenHelper {
+		OpenHelper(Context context, String databaseName, CursorFactory factory,
+				int databaseVersion) {
+			super(context, databaseName, factory, databaseVersion);
+		}
 	}
 }
