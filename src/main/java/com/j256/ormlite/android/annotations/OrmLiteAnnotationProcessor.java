@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -32,7 +33,6 @@ import javax.tools.JavaFileObject;
 
 //TODO: handle javax.persistance annotations
 //TODO: analyze if this should be part of core (and if config file stuff can be removed)
-//TODO: handle incremental compilation across files
 
 /**
  * Class that is automatically run when compiling client code that automatically
@@ -51,8 +51,7 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 	private static final String FQCN_OpenHelper = "com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper";
 	private static final String CN_OpenHelper = "OrmLiteSqliteOpenHelper";
 
-	private Set<TypeElement> declaredTables = new HashSet<TypeElement>();
-	private Map<TypeElement, List<TypeElement>> declaredTableToDatabaseMap = new HashMap<TypeElement, List<TypeElement>>();
+	private Map<TypeElement, List<TypeElement>> foundDatabases = new HashMap<TypeElement, List<TypeElement>>();
 	private Set<TypeElement> foundTables = new HashSet<TypeElement>();
 
 	private static final class ParsedClassName {
@@ -149,6 +148,10 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 				continue;
 			}
 
+			raiseNote(String.format("Processing %s class: %s",
+					DatabaseTable.class.getSimpleName(),
+					((TypeElement) element).getQualifiedName()));
+
 			TableModel table = new TableModel();
 			table.parsedClassName = new ParsedClassName(element);
 			table.annotation = element.getAnnotation(DatabaseTable.class);
@@ -210,6 +213,10 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 				continue;
 			}
 
+			raiseNote(String.format("Processing %s class: %s",
+					Database.class.getSimpleName(),
+					((TypeElement) element).getQualifiedName()));
+
 			boolean derivedFromOpenHelper = false;
 			TypeElement annotatedClassElement = (TypeElement) element;
 			do {
@@ -270,47 +277,50 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 								DatabaseTable.class.getSimpleName()), element);
 			}
 
-			for (TypeElement tableType : tableTypes) {
-				List<TypeElement> databases = declaredTableToDatabaseMap
-						.get(tableType);
-				if (databases == null) {
-					databases = new ArrayList<TypeElement>();
-					declaredTableToDatabaseMap.put(tableType, databases);
-				}
-				databases.add((TypeElement) element);
-
-				declaredTables.add(tableType);
-			}
+			foundDatabases.put((TypeElement) element, tableTypes);
 
 			createDatabaseConfigSourceFile((TypeElement) element, tableTypes);
 		}
 
 		if (env.processingOver()) {
-			Set<TypeElement> undeclaredFoundTables = new HashSet<TypeElement>(
-					foundTables);
+			raiseNote(String.format(
+					"Processed %d %s class(es) and %d %s class(es)",
+					foundTables.size(), DatabaseTable.class.getSimpleName(),
+					foundDatabases.size(), Database.class.getSimpleName()));
 
-			for (TypeElement declared : declaredTables) {
-				if (foundTables.contains(declared)) {
-					undeclaredFoundTables.remove(declared);
-				} else {
-					for (TypeElement database : declaredTableToDatabaseMap
-							.get(declared)) {
+			// compare as strings since TypeElements from different passes may
+			// not compare as expected
+			Set<String> tablesIncludedInDatabases = new HashSet<String>();
+
+			for (Entry<TypeElement, List<TypeElement>> databaseAndTables : foundDatabases
+					.entrySet()) {
+				for (TypeElement table : databaseAndTables.getValue()) {
+					if (table.getAnnotation(DatabaseTable.class) == null) {
 						raiseError(
 								String.format(
-										"%s annotation must contain only classes annotated with %s",
+										"%s annotation contains class %s not annotated with %s",
 										Database.class.getSimpleName(),
+										table.getSimpleName(),
 										DatabaseTable.class.getSimpleName()),
-								database);
+								databaseAndTables.getKey());
+					} else {
+						tablesIncludedInDatabases.add(table.getQualifiedName()
+								.toString());
 					}
 				}
 			}
 
-			for (TypeElement undeclared : undeclaredFoundTables) {
-				raiseWarning(
-						String.format(
-								"Class annotated with %s is not included in any %s annotation",
-								DatabaseTable.class.getSimpleName(),
-								Database.class.getSimpleName()), undeclared);
+			// TODO: fix false positives during incremental compilation of the
+			// table class only
+			for (TypeElement foundTable : foundTables) {
+				if (!tablesIncludedInDatabases.contains(foundTable
+						.getQualifiedName().toString())) {
+					raiseWarning(
+							String.format(
+									"Class annotated with %s is not included in any %s annotation",
+									DatabaseTable.class.getSimpleName(),
+									Database.class.getSimpleName()), foundTable);
+				}
 			}
 		}
 
