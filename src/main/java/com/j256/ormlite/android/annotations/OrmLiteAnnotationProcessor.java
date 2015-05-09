@@ -5,6 +5,8 @@ import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -29,10 +31,9 @@ import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
+import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
-
-//TODO: handle javax.persistance annotations
-//TODO: analyze if this should be part of core (and if config file stuff can be removed)
+import javax.tools.StandardLocation;
 
 /**
  * Class that is automatically run when compiling client code that automatically
@@ -41,13 +42,16 @@ import javax.tools.JavaFileObject;
  * 
  * @author nathancrouther
  */
-// TODO: understand this
+/*
+ * Eclipse doesn't like the link to rt.jar and classes therein. This is a
+ * spurious warning that can be ignored. It is intended to prevent referencing
+ * com.sun packages that may not be in every JVM, but the annotation processing
+ * stuff is part of JSR-269, so will always be present.
+ */
 @SuppressWarnings("restriction")
 public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 	private static final String FQCN_Object = "java.lang.Object";
 	private static final String FQCN_Class = "java.lang.Class";
-
-	// TODO: understand why reading these from Class throws exception
 	private static final String FQCN_OpenHelper = "com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper";
 	private static final String CN_OpenHelper = "OrmLiteSqliteOpenHelper";
 
@@ -284,16 +288,60 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 
 		if (env.processingOver()) {
 			raiseNote(String.format(
-					"Processed %d %s class(es) and %d %s class(es)",
+					"Finished processing %d %s class(es) and %d %s class(es)",
 					foundTables.size(), DatabaseTable.class.getSimpleName(),
 					foundDatabases.size(), Database.class.getSimpleName()));
 
-			// compare as strings since TypeElements from different passes may
-			// not compare as expected
-			Set<String> tablesIncludedInDatabases = new HashSet<String>();
+			final StandardLocation savedDatabaseInfoLocation = StandardLocation.SOURCE_OUTPUT;
+			final String savedDatabaseInfoPackageName = getClass().getPackage()
+					.getName();
+			final String savedDatabaseInfoFileName = "savedDatabaseInfo";
 
+			// Try to read a file from before
+			Map<String, List<String>> savedDatabaseInfo;
+			try {
+				FileObject file = processingEnv.getFiler()
+						.getResource(savedDatabaseInfoLocation,
+								savedDatabaseInfoPackageName,
+								savedDatabaseInfoFileName);
+				ObjectInputStream reader = new ObjectInputStream(
+						file.openInputStream());
+				try {
+					// We created the file previously, so the cast is safe
+					@SuppressWarnings("unchecked")
+					Map<String, List<String>> oldDatabaseInfo = (Map<String, List<String>>) reader
+							.readObject();
+					raiseNote(String.format(
+							"Loaded %d Database-to-DatabaseTable mappings",
+							oldDatabaseInfo.size()));
+					savedDatabaseInfo = oldDatabaseInfo;
+				} catch (IOException e) {
+					// Inability to read is not an error, just initialize with
+					// empty contents
+					savedDatabaseInfo = new HashMap<String, List<String>>();
+				} finally {
+					reader.close();
+				}
+			} catch (FilerException e) {
+				// Inability to read is not an error, just initialize with empty
+				// contents
+				savedDatabaseInfo = new HashMap<String, List<String>>();
+			} catch (IOException e) {
+				// Inability to read is not an error, just initialize with empty
+				// contents
+				savedDatabaseInfo = new HashMap<String, List<String>>();
+			} catch (ClassNotFoundException e) {
+				// Built-in Java classes will always be available
+				throw new RuntimeException(e);
+			}
+
+			// Verify each Database annotation only contains valid tables and
+			// add it to the saved list for future rounds of incremental
+			// compilation
 			for (Entry<TypeElement, List<TypeElement>> databaseAndTables : foundDatabases
 					.entrySet()) {
+				List<String> tableNames = new ArrayList<String>();
+
 				for (TypeElement table : databaseAndTables.getValue()) {
 					if (table.getAnnotation(DatabaseTable.class) == null) {
 						raiseError(
@@ -303,15 +351,43 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 										table.getSimpleName(),
 										DatabaseTable.class.getSimpleName()),
 								databaseAndTables.getKey());
-					} else {
-						tablesIncludedInDatabases.add(table.getQualifiedName()
-								.toString());
 					}
+
+					tableNames.add(table.getQualifiedName().toString());
 				}
+
+				savedDatabaseInfo.put(databaseAndTables.getKey()
+						.getQualifiedName().toString(), tableNames);
 			}
 
-			// TODO: fix false positives during incremental compilation of the
-			// table class only
+			// Save the updated information for future rounds of incremental
+			// compilation
+			try {
+				FileObject file = processingEnv.getFiler()
+						.createResource(savedDatabaseInfoLocation,
+								savedDatabaseInfoPackageName,
+								savedDatabaseInfoFileName);
+				ObjectOutputStream writer = new ObjectOutputStream(
+						file.openOutputStream());
+				writer.writeObject(savedDatabaseInfo);
+				writer.close();
+				raiseNote(String.format(
+						"Stored %d Database-to-DatabaseTable mappings",
+						savedDatabaseInfo.size()));
+			} catch (FilerException e) {
+				// intentionally ignore the error
+			} catch (IOException e) {
+				// intentionally ignore the error
+			}
+
+			// Verify that every table is in a database (try to enforce using
+			// the database annotation for better performance)
+			Set<String> tablesIncludedInDatabases = new HashSet<String>();
+			for (List<String> tableNames : savedDatabaseInfo.values()) {
+				for (String tableName : tableNames) {
+					tablesIncludedInDatabases.add(tableName);
+				}
+			}
 			for (TypeElement foundTable : foundTables) {
 				if (!tablesIncludedInDatabases.contains(foundTable
 						.getQualifiedName().toString())) {
@@ -329,10 +405,10 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 
 	private void createDatabaseConfigSourceFile(TypeElement openHelperClass,
 			List<TypeElement> tableClasses) {
-		try {
-			ParsedClassName openHelperClassName = new ParsedClassName(
-					openHelperClass);
+		ParsedClassName openHelperClassName = new ParsedClassName(
+				openHelperClass);
 
+		try {
 			JavaFileObject javaFileObject = processingEnv
 					.getFiler()
 					.createSourceFile(
@@ -387,7 +463,17 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 			} finally {
 				writer.close();
 			}
+		} catch (FilerException e) {
+			// if multiple classes are in the same file (e.g. inner/nested
+			// classes), eclipse will do an incremental compilation for all of
+			// them. The unchanged ones' generated files will not be deleted, so
+			// we can ignore this benign error.
+			raiseNote(String
+					.format("Skipping file generation for %s since file already exists",
+							openHelperClassName
+									.getGeneratedFullyQualifiedClassName()));
 		} catch (IOException e) {
+			// We should always be able to generate the source files
 			throw new RuntimeException(e);
 		}
 	}
@@ -418,6 +504,7 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 							table.parsedClassName
 									.getGeneratedFullyQualifiedClassName()));
 		} catch (IOException e) {
+			// We should always be able to generate the source files
 			throw new RuntimeException(e);
 		}
 	}
@@ -647,6 +734,8 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 			return writeSetterIfNotEqual(actualValue, defaultValue, setterCall,
 					writer);
 		} catch (Exception e) {
+			// All possible annotation properties are unit tested, so it is not
+			// possible to get an exception here
 			throw new RuntimeException(e);
 		}
 	}
@@ -689,13 +778,35 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 		this.processingEnv.getMessager().printMessage(Kind.NOTE, message);
 	}
 
+	/*
+	 * During incremental compiles in eclipse, if the same element raises
+	 * multiple warnings, the internal message printing code can throw a NPE.
+	 * When this happens, all warnings are displayed properly, so we should
+	 * ignore the error. We will validate our arguments ourself to ensure that
+	 * this code doesn't mask a real bug.
+	 */
+
 	private void raiseWarning(String message, Element element) {
-		this.processingEnv.getMessager().printMessage(Kind.WARNING, message,
-				element);
+		if (message == null || element == null) {
+			throw new NullPointerException();
+		}
+		try {
+			this.processingEnv.getMessager().printMessage(Kind.WARNING,
+					message, element);
+		} catch (NullPointerException e) {
+			// ignore to workaround issues with eclipse incremental compilation
+		}
 	}
 
 	private void raiseError(String message, Element element) {
-		this.processingEnv.getMessager().printMessage(Kind.ERROR, message,
-				element);
+		if (message == null || element == null) {
+			throw new NullPointerException();
+		}
+		try {
+			this.processingEnv.getMessager().printMessage(Kind.ERROR, message,
+					element);
+		} catch (NullPointerException e) {
+			// ignore to workaround issues with eclipse incremental compilation
+		}
 	}
 }
