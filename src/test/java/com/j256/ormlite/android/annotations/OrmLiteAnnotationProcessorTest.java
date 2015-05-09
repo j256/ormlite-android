@@ -7,6 +7,11 @@ import org.junit.Test;
 
 import com.google.testing.compile.JavaFileObjects;
 
+import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
+import com.j256.ormlite.table.DatabaseTable;
+
 public class OrmLiteAnnotationProcessorTest {
 
 	@Test
@@ -89,5 +94,66 @@ public class OrmLiteAnnotationProcessorTest {
 								.forResource("outputs/InnerClassTable_OtherInnerClass_TableConfig.java"),
 						JavaFileObjects
 								.forResource("outputs/InnerClassTable_OpenHelper_TableConfig.java"));
+	}
+
+	@Test
+	public void testErrorBothAnnotationsOnField() {
+		assert_()
+				.about(javaSource())
+				.that(JavaFileObjects
+						.forResource("inputs/TableWithFieldWithBothAnnotations.java"))
+				.processedWith(new OrmLiteAnnotationProcessor())
+				.failsToCompile()
+				.withErrorContaining(
+						String.format(
+								"Fields cannot be annotated with both %s and %s",
+								DatabaseField.class.getSimpleName(),
+								ForeignCollectionField.class.getSimpleName()));
+	}
+
+	@Test
+	public void testErrorDatabaseWithNoTables() {
+		assert_()
+				.about(javaSource())
+				.that(JavaFileObjects
+						.forResource("inputs/DatabaseWithNoTables.java"))
+				.processedWith(new OrmLiteAnnotationProcessor())
+				.failsToCompile()
+				.withErrorContaining(
+						String.format(
+								"%s annotation must contain at least one class annotated with %s",
+								Database.class.getSimpleName(),
+								DatabaseTable.class.getSimpleName()));
+	}
+
+	@Test
+	public void testErrorDatabaseDerivedFromWrongClass() {
+		assert_()
+				.about(javaSource())
+				.that(JavaFileObjects
+						.forResource("inputs/DatabaseDerivedFromWrongClass.java"))
+				.processedWith(new OrmLiteAnnotationProcessor())
+				.failsToCompile()
+				.withErrorContaining(
+						String.format(
+								"%s annotation must be applied to a class deriving from %s",
+								Database.class.getSimpleName(),
+								OrmLiteSqliteOpenHelper.class.getSimpleName()));
+	}
+
+	@Test
+	public void testErrorDatabaseWithNonTable() {
+		assert_()
+				.about(javaSource())
+				.that(JavaFileObjects
+						.forResource("inputs/DatabaseWithNonTable.java"))
+				.processedWith(new OrmLiteAnnotationProcessor())
+				.failsToCompile()
+				.withErrorContaining(
+						String.format(
+								"%s annotation contains class %s not annotated with %s",
+								Database.class.getSimpleName(),
+								String.class.getSimpleName(),
+								DatabaseTable.class.getSimpleName()));
 	}
 }
