@@ -15,11 +15,11 @@ public final class NamedTableWithSpecifiedDatabaseField_OpenHelper_TableConfig {
 
 	public static void cacheTableConfigurations() {
 		List<DatabaseTableConfig<?>> tableConfigs = new ArrayList<DatabaseTableConfig<?>>();
-		tableConfigs.add(inputs.NamedTableWithSpecifiedDatabaseField_TableConfig.CONFIG);
+		tableConfigs.add(com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField_TableConfig.CONFIG);
 		DaoManager.addCachedDatabaseConfigs(tableConfigs);
 	}
 
 	public static void createTables(ConnectionSource connectionSource) throws SQLException {
-		TableUtils.createTable(connectionSource, inputs.NamedTableWithSpecifiedDatabaseField.class);
+		TableUtils.createTable(connectionSource, com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField.class);
 	}
 }

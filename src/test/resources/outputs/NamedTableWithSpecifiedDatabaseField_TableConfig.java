@@ -10,7 +10,7 @@ public final class NamedTableWithSpecifiedDatabaseField_TableConfig {
 	private NamedTableWithSpecifiedDatabaseField_TableConfig() {
 	}
 
-	public static final DatabaseTableConfig<inputs.NamedTableWithSpecifiedDatabaseField> CONFIG;
+	public static final DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField> CONFIG;
 
 	static {
 		List<DatabaseFieldConfig> databaseFieldConfigs = new ArrayList<DatabaseFieldConfig>();
@@ -26,7 +26,7 @@ public final class NamedTableWithSpecifiedDatabaseField_TableConfig {
 			databaseFieldConfig.setGeneratedIdSequence("id_sequence");
 			databaseFieldConfig.setForeign(true);
 			databaseFieldConfig.setUseGetSet(true);
-			databaseFieldConfig.setUnknownEnumValue(inputs.NamedTableWithSpecifiedDatabaseField.FieldTypeEnum.OTHER_VALUE);
+			databaseFieldConfig.setUnknownEnumValue(com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField.FieldTypeEnum.OTHER_VALUE);
 			databaseFieldConfig.setThrowIfNull(true);
 			databaseFieldConfig.setFormat("%f");
 			databaseFieldConfig.setUnique(true);
@@ -37,7 +37,7 @@ public final class NamedTableWithSpecifiedDatabaseField_TableConfig {
 			databaseFieldConfig.setUniqueIndexName("unique_index");
 			databaseFieldConfig.setForeignAutoRefresh(true);
 			databaseFieldConfig.setMaxForeignAutoRefreshLevel(5);
-			databaseFieldConfig.setPersisterClass(inputs.NamedTableWithSpecifiedDatabaseField.CustomPersister.class);
+			databaseFieldConfig.setPersisterClass(com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField.CustomPersister.class);
 			databaseFieldConfig.setAllowGeneratedIdInsert(true);
 			databaseFieldConfig.setColumnDefinition("INT NOT NULL");
 			databaseFieldConfig.setForeignAutoCreate(true);
@@ -46,6 +46,6 @@ public final class NamedTableWithSpecifiedDatabaseField_TableConfig {
 			databaseFieldConfig.setReadOnly(true);
 			databaseFieldConfigs.add(databaseFieldConfig);
 		}
-		CONFIG = new DatabaseTableConfig<inputs.NamedTableWithSpecifiedDatabaseField>(inputs.NamedTableWithSpecifiedDatabaseField.class, "table", databaseFieldConfigs);
+		CONFIG = new DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField>(com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField.class, "table", databaseFieldConfigs);
 	}
 }

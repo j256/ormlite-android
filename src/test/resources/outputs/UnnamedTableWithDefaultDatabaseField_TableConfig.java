@@ -10,7 +10,7 @@ public final class UnnamedTableWithDefaultDatabaseField_TableConfig {
 	private UnnamedTableWithDefaultDatabaseField_TableConfig() {
 	}
 
-	public static final DatabaseTableConfig<inputs.UnnamedTableWithDefaultDatabaseField> CONFIG;
+	public static final DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.UnnamedTableWithDefaultDatabaseField> CONFIG;
 
 	static {
 		List<DatabaseFieldConfig> databaseFieldConfigs = new ArrayList<DatabaseFieldConfig>();
@@ -18,6 +18,6 @@ public final class UnnamedTableWithDefaultDatabaseField_TableConfig {
 			DatabaseFieldConfig databaseFieldConfig = new DatabaseFieldConfig("field");
 			databaseFieldConfigs.add(databaseFieldConfig);
 		}
-		CONFIG = new DatabaseTableConfig<inputs.UnnamedTableWithDefaultDatabaseField>(inputs.UnnamedTableWithDefaultDatabaseField.class, "unnamedtablewithdefaultdatabasefield", databaseFieldConfigs);
+		CONFIG = new DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.UnnamedTableWithDefaultDatabaseField>(com.j256.ormlite.android.processor.inputs.UnnamedTableWithDefaultDatabaseField.class, "unnamedtablewithdefaultdatabasefield", databaseFieldConfigs);
 	}
 }

@@ -10,7 +10,7 @@ public final class NamedTableWithSpecifiedForeignCollectionField_TableConfig {
 	private NamedTableWithSpecifiedForeignCollectionField_TableConfig() {
 	}
 
-	public static final DatabaseTableConfig<inputs.NamedTableWithSpecifiedForeignCollectionField> CONFIG;
+	public static final DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedForeignCollectionField> CONFIG;
 
 	static {
 		List<DatabaseFieldConfig> databaseFieldConfigs = new ArrayList<DatabaseFieldConfig>();
@@ -33,6 +33,6 @@ public final class NamedTableWithSpecifiedForeignCollectionField_TableConfig {
 			databaseFieldConfig.setForeignCollectionForeignFieldName("foreign_field");
 			databaseFieldConfigs.add(databaseFieldConfig);
 		}
-		CONFIG = new DatabaseTableConfig<inputs.NamedTableWithSpecifiedForeignCollectionField>(inputs.NamedTableWithSpecifiedForeignCollectionField.class, "table", databaseFieldConfigs);
+		CONFIG = new DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedForeignCollectionField>(com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedForeignCollectionField.class, "table", databaseFieldConfigs);
 	}
 }

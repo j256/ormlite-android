@@ -10,7 +10,7 @@ public final class InnerClassTable_InnerClass_TableConfig {
 	private InnerClassTable_InnerClass_TableConfig() {
 	}
 
-	public static final DatabaseTableConfig<inputs.InnerClassTable.InnerClass> CONFIG;
+	public static final DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.InnerClassTable.InnerClass> CONFIG;
 
 	static {
 		List<DatabaseFieldConfig> databaseFieldConfigs = new ArrayList<DatabaseFieldConfig>();
@@ -18,6 +18,6 @@ public final class InnerClassTable_InnerClass_TableConfig {
 			DatabaseFieldConfig databaseFieldConfig = new DatabaseFieldConfig("field");
 			databaseFieldConfigs.add(databaseFieldConfig);
 		}
-		CONFIG = new DatabaseTableConfig<inputs.InnerClassTable.InnerClass>(inputs.InnerClassTable.InnerClass.class, "innerclass", databaseFieldConfigs);
+		CONFIG = new DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.InnerClassTable.InnerClass>(com.j256.ormlite.android.processor.inputs.InnerClassTable.InnerClass.class, "innerclass", databaseFieldConfigs);
 	}
 }

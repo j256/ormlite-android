@@ -15,11 +15,11 @@ public final class UnnamedTableWithDefaultForeignCollectionField_OpenHelper_Tabl
 
 	public static void cacheTableConfigurations() {
 		List<DatabaseTableConfig<?>> tableConfigs = new ArrayList<DatabaseTableConfig<?>>();
-		tableConfigs.add(inputs.UnnamedTableWithDefaultForeignCollectionField_TableConfig.CONFIG);
+		tableConfigs.add(com.j256.ormlite.android.processor.inputs.UnnamedTableWithDefaultForeignCollectionField_TableConfig.CONFIG);
 		DaoManager.addCachedDatabaseConfigs(tableConfigs);
 	}
 
 	public static void createTables(ConnectionSource connectionSource) throws SQLException {
-		TableUtils.createTable(connectionSource, inputs.UnnamedTableWithDefaultForeignCollectionField.class);
+		TableUtils.createTable(connectionSource, com.j256.ormlite.android.processor.inputs.UnnamedTableWithDefaultForeignCollectionField.class);
 	}
 }
