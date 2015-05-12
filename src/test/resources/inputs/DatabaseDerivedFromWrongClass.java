@@ -1,4 +1,4 @@
-package inputs;
+package com.j256.ormlite.android.processor.inputs;
 
 import com.j256.ormlite.android.annotations.Database;
 import com.j256.ormlite.field.DatabaseField;

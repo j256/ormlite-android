@@ -1,4 +1,4 @@
-package inputs;
+package com.j256.ormlite.android.processor.inputs;
 
 import java.sql.SQLException;
 
