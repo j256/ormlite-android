@@ -240,23 +240,24 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 							"Loaded %d Database-to-DatabaseTable mappings",
 							oldDatabaseInfo.size()));
 					savedDatabaseInfo = oldDatabaseInfo;
-				} catch (IOException e) {
-					// Inability to read is not an error, just initialize with
-					// empty contents
-					savedDatabaseInfo = new HashMap<String, List<String>>();
 				} finally {
 					reader.close();
 				}
 			} catch (FilerException e) {
-				// Inability to read is not an error, just initialize with empty
-				// contents
+				// This file will only exist and have content during a round of
+				// incremental compilation, there is no clean way to detect this
+				// without trying and failing to read the file, so we catch the
+				// error and initialize with empty contents.
 				savedDatabaseInfo = new HashMap<String, List<String>>();
 			} catch (IOException e) {
-				// Inability to read is not an error, just initialize with empty
-				// contents
+				// This file will only exist and have content during a round of
+				// incremental compilation, there is no clean way to detect this
+				// without trying and failing to read the file, so we catch the
+				// error and initialize with empty contents.
 				savedDatabaseInfo = new HashMap<String, List<String>>();
 			} catch (ClassNotFoundException e) {
-				// Built-in Java classes will always be available
+				// Built-in Java classes will always be available so this should
+				// never happen
 				throw new RuntimeException(e);
 			}
 
@@ -300,9 +301,19 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 						"Stored %d Database-to-DatabaseTable mappings",
 						savedDatabaseInfo.size()));
 			} catch (FilerException e) {
-				// intentionally ignore the error
+				// should never happen, but if it does, it shouldn't be fatal
+				// since the worst consequence would be a spurious warning
+				// during future incremental compilations that would be cleared
+				// with a full rebuild.
+				raiseNote("FilerException while saving Database-to-DatabaseTable mappings: "
+						+ e.toString());
 			} catch (IOException e) {
-				// intentionally ignore the error
+				// should never happen, but if it does, it shouldn't be fatal
+				// since the worst consequence would be a spurious warning
+				// during future incremental compilations that would be cleared
+				// with a full rebuild.
+				raiseNote("IOException while saving Database-to-DatabaseTable mappings: "
+						+ e.toString());
 			}
 
 			// Verify that every table is in a database (try to enforce using
@@ -398,7 +409,8 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 							openHelperClassName
 									.getGeneratedFullyQualifiedClassName()));
 		} catch (IOException e) {
-			// We should always be able to generate the source files
+			// We should always be able to generate the source files and if we
+			// can't we should bail out
 			throw new RuntimeException(e);
 		}
 	}
@@ -428,7 +440,8 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 							table.getParsedClassName()
 									.getGeneratedFullyQualifiedClassName()));
 		} catch (IOException e) {
-			// We should always be able to generate the source files
+			// We should always be able to generate the source files and if we
+			// can't we should bail out
 			throw new RuntimeException(e);
 		}
 	}
@@ -729,6 +742,8 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 					message, element);
 		} catch (NullPointerException e) {
 			// ignore to workaround issues with eclipse incremental compilation
+			raiseNote("NullPointerException while raising a warning: "
+					+ e.toString());
 		}
 	}
 
@@ -741,6 +756,8 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 					element);
 		} catch (NullPointerException e) {
 			// ignore to workaround issues with eclipse incremental compilation
+			raiseNote("NullPointerException while raising an error: "
+					+ e.toString());
 		}
 	}
 }
