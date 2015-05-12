@@ -446,7 +446,7 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 		}
 	}
 
-	private static void writeTable(Writer writer, TableBindings table)
+	private void writeTable(Writer writer, TableBindings table)
 			throws IOException {
 		if (!table.getParsedClassName().getPackageName().isEmpty()) {
 			writer.write("package "
@@ -652,7 +652,7 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 		writer.write("}\n");
 	}
 
-	private static boolean writeSetterIfNotDefault(Annotation annotation,
+	private boolean writeSetterIfNotDefault(Annotation annotation,
 			String annotationFieldName, String setterCall, Writer writer) {
 		try {
 			Method method = annotation.annotationType().getMethod(
@@ -687,11 +687,11 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 		}
 	}
 
-	private static String getClassNameFromClassObject(Object object) {
+	private String getClassNameFromClassObject(Object object) {
 		return ((Class<?>) object).getCanonicalName();
 	}
 
-	private static String getMirroredClassNameFromException(Exception ex)
+	private String getMirroredClassNameFromException(Exception ex)
 			throws Exception {
 		Throwable t = ex;
 		do {
@@ -704,7 +704,7 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 		throw ex;
 	}
 
-	private static boolean writeSetterIfNotEqual(Object actualValue,
+	private boolean writeSetterIfNotEqual(Object actualValue,
 			Object defaultValue, String setterCall, Writer writer)
 			throws IOException {
 		if (!actualValue.equals(defaultValue)) {
@@ -715,8 +715,8 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 		}
 	}
 
-	private static void writeSetter(Object value, String setterCall,
-			Writer writer) throws IOException {
+	private void writeSetter(Object value, String setterCall, Writer writer)
+			throws IOException {
 		writer.write(String.format("\t\t\tdatabaseFieldConfig." + setterCall
 				+ ";\n", value));
 	}
