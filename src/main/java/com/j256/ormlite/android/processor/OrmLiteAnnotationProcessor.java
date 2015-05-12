@@ -652,6 +652,25 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 		writer.write("}\n");
 	}
 
+	/**
+	 * This function examines a single field in an annotation and if the current
+	 * value doesn't match the default, outputs a setter call. It returns
+	 * whether it output the setter call in case calling code needs to fall back
+	 * on another field only if the primary field wasn't set (e.g. a deprecated
+	 * field and its replacement).
+	 * 
+	 * @param annotation
+	 *            the annotation containing the field of interest
+	 * @param annotationFieldName
+	 *            the name of the field in the annotation to read
+	 * @param setterCall
+	 *            a format string describing the code that should be emitted to
+	 *            set this property in the table configuration
+	 * @param writer
+	 *            the writer for the generated file
+	 * @return true if the value was not the default and a setter was emitted,
+	 *         false if the field had the default value
+	 */
 	private boolean writeSetterIfNotDefault(Annotation annotation,
 			String annotationFieldName, String setterCall, Writer writer) {
 		try {
