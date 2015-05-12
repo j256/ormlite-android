@@ -1,4 +1,4 @@
-package com.j256.ormlite.android.annotations;
+package com.j256.ormlite.android.processor;
 
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import com.google.testing.compile.JavaFileObjects;
 
+import com.j256.ormlite.android.annotations.Database;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;

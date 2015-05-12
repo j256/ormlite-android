@@ -1,5 +1,6 @@
-package com.j256.ormlite.android.annotations;
+package com.j256.ormlite.android.processor;
 
+import com.j256.ormlite.android.annotations.Database;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
