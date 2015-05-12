@@ -23,6 +23,109 @@ import java.lang.annotation.Target;
  * separate the classes (e.g. package.Outer.Inner will result in
  * package.Outer_Inner_TableConfig begin generated).
  * 
+ * <p>
+ * Example (Table.java)
+ * </p>
+ * 
+ * <p>
+ * <blockquote>
+ * 
+ * <pre>
+ * &#064;DatabaseTable
+ * class Table {
+ * 	&#064;DatabaseField
+ * 	int field;
+ * }
+ * </pre>
+ * 
+ * </blockquote>
+ * </p>
+ * 
+ * <p>
+ * Example (Outer.java)
+ * </p>
+ * 
+ * <p>
+ * <blockquote>
+ * 
+ * <pre>
+ * class Outer {
+ * 	&#064;DatabaseTable
+ * 	class Inner {
+ * 		&#064;DatabaseField
+ * 		int field;
+ * 	}
+ * }
+ * </pre>
+ * 
+ * </blockquote>
+ * </p>
+ * 
+ * <p>
+ * Example (OpenHelper.java)
+ * </p>
+ * 
+ * <p>
+ * <blockquote>
+ * 
+ * <pre>
+ * &#064;Database({ Table.class, Outer.Inner.class })
+ * class OpenHelper extends OrmLiteSqliteOpenHelper {
+ * 	OpenHelper(Context context, String databaseName, CursorFactory factory,
+ * 			int databaseVersion) {
+ * 		super(context, databaseName, factory, databaseVersion);
+ * 		OpenHelper_TableConfig.cacheTableConfigurations();
+ * 	}
+ * 
+ * 	&#064;Override
+ * 	public void onCreate(SQLiteDatabase database,
+ * 			ConnectionSource connectionSource) {
+ * 		try {
+ * 			OpenHelper_TableConfig.createTables(connectionSource);
+ * 		} catch (SQLException e) {
+ * 			throw new RuntimeException(e);
+ * 		}
+ * 	}
+ * }
+ * </pre>
+ * 
+ * </blockquote>
+ * </p>
+ * 
+ * *
+ * <p>
+ * Example (InnerOpenHelper.java)
+ * </p>
+ * 
+ * <p>
+ * <blockquote>
+ * 
+ * <pre>
+ * class Outer {
+ * 	&#064;Database({ Table.class, Outer.Inner.class })
+ * 	class OpenHelper extends OrmLiteSqliteOpenHelper {
+ * 		OpenHelper(Context context, String databaseName, CursorFactory factory,
+ * 				int databaseVersion) {
+ * 			super(context, databaseName, factory, databaseVersion);
+ * 			Outer_OpenHelper_TableConfig.cacheTableConfigurations();
+ * 		}
+ * 
+ * 		&#064;Override
+ * 		public void onCreate(SQLiteDatabase database,
+ * 				ConnectionSource connectionSource) {
+ * 			try {
+ * 				Outer_OpenHelper_TableConfig.createTables(connectionSource);
+ * 			} catch (SQLException e) {
+ * 				throw new RuntimeException(e);
+ * 			}
+ * 		}
+ * 	}
+ * }
+ * </pre>
+ * 
+ * </blockquote>
+ * </p>
+ * 
  * @author nathancrouther
  */
 @Retention(RetentionPolicy.SOURCE)
