@@ -152,7 +152,7 @@
 						<configuration>
 							<compilerArgument>-proc:none</compilerArgument>
 							<includes>
-								<include>com/j256/ormlite/android/annotations/OrmLiteAnnotationProcessor.java</include>
+								<include>com/j256/ormlite/android/processor/OrmLiteAnnotationProcessor.java</include>
 							</includes>
 						</configuration>
 					</execution>
