@@ -1,13 +1,12 @@
 package com.j256.ormlite.android.processor.inputs;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTableConfig;
 import com.j256.ormlite.table.TableUtils;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class UnnamedTableWithDefaultForeignCollectionField_OpenHelper_TableConfig {
 	private UnnamedTableWithDefaultForeignCollectionField_OpenHelper_TableConfig() {
@@ -15,11 +14,15 @@ public final class UnnamedTableWithDefaultForeignCollectionField_OpenHelper_Tabl
 
 	public static void cacheTableConfigurations() {
 		List<DatabaseTableConfig<?>> tableConfigs = new ArrayList<DatabaseTableConfig<?>>();
-		tableConfigs.add(com.j256.ormlite.android.processor.inputs.UnnamedTableWithDefaultForeignCollectionField_TableConfig.CONFIG);
+		tableConfigs
+				.add(UnnamedTableWithDefaultForeignCollectionField_TableConfig
+						.createConfig());
 		DaoManager.addCachedDatabaseConfigs(tableConfigs);
 	}
 
-	public static void createTables(ConnectionSource connectionSource) throws SQLException {
-		TableUtils.createTable(connectionSource, com.j256.ormlite.android.processor.inputs.UnnamedTableWithDefaultForeignCollectionField.class);
+	public static void createTables(ConnectionSource connectionSource)
+			throws SQLException {
+		TableUtils.createTable(connectionSource,
+				UnnamedTableWithDefaultForeignCollectionField.class);
 	}
 }

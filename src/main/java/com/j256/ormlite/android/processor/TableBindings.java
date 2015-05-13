@@ -3,16 +3,14 @@ package com.j256.ormlite.android.processor;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.j256.ormlite.table.DatabaseTable;
-
 class TableBindings {
 	private final ParsedClassName parsedClassName;
-	private final DatabaseTable annotation;
+	private final String tableName;
 	private final List<FieldBindings> fields = new ArrayList<FieldBindings>();
 
-	TableBindings(ParsedClassName parsedClassName, DatabaseTable annotation) {
+	TableBindings(ParsedClassName parsedClassName, String tableName) {
 		this.parsedClassName = parsedClassName;
-		this.annotation = annotation;
+		this.tableName = tableName;
 	}
 
 	void addField(FieldBindings field) {
@@ -23,8 +21,8 @@ class TableBindings {
 		return parsedClassName;
 	}
 
-	DatabaseTable getAnnotation() {
-		return annotation;
+	String getTableName() {
+		return tableName;
 	}
 
 	List<FieldBindings> getFields() {

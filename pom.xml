@@ -266,6 +266,33 @@
 					<value>$1${version}$2</value>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<artifactSet>
+								<includes>
+									<include>com.squareup:javapoet</include>
+								</includes>
+							</artifactSet>
+							<minimizeJar>true</minimizeJar>
+							<relocations>
+								<relocation>
+									<pattern>com.squareup.javapoet</pattern>
+									<shadedPattern>com.j256.ormlite.android.processor.javapoet</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -347,6 +374,11 @@
 			<scope>provided</scope>
 			<version>${android-support-version}</version>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup</groupId>
+			<artifactId>javapoet</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 
 		<!-- =================================================================== -->

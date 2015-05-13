@@ -1,38 +1,37 @@
 package com.j256.ormlite.android.processor.inputs;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.j256.ormlite.field.DatabaseFieldConfig;
 import com.j256.ormlite.table.DatabaseTableConfig;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class NamedTableWithSpecifiedForeignCollectionField_TableConfig {
 	private NamedTableWithSpecifiedForeignCollectionField_TableConfig() {
 	}
 
-	public static final DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedForeignCollectionField> CONFIG;
-
-	static {
+	public static DatabaseTableConfig<?> createConfig() {
 		List<DatabaseFieldConfig> databaseFieldConfigs = new ArrayList<DatabaseFieldConfig>();
-		{
-			DatabaseFieldConfig databaseFieldConfig = new DatabaseFieldConfig("numbers");
-			databaseFieldConfig.setColumnName("column");
-			databaseFieldConfig.setForeignCollection(true);
-			databaseFieldConfig.setForeignCollectionEager(true);
-			databaseFieldConfig.setForeignCollectionMaxEagerLevel(5);
-			databaseFieldConfig.setForeignCollectionColumnName("column");
-			databaseFieldConfig.setForeignCollectionOrderColumnName("order_column");
-			databaseFieldConfig.setForeignCollectionOrderAscending(false);
-			databaseFieldConfig.setForeignCollectionForeignFieldName("foreign_field");
-			databaseFieldConfigs.add(databaseFieldConfig);
-		}
-		{
-			DatabaseFieldConfig databaseFieldConfig = new DatabaseFieldConfig("numbers_deprecated");
-			databaseFieldConfig.setForeignCollection(true);
-			databaseFieldConfig.setForeignCollectionMaxEagerLevel(5);
-			databaseFieldConfig.setForeignCollectionForeignFieldName("foreign_field");
-			databaseFieldConfigs.add(databaseFieldConfig);
-		}
-		CONFIG = new DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedForeignCollectionField>(com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedForeignCollectionField.class, "table", databaseFieldConfigs);
+		DatabaseFieldConfig numbersFieldConfig = new DatabaseFieldConfig(
+				"numbers");
+		numbersFieldConfig.setColumnName("column");
+		numbersFieldConfig.setForeignCollection(true);
+		numbersFieldConfig.setForeignCollectionEager(true);
+		numbersFieldConfig.setForeignCollectionMaxEagerLevel(5);
+		numbersFieldConfig.setForeignCollectionColumnName("column");
+		numbersFieldConfig.setForeignCollectionOrderColumnName("order_column");
+		numbersFieldConfig.setForeignCollectionOrderAscending(false);
+		numbersFieldConfig
+				.setForeignCollectionForeignFieldName("foreign_field");
+		databaseFieldConfigs.add(numbersFieldConfig);
+		DatabaseFieldConfig numbers_deprecatedFieldConfig = new DatabaseFieldConfig(
+				"numbers_deprecated");
+		numbers_deprecatedFieldConfig.setForeignCollection(true);
+		numbers_deprecatedFieldConfig.setForeignCollectionMaxEagerLevel(5);
+		numbers_deprecatedFieldConfig
+				.setForeignCollectionForeignFieldName("foreign_field");
+		databaseFieldConfigs.add(numbers_deprecatedFieldConfig);
+		return new DatabaseTableConfig<NamedTableWithSpecifiedForeignCollectionField>(
+				NamedTableWithSpecifiedForeignCollectionField.class, "table",
+				databaseFieldConfigs);
 	}
 }

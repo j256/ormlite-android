@@ -1,9 +1,22 @@
 package com.j256.ormlite.android.processor;
 
 import com.j256.ormlite.android.annotations.Database;
+import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.DatabaseFieldConfig;
 import com.j256.ormlite.field.ForeignCollectionField;
+import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
+import com.j256.ormlite.table.DatabaseTableConfig;
+import com.j256.ormlite.table.TableUtils;
+
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -11,6 +24,7 @@ import java.io.ObjectOutputStream;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +38,7 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.type.MirroredTypeException;
@@ -75,7 +90,9 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 			RoundEnvironment env) {
 		for (Element element : env
 				.getElementsAnnotatedWith(DatabaseTable.class)) {
-			if (element.getAnnotation(DatabaseTable.class) == null) {
+			DatabaseTable annotation = element
+					.getAnnotation(DatabaseTable.class);
+			if (annotation == null) {
 				continue;
 			}
 
@@ -83,9 +100,17 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 					DatabaseTable.class.getSimpleName(),
 					((TypeElement) element).getQualifiedName()));
 
-			TableBindings table = new TableBindings(
-					new ParsedClassName(element),
-					element.getAnnotation(DatabaseTable.class));
+			ParsedClassName parsedClassName = new ParsedClassName(element);
+
+			String tableName;
+			if (annotation.tableName() != null
+					&& annotation.tableName().length() > 0) {
+				tableName = annotation.tableName();
+			} else {
+				tableName = element.getSimpleName().toString().toLowerCase();
+			}
+
+			TableBindings table = new TableBindings(parsedClassName, tableName);
 
 			// get all fields from this and all parents until we hit Object
 			TypeElement tableClassElement = (TypeElement) element;
@@ -97,13 +122,29 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 								.getAnnotation(DatabaseField.class);
 						ForeignCollectionField foreignCollectionField = child
 								.getAnnotation(ForeignCollectionField.class);
-						if (databaseField != null
-								|| foreignCollectionField != null) {
-							FieldBindings field = new FieldBindings(child
-									.asType().toString(), child.getSimpleName()
-									.toString(), databaseField,
-									foreignCollectionField);
-							table.addField(field);
+
+						if (databaseField != null) {
+							if (databaseField.persisted()) {
+								table.addField(new FieldBindings(child
+										.getSimpleName().toString(),
+										getSettersForDatabaseField(
+												databaseField, child.asType()
+														.toString())));
+							}
+							if (foreignCollectionField != null) {
+								raiseError(
+										String.format(
+												"Fields cannot be annotated with both %s and %s",
+												DatabaseField.class
+														.getSimpleName(),
+												ForeignCollectionField.class
+														.getSimpleName()),
+										child);
+							}
+						} else if (foreignCollectionField != null) {
+							table.addField(new FieldBindings(
+									child.getSimpleName().toString(),
+									getSettersForForeignCollectionField(foreignCollectionField)));
 						}
 
 						if (databaseField != null
@@ -339,10 +380,10 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 		return true;
 	}
 
-	private void createDatabaseConfigSourceFile(TypeElement openHelperClass,
-			List<TypeElement> tableClasses) {
+	private void createDatabaseConfigSourceFile(
+			TypeElement openHelperClassElement, List<TypeElement> tableClasses) {
 		ParsedClassName openHelperClassName = new ParsedClassName(
-				openHelperClass);
+				openHelperClassElement);
 
 		try {
 			JavaFileObject javaFileObject = processingEnv
@@ -350,52 +391,66 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 					.createSourceFile(
 							openHelperClassName
 									.getGeneratedFullyQualifiedClassName(),
-							openHelperClass);
+							openHelperClassElement);
 
 			Writer writer = javaFileObject.openWriter();
+
 			try {
-				writer.write("package " + openHelperClassName.getPackageName()
-						+ ";\n");
-				writer.write("\n");
-				writer.write("import java.sql.SQLException;\n");
-				writer.write("import java.util.ArrayList;\n");
-				writer.write("import java.util.List;\n");
-				writer.write("\n");
-				writer.write("import com.j256.ormlite.dao.DaoManager;\n");
-				writer.write("import com.j256.ormlite.support.ConnectionSource;\n");
-				writer.write("import com.j256.ormlite.table.DatabaseTableConfig;\n");
-				writer.write("import com.j256.ormlite.table.TableUtils;\n");
-				writer.write("\n");
-				writer.write("public final class "
-						+ openHelperClassName.getGeneratedClassName() + " {\n");
-				writer.write("\tprivate "
-						+ openHelperClassName.getGeneratedClassName()
-						+ "() {\n");
-				writer.write("\t}\n");
-				writer.write("\n");
-				writer.write("\tpublic static void cacheTableConfigurations() {\n");
-				writer.write("\t\tList<DatabaseTableConfig<?>> tableConfigs = new ArrayList<DatabaseTableConfig<?>>();\n");
+				MethodSpec.Builder constructor = MethodSpec
+						.constructorBuilder().addModifiers(Modifier.PRIVATE);
+
+				MethodSpec.Builder cacheTableConfigurations = MethodSpec
+						.methodBuilder("cacheTableConfigurations")
+						.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+				cacheTableConfigurations.addStatement(
+						"$T tableConfigs = new $T()",
+						ParameterizedTypeName.get(ClassName.get(List.class),
+								ParameterizedTypeName.get(ClassName
+										.get(DatabaseTableConfig.class),
+										WildcardTypeName
+												.subtypeOf(Object.class))),
+						ParameterizedTypeName.get(ClassName
+								.get(ArrayList.class), ParameterizedTypeName
+								.get(ClassName.get(DatabaseTableConfig.class),
+										WildcardTypeName
+												.subtypeOf(Object.class))));
 				for (TypeElement tableClass : tableClasses) {
 					ParsedClassName tableClassName = new ParsedClassName(
 							tableClass);
-					writer.write("\t\ttableConfigs.add("
-							+ tableClassName
-									.getGeneratedFullyQualifiedClassName()
-							+ ".CONFIG);\n");
+					cacheTableConfigurations.addStatement(
+							"tableConfigs.add($T.createConfig())", ClassName
+									.get(tableClassName.getPackageName(),
+											tableClassName
+													.getGeneratedClassName()));
 				}
-				writer.write("\t\tDaoManager.addCachedDatabaseConfigs(tableConfigs);\n");
-				writer.write("\t}\n");
-				writer.write("\n");
-				writer.write("\tpublic static void createTables(ConnectionSource connectionSource) throws SQLException {\n");
+				cacheTableConfigurations.addStatement(
+						"$T.addCachedDatabaseConfigs(tableConfigs)",
+						DaoManager.class);
+
+				MethodSpec.Builder createTables = MethodSpec
+						.methodBuilder("createTables")
+						.addParameter(ConnectionSource.class,
+								"connectionSource")
+						.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+						.addException(SQLException.class);
 				for (TypeElement tableClass : tableClasses) {
-					ParsedClassName tableClassName = new ParsedClassName(
-							tableClass);
-					writer.write("\t\tTableUtils.createTable(connectionSource, "
-							+ tableClassName.getInputFullyQualifiedClassName()
-							+ ".class);\n");
+					createTables.addStatement(
+							"$T.createTable(connectionSource, $T.class)",
+							TableUtils.class, tableClass.asType());
 				}
-				writer.write("\t}\n");
-				writer.write("}\n");
+
+				TypeSpec.Builder openHelperClass = TypeSpec
+						.classBuilder(
+								openHelperClassName.getGeneratedClassName())
+						.addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+						.addMethod(constructor.build())
+						.addMethod(cacheTableConfigurations.build())
+						.addMethod(createTables.build());
+
+				JavaFile openHelperFile = JavaFile.builder(
+						openHelperClassName.getPackageName(),
+						openHelperClass.build()).build();
+				openHelperFile.writeTo(writer);
 			} finally {
 				writer.close();
 			}
@@ -413,6 +468,172 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 			// can't we should bail out
 			throw new RuntimeException(e);
 		}
+	}
+
+	private List<SetterBindings> getSettersForDatabaseField(
+			DatabaseField annotation, String fullyQualifiedFieldType) {
+		List<SetterBindings> output = new ArrayList<SetterBindings>();
+		addSetterIfNotDefault(annotation, "columnName", "setColumnName($S)",
+				output);
+		addSetterIfNotDefault(annotation, "dataType",
+				"setDataType(com.j256.ormlite.field.DataType.$L)", output);
+		addSetterIfNotDefault(annotation, "defaultValue",
+				"setDefaultValue($S)", output);
+		addSetterIfNotDefault(annotation, "width", "setWidth($L)", output);
+		addSetterIfNotDefault(annotation, "canBeNull", "setCanBeNull($L)",
+				output);
+		addSetterIfNotDefault(annotation, "id", "setId($L)", output);
+		addSetterIfNotDefault(annotation, "generatedId", "setGeneratedId($L)",
+				output);
+		addSetterIfNotDefault(annotation, "generatedIdSequence",
+				"setGeneratedIdSequence($S)", output);
+		addSetterIfNotDefault(annotation, "foreign", "setForeign($L)", output);
+		addSetterIfNotDefault(annotation, "useGetSet", "setUseGetSet($L)",
+				output);
+		addSetterIfNotDefault(annotation, "unknownEnumName",
+				"setUnknownEnumValue(" + fullyQualifiedFieldType + ".$L)",
+				output);
+		addSetterIfNotDefault(annotation, "throwIfNull", "setThrowIfNull($L)",
+				output);
+		addSetterIfNotDefault(annotation, "format", "setFormat($S)", output);
+		addSetterIfNotDefault(annotation, "unique", "setUnique($L)", output);
+		addSetterIfNotDefault(annotation, "uniqueCombo", "setUniqueCombo($L)",
+				output);
+		addSetterIfNotDefault(annotation, "index", "setIndex($L)", output);
+		addSetterIfNotDefault(annotation, "uniqueIndex", "setUniqueIndex($L)",
+				output);
+		addSetterIfNotDefault(annotation, "indexName", "setIndexName($S)",
+				output);
+		addSetterIfNotDefault(annotation, "uniqueIndexName",
+				"setUniqueIndexName($S)", output);
+		addSetterIfNotDefault(annotation, "foreignAutoRefresh",
+				"setForeignAutoRefresh($L)", output);
+		addSetterIfNotDefault(annotation, "maxForeignAutoRefreshLevel",
+				"setMaxForeignAutoRefreshLevel($L)", output);
+		addSetterIfNotDefault(annotation, "persisterClass",
+				"setPersisterClass($T.class)", output);
+		addSetterIfNotDefault(annotation, "allowGeneratedIdInsert",
+				"setAllowGeneratedIdInsert($L)", output);
+		addSetterIfNotDefault(annotation, "columnDefinition",
+				"setColumnDefinition($S)", output);
+		addSetterIfNotDefault(annotation, "foreignAutoCreate",
+				"setForeignAutoCreate($L)", output);
+		addSetterIfNotDefault(annotation, "version", "setVersion($L)", output);
+		addSetterIfNotDefault(annotation, "foreignColumnName",
+				"setForeignColumnName($S)", output);
+		addSetterIfNotDefault(annotation, "readOnly", "setReadOnly($L)", output);
+		return output;
+	}
+
+	private List<SetterBindings> getSettersForForeignCollectionField(
+			ForeignCollectionField annotation) {
+		List<SetterBindings> output = new ArrayList<SetterBindings>();
+		addSetterIfNotDefault(annotation, "columnName", "setColumnName($S)",
+				output);
+		addSetter("setForeignCollection($L)", true, output);
+		addSetterIfNotDefault(annotation, "eager",
+				"setForeignCollectionEager($L)", output);
+		addSetterIfNotDefault(annotation, "maxEagerLevel",
+				"maxEagerForeignCollectionLevel",
+				"setForeignCollectionMaxEagerLevel($L)", output);
+		addSetterIfNotDefault(annotation, "columnName",
+				"setForeignCollectionColumnName($S)", output);
+		addSetterIfNotDefault(annotation, "orderColumnName",
+				"setForeignCollectionOrderColumnName($S)", output);
+		addSetterIfNotDefault(annotation, "orderAscending",
+				"setForeignCollectionOrderAscending($L)", output);
+		addSetterIfNotDefault(annotation, "foreignFieldName",
+				"foreignColumnName",
+				"setForeignCollectionForeignFieldName($S)", output);
+		return output;
+	}
+
+	private void addSetterIfNotDefault(Annotation annotation, String name,
+			String format, List<SetterBindings> output) {
+		addSetterIfNotDefault(annotation, name, null, format, output);
+	}
+
+	private void addSetterIfNotDefault(Annotation annotation, String name,
+			String fallbackName, String format, List<SetterBindings> output) {
+		Object value = getValueIfNotDefault(annotation, name);
+		if (value != null) {
+			addSetter(format, value, output);
+		} else if (fallbackName != null) {
+			value = getValueIfNotDefault(annotation, fallbackName);
+			if (value != null) {
+				addSetter(format, value, output);
+			}
+		}
+	}
+
+	private void addSetter(String format, Object value,
+			List<SetterBindings> output) {
+		output.add(new SetterBindings(format, value));
+	}
+
+	/**
+	 * This function examines a single field in an annotation and if the current
+	 * value doesn't match the default returns the current value. If the current
+	 * value matches the default, it returns null.
+	 * 
+	 * @param annotation
+	 *            the annotation containing the field of interest
+	 * @param name
+	 *            the name of the field in the annotation to read
+	 * @return the current value if it is not the default, null otherwise
+	 */
+	private Object getValueIfNotDefault(Annotation annotation, String name) {
+		try {
+			Method method = annotation.annotationType().getMethod(name);
+
+			Object actualValue;
+			Object defaultValue;
+			if (method.getReturnType().getCanonicalName().equals(FQCN_Class)) {
+				try {
+					actualValue = getClassNameFromClassObject(method
+							.invoke(annotation));
+				} catch (Exception ex) {
+					actualValue = getMirroredClassNameFromException(ex);
+				}
+				try {
+					defaultValue = getClassNameFromClassObject(method
+							.getDefaultValue());
+				} catch (Exception ex) {
+					defaultValue = getMirroredClassNameFromException(ex);
+				}
+			} else {
+				actualValue = method.invoke(annotation);
+				defaultValue = method.getDefaultValue();
+			}
+
+			if (defaultValue.equals(actualValue)) {
+				return null;
+			} else {
+				return actualValue;
+			}
+		} catch (Exception e) {
+			// All possible annotation properties are unit tested, so it is not
+			// possible to get an exception here
+			throw new RuntimeException(e);
+		}
+	}
+
+	private TypeName getClassNameFromClassObject(Object object) {
+		return TypeName.get((Class<?>) object);
+	}
+
+	private TypeName getMirroredClassNameFromException(Exception ex)
+			throws Exception {
+		Throwable t = ex;
+		do {
+			if (t instanceof MirroredTypeException) {
+				return TypeName
+						.get(((MirroredTypeException) t).getTypeMirror());
+			}
+			t = t.getCause();
+		} while (t != null);
+
+		throw ex;
 	}
 
 	private void createTableConfigSourceFile(TableBindings table,
@@ -448,296 +669,57 @@ public final class OrmLiteAnnotationProcessor extends AbstractProcessor {
 
 	private void writeTable(Writer writer, TableBindings table)
 			throws IOException {
-		if (!table.getParsedClassName().getPackageName().isEmpty()) {
-			writer.write("package "
-					+ table.getParsedClassName().getPackageName() + ";\n");
-			writer.write("\n");
-		}
-		writer.write("import java.util.ArrayList;\n");
-		writer.write("import java.util.List;\n");
-		writer.write("\n");
-		writer.write("import com.j256.ormlite.field.DatabaseFieldConfig;\n");
-		writer.write("import com.j256.ormlite.table.DatabaseTableConfig;\n");
-		writer.write("\n");
-		writer.write("public final class "
-				+ table.getParsedClassName().getGeneratedClassName() + " {\n");
-		writer.write("\tprivate "
-				+ table.getParsedClassName().getGeneratedClassName() + "() {\n");
-		writer.write("\t}\n");
-		writer.write("\n");
-		writer.write("\tpublic static final DatabaseTableConfig<"
-				+ table.getParsedClassName().getInputFullyQualifiedClassName()
-				+ "> CONFIG;\n");
-		writer.write("\n");
-		writer.write("\tstatic {\n");
-		writer.write("\t\tList<DatabaseFieldConfig> databaseFieldConfigs = new ArrayList<DatabaseFieldConfig>();\n");
+		MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
+				.addModifiers(Modifier.PRIVATE);
+
+		MethodSpec.Builder createConfig = MethodSpec
+				.methodBuilder("createConfig")
+				.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+				.returns(
+						ParameterizedTypeName.get(
+								ClassName.get(DatabaseTableConfig.class),
+								WildcardTypeName.subtypeOf(Object.class)));
+		createConfig.addStatement("$T databaseFieldConfigs = new $T()",
+				ParameterizedTypeName.get(ClassName.get(List.class),
+						TypeName.get(DatabaseFieldConfig.class)),
+				ParameterizedTypeName.get(ClassName.get(ArrayList.class),
+						TypeName.get(DatabaseFieldConfig.class)));
+
 		for (FieldBindings field : table.getFields()) {
+			createConfig.addStatement("$T $LFieldConfig = new $T($S)",
+					DatabaseFieldConfig.class, field.getFieldName(),
+					DatabaseFieldConfig.class, field.getFieldName());
 
-			if (field.getDatabaseFieldAnnotation() != null
-					&& !field.getDatabaseFieldAnnotation().persisted()) {
-				continue;
+			for (SetterBindings setter : field.getSetters()) {
+				createConfig.addStatement(
+						"$LFieldConfig." + setter.getFormat(),
+						field.getFieldName(), setter.getParameter());
 			}
 
-			writer.write("\t\t{\n");
-			writer.write(String
-					.format("\t\t\tDatabaseFieldConfig databaseFieldConfig = new DatabaseFieldConfig(\"%s\");\n",
-							field.getFieldName()));
-
-			if (field.getDatabaseFieldAnnotation() != null) {
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"columnName", "setColumnName(\"%s\")", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"dataType",
-						"setDataType(com.j256.ormlite.field.DataType.%s)",
-						writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"defaultValue", "setDefaultValue(\"%s\")", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"width", "setWidth(%d)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"canBeNull", "setCanBeNull(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"id", "setId(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"generatedId", "setGeneratedId(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"generatedIdSequence",
-						"setGeneratedIdSequence(\"%s\")", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"foreign", "setForeign(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"useGetSet", "setUseGetSet(%b)", writer);
-
-				writeSetterIfNotDefault(
-						field.getDatabaseFieldAnnotation(),
-						"unknownEnumName",
-						"setUnknownEnumValue("
-								+ field.getFullyQualifiedTypeName() + ".%s)",
-						writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"throwIfNull", "setThrowIfNull(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"format", "setFormat(\"%s\")", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"unique", "setUnique(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"uniqueCombo", "setUniqueCombo(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"index", "setIndex(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"uniqueIndex", "setUniqueIndex(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"indexName", "setIndexName(\"%s\")", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"uniqueIndexName", "setUniqueIndexName(\"%s\")", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"foreignAutoRefresh", "setForeignAutoRefresh(%b)",
-						writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"maxForeignAutoRefreshLevel",
-						"setMaxForeignAutoRefreshLevel(%d)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"persisterClass", "setPersisterClass(%s.class)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"allowGeneratedIdInsert",
-						"setAllowGeneratedIdInsert(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"columnDefinition", "setColumnDefinition(\"%s\")",
-						writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"foreignAutoCreate", "setForeignAutoCreate(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"version", "setVersion(%b)", writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"foreignColumnName", "setForeignColumnName(\"%s\")",
-						writer);
-
-				writeSetterIfNotDefault(field.getDatabaseFieldAnnotation(),
-						"readOnly", "setReadOnly(%b)", writer);
-			}
-
-			if (field.getForeignCollectionFieldAnnotation() != null) {
-				writeSetterIfNotDefault(
-						field.getForeignCollectionFieldAnnotation(),
-						"columnName", "setColumnName(\"%s\")", writer);
-
-				writeSetter(true, "setForeignCollection(%b)", writer);
-
-				writeSetterIfNotDefault(
-						field.getForeignCollectionFieldAnnotation(), "eager",
-						"setForeignCollectionEager(%b)", writer);
-
-				if (!writeSetterIfNotDefault(
-						field.getForeignCollectionFieldAnnotation(),
-						"maxEagerLevel",
-						"setForeignCollectionMaxEagerLevel(%d)", writer)) {
-					writeSetterIfNotDefault(
-							field.getForeignCollectionFieldAnnotation(),
-							"maxEagerForeignCollectionLevel",
-							"setForeignCollectionMaxEagerLevel(%d)", writer);
-				}
-
-				writeSetterIfNotDefault(
-						field.getForeignCollectionFieldAnnotation(),
-						"columnName", "setForeignCollectionColumnName(\"%s\")",
-						writer);
-
-				writeSetterIfNotDefault(
-						field.getForeignCollectionFieldAnnotation(),
-						"orderColumnName",
-						"setForeignCollectionOrderColumnName(\"%s\")", writer);
-
-				writeSetterIfNotDefault(
-						field.getForeignCollectionFieldAnnotation(),
-						"orderAscending",
-						"setForeignCollectionOrderAscending(%b)", writer);
-
-				if (!writeSetterIfNotDefault(
-						field.getForeignCollectionFieldAnnotation(),
-						"foreignFieldName",
-						"setForeignCollectionForeignFieldName(\"%s\")", writer)) {
-					writeSetterIfNotDefault(
-							field.getForeignCollectionFieldAnnotation(),
-							"foreignColumnName",
-							"setForeignCollectionForeignFieldName(\"%s\")",
-							writer);
-				}
-			}
-
-			writer.write("\t\t\tdatabaseFieldConfigs.add(databaseFieldConfig);\n");
-			writer.write("\t\t}\n");
+			createConfig.addStatement(
+					"databaseFieldConfigs.add($LFieldConfig)",
+					field.getFieldName());
 		}
 
-		String tableName;
-		if (table.getAnnotation().tableName() != null
-				&& table.getAnnotation().tableName().length() > 0) {
-			tableName = table.getAnnotation().tableName();
-		} else {
-			tableName = table.getParsedClassName().getInputSimpleClassName()
-					.toLowerCase();
-		}
+		createConfig.addStatement(
+				"return new $T<$T>($T.class, $S, databaseFieldConfigs)",
+				DatabaseTableConfig.class, ClassName.get(table
+						.getParsedClassName().getPackageName(), table
+						.getParsedClassName().getInputClassName()), ClassName
+						.get(table.getParsedClassName().getPackageName(), table
+								.getParsedClassName().getInputClassName()),
+				table.getTableName());
 
-		writer.write(String
-				.format("\t\tCONFIG = new DatabaseTableConfig<%s>(%s.class, \"%s\", databaseFieldConfigs);\n",
-						table.getParsedClassName()
-								.getInputFullyQualifiedClassName(), table
-								.getParsedClassName()
-								.getInputFullyQualifiedClassName(), tableName));
-		writer.write("\t}\n");
-		writer.write("}\n");
-	}
+		TypeSpec.Builder tableConfigClass = TypeSpec
+				.classBuilder(
+						table.getParsedClassName().getGeneratedClassName())
+				.addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+				.addMethod(constructor.build()).addMethod(createConfig.build());
 
-	/**
-	 * This function examines a single field in an annotation and if the current
-	 * value doesn't match the default, outputs a setter call. It returns
-	 * whether it output the setter call in case calling code needs to fall back
-	 * on another field only if the primary field wasn't set (e.g. a deprecated
-	 * field and its replacement).
-	 * 
-	 * @param annotation
-	 *            the annotation containing the field of interest
-	 * @param annotationFieldName
-	 *            the name of the field in the annotation to read
-	 * @param setterCall
-	 *            a format string describing the code that should be emitted to
-	 *            set this property in the table configuration
-	 * @param writer
-	 *            the writer for the generated file
-	 * @return true if the value was not the default and a setter was emitted,
-	 *         false if the field had the default value
-	 */
-	private boolean writeSetterIfNotDefault(Annotation annotation,
-			String annotationFieldName, String setterCall, Writer writer) {
-		try {
-			Method method = annotation.annotationType().getMethod(
-					annotationFieldName);
-
-			Object actualValue;
-			Object defaultValue;
-			if (method.getReturnType().getCanonicalName().equals(FQCN_Class)) {
-				try {
-					actualValue = getClassNameFromClassObject(method
-							.invoke(annotation));
-				} catch (Exception ex) {
-					actualValue = getMirroredClassNameFromException(ex);
-				}
-				try {
-					defaultValue = getClassNameFromClassObject(method
-							.getDefaultValue());
-				} catch (Exception ex) {
-					defaultValue = getMirroredClassNameFromException(ex);
-				}
-			} else {
-				actualValue = method.invoke(annotation);
-				defaultValue = method.getDefaultValue();
-			}
-
-			return writeSetterIfNotEqual(actualValue, defaultValue, setterCall,
-					writer);
-		} catch (Exception e) {
-			// All possible annotation properties are unit tested, so it is not
-			// possible to get an exception here
-			throw new RuntimeException(e);
-		}
-	}
-
-	private String getClassNameFromClassObject(Object object) {
-		return ((Class<?>) object).getCanonicalName();
-	}
-
-	private String getMirroredClassNameFromException(Exception ex)
-			throws Exception {
-		Throwable t = ex;
-		do {
-			if (t instanceof MirroredTypeException) {
-				return ((MirroredTypeException) t).getTypeMirror().toString();
-			}
-			t = t.getCause();
-		} while (t != null);
-
-		throw ex;
-	}
-
-	private boolean writeSetterIfNotEqual(Object actualValue,
-			Object defaultValue, String setterCall, Writer writer)
-			throws IOException {
-		if (!actualValue.equals(defaultValue)) {
-			writeSetter(actualValue, setterCall, writer);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private void writeSetter(Object value, String setterCall, Writer writer)
-			throws IOException {
-		writer.write(String.format("\t\t\tdatabaseFieldConfig." + setterCall
-				+ ";\n", value));
+		JavaFile tableConfigFile = JavaFile.builder(
+				table.getParsedClassName().getPackageName(),
+				tableConfigClass.build()).build();
+		tableConfigFile.writeTo(writer);
 	}
 
 	private void raiseNote(String message) {

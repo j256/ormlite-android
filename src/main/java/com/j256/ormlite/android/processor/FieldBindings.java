@@ -1,36 +1,21 @@
 package com.j256.ormlite.android.processor;
 
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
+import java.util.List;
 
 class FieldBindings {
-	private final String fullyQualifiedTypeName;
 	private final String fieldName;
-	private final DatabaseField databaseFieldAnnotation;
-	private final ForeignCollectionField foreignCollectionFieldAnnotation;
+	private final List<SetterBindings> setters;
 
-	FieldBindings(String fullyQualifiedTypeName, String fieldName,
-			DatabaseField databaseFieldAnnotation,
-			ForeignCollectionField foreignCollectionFieldAnnotation) {
-		this.fullyQualifiedTypeName = fullyQualifiedTypeName;
+	FieldBindings(String fieldName, List<SetterBindings> setters) {
 		this.fieldName = fieldName;
-		this.databaseFieldAnnotation = databaseFieldAnnotation;
-		this.foreignCollectionFieldAnnotation = foreignCollectionFieldAnnotation;
-	}
-
-	String getFullyQualifiedTypeName() {
-		return fullyQualifiedTypeName;
+		this.setters = setters;
 	}
 
 	String getFieldName() {
 		return fieldName;
 	}
 
-	DatabaseField getDatabaseFieldAnnotation() {
-		return databaseFieldAnnotation;
-	}
-
-	ForeignCollectionField getForeignCollectionFieldAnnotation() {
-		return foreignCollectionFieldAnnotation;
+	List<SetterBindings> getSetters() {
+		return setters;
 	}
 }

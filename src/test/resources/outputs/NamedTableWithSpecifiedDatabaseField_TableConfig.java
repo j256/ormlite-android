@@ -1,51 +1,51 @@
 package com.j256.ormlite.android.processor.inputs;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.j256.ormlite.field.DatabaseFieldConfig;
 import com.j256.ormlite.table.DatabaseTableConfig;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class NamedTableWithSpecifiedDatabaseField_TableConfig {
 	private NamedTableWithSpecifiedDatabaseField_TableConfig() {
 	}
 
-	public static final DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField> CONFIG;
-
-	static {
+	public static DatabaseTableConfig<?> createConfig() {
 		List<DatabaseFieldConfig> databaseFieldConfigs = new ArrayList<DatabaseFieldConfig>();
-		{
-			DatabaseFieldConfig databaseFieldConfig = new DatabaseFieldConfig("field");
-			databaseFieldConfig.setColumnName("column");
-			databaseFieldConfig.setDataType(com.j256.ormlite.field.DataType.ENUM_INTEGER);
-			databaseFieldConfig.setDefaultValue("VALUE");
-			databaseFieldConfig.setWidth(100);
-			databaseFieldConfig.setCanBeNull(false);
-			databaseFieldConfig.setId(true);
-			databaseFieldConfig.setGeneratedId(true);
-			databaseFieldConfig.setGeneratedIdSequence("id_sequence");
-			databaseFieldConfig.setForeign(true);
-			databaseFieldConfig.setUseGetSet(true);
-			databaseFieldConfig.setUnknownEnumValue(com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField.FieldTypeEnum.OTHER_VALUE);
-			databaseFieldConfig.setThrowIfNull(true);
-			databaseFieldConfig.setFormat("%f");
-			databaseFieldConfig.setUnique(true);
-			databaseFieldConfig.setUniqueCombo(true);
-			databaseFieldConfig.setIndex(true);
-			databaseFieldConfig.setUniqueIndex(true);
-			databaseFieldConfig.setIndexName("index");
-			databaseFieldConfig.setUniqueIndexName("unique_index");
-			databaseFieldConfig.setForeignAutoRefresh(true);
-			databaseFieldConfig.setMaxForeignAutoRefreshLevel(5);
-			databaseFieldConfig.setPersisterClass(com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField.CustomPersister.class);
-			databaseFieldConfig.setAllowGeneratedIdInsert(true);
-			databaseFieldConfig.setColumnDefinition("INT NOT NULL");
-			databaseFieldConfig.setForeignAutoCreate(true);
-			databaseFieldConfig.setVersion(true);
-			databaseFieldConfig.setForeignColumnName("foreign");
-			databaseFieldConfig.setReadOnly(true);
-			databaseFieldConfigs.add(databaseFieldConfig);
-		}
-		CONFIG = new DatabaseTableConfig<com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField>(com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField.class, "table", databaseFieldConfigs);
+		DatabaseFieldConfig fieldFieldConfig = new DatabaseFieldConfig("field");
+		fieldFieldConfig.setColumnName("column");
+		fieldFieldConfig
+				.setDataType(com.j256.ormlite.field.DataType.ENUM_INTEGER);
+		fieldFieldConfig.setDefaultValue("VALUE");
+		fieldFieldConfig.setWidth(100);
+		fieldFieldConfig.setCanBeNull(false);
+		fieldFieldConfig.setId(true);
+		fieldFieldConfig.setGeneratedId(true);
+		fieldFieldConfig.setGeneratedIdSequence("id_sequence");
+		fieldFieldConfig.setForeign(true);
+		fieldFieldConfig.setUseGetSet(true);
+		fieldFieldConfig
+				.setUnknownEnumValue(com.j256.ormlite.android.processor.inputs.NamedTableWithSpecifiedDatabaseField.FieldTypeEnum.OTHER_VALUE);
+		fieldFieldConfig.setThrowIfNull(true);
+		fieldFieldConfig.setFormat("%f");
+		fieldFieldConfig.setUnique(true);
+		fieldFieldConfig.setUniqueCombo(true);
+		fieldFieldConfig.setIndex(true);
+		fieldFieldConfig.setUniqueIndex(true);
+		fieldFieldConfig.setIndexName("index");
+		fieldFieldConfig.setUniqueIndexName("unique_index");
+		fieldFieldConfig.setForeignAutoRefresh(true);
+		fieldFieldConfig.setMaxForeignAutoRefreshLevel(5);
+		fieldFieldConfig
+				.setPersisterClass(NamedTableWithSpecifiedDatabaseField.CustomPersister.class);
+		fieldFieldConfig.setAllowGeneratedIdInsert(true);
+		fieldFieldConfig.setColumnDefinition("INT NOT NULL");
+		fieldFieldConfig.setForeignAutoCreate(true);
+		fieldFieldConfig.setVersion(true);
+		fieldFieldConfig.setForeignColumnName("foreign");
+		fieldFieldConfig.setReadOnly(true);
+		databaseFieldConfigs.add(fieldFieldConfig);
+		return new DatabaseTableConfig<NamedTableWithSpecifiedDatabaseField>(
+				NamedTableWithSpecifiedDatabaseField.class, "table",
+				databaseFieldConfigs);
 	}
 }

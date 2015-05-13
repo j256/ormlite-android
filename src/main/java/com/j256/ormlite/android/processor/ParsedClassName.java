@@ -39,6 +39,12 @@ class ParsedClassName {
 			sb.append(packageName);
 			sb.append('.');
 		}
+		sb.append(getInputClassName());
+		return sb.toString();
+	}
+
+	String getInputClassName() {
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < nestedClasses.size(); ++i) {
 			if (i != 0) {
 				sb.append('.');
@@ -46,10 +52,6 @@ class ParsedClassName {
 			sb.append(nestedClasses.get(i));
 		}
 		return sb.toString();
-	}
-
-	String getInputSimpleClassName() {
-		return nestedClasses.get(nestedClasses.size() - 1);
 	}
 
 	String getGeneratedClassName() {
