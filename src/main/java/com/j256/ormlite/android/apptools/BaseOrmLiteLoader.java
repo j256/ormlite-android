@@ -83,6 +83,7 @@ public abstract class BaseOrmLiteLoader<T, ID> extends AsyncTaskLoader<List<T>> 
 		dao.unregisterObserver(this);
 	}
 
+	@Override
 	public void onChange() {
 		onContentChanged();
 	}

@@ -50,14 +50,17 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		this.cancelQueriesEnabled = cancelQueriesEnabled;
 	}
 
+	@Override
 	public int getColumnCount() throws SQLException {
 		return getCursor().getColumnCount();
 	}
 
+	@Override
 	public String getColumnName(int column) throws SQLException {
 		return getCursor().getColumnName(column);
 	}
 
+	@Override
 	public DatabaseResults runQuery(ObjectCache objectCache) throws SQLException {
 		// this could come from DELETE or UPDATE, just not a SELECT
 		if (!type.isOkForQuery()) {
@@ -66,6 +69,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		return new AndroidDatabaseResults(getCursor(), objectCache);
 	}
 
+	@Override
 	public int runUpdate() throws SQLException {
 		if (!type.isOkForUpdate()) {
 			throw new IllegalArgumentException("Cannot call update on a " + type + " statement");
@@ -79,6 +83,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		return execSql(db, "runUpdate", finalSql, getArgArray());
 	}
 
+	@Override
 	public int runExecute() throws SQLException {
 		if (!type.isOkForExecute()) {
 			throw new IllegalArgumentException("Cannot call execute on a " + type + " statement");
@@ -86,6 +91,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		return execSql(db, "runExecute", sql, getArgArray());
 	}
 
+	@Override
 	public void close() throws IOException {
 		if (cursor != null && !cursor.isClosed()) {
 			try {
@@ -97,18 +103,21 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		cancellationHook = null;
 	}
 
+	@Override
 	public void closeQuietly() {
 		if (cursor != null) {
 			cursor.close();
 		}
 	}
 
+	@Override
 	public void cancel() {
 		if (cancellationHook != null) {
 			cancellationHook.cancel();
 		}
 	}
 
+	@Override
 	public void setObject(int parameterIndex, Object obj, SqlType sqlType) throws SQLException {
 		isInPrep();
 		if (args == null) {
@@ -148,11 +157,13 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		}
 	}
 
+	@Override
 	public void setMaxRows(int max) throws SQLException {
 		isInPrep();
 		this.max = max;
 	}
 
+	@Override
 	public void setQueryTimeout(long millis) {
 		// as far as I could tell this is not supported by Android API
 	}

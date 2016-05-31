@@ -56,10 +56,12 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		this(cursor, objectCache);
 	}
 
+	@Override
 	public int getColumnCount() {
 		return cursor.getColumnCount();
 	}
 
+	@Override
 	public String[] getColumnNames() {
 		int colN = getColumnCount();
 		String[] columnNames = new String[colN];
@@ -69,26 +71,32 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		return columnNames;
 	}
 
+	@Override
 	public boolean first() {
 		return cursor.moveToFirst();
 	}
 
+	@Override
 	public boolean next() {
 		return cursor.moveToNext();
 	}
 
+	@Override
 	public boolean last() {
 		return cursor.moveToLast();
 	}
 
+	@Override
 	public boolean previous() {
 		return cursor.moveToPrevious();
 	}
 
+	@Override
 	public boolean moveRelative(int offset) {
 		return cursor.move(offset);
 	}
 
+	@Override
 	public boolean moveAbsolute(int position) {
 		return cursor.moveToPosition(position);
 	}
@@ -107,6 +115,7 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		return cursor.getPosition();
 	}
 
+	@Override
 	public int findColumn(String columnName) throws SQLException {
 		int index = lookupColumn(columnName);
 		if (index >= 0) {
@@ -130,10 +139,12 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		}
 	}
 
+	@Override
 	public String getString(int columnIndex) {
 		return cursor.getString(columnIndex);
 	}
 
+	@Override
 	public boolean getBoolean(int columnIndex) {
 		if (cursor.isNull(columnIndex) || cursor.getShort(columnIndex) == 0) {
 			return false;
@@ -142,6 +153,7 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		}
 	}
 
+	@Override
 	public char getChar(int columnIndex) throws SQLException {
 		String string = cursor.getString(columnIndex);
 		if (string == null || string.length() == 0) {
@@ -153,58 +165,72 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		}
 	}
 
+	@Override
 	public byte getByte(int columnIndex) {
 		return (byte) getShort(columnIndex);
 	}
 
+	@Override
 	public byte[] getBytes(int columnIndex) {
 		return cursor.getBlob(columnIndex);
 	}
 
+	@Override
 	public short getShort(int columnIndex) {
 		return cursor.getShort(columnIndex);
 	}
 
+	@Override
 	public int getInt(int columnIndex) {
 		return cursor.getInt(columnIndex);
 	}
 
+	@Override
 	public long getLong(int columnIndex) {
 		return cursor.getLong(columnIndex);
 	}
 
+	@Override
 	public float getFloat(int columnIndex) {
 		return cursor.getFloat(columnIndex);
 	}
 
+	@Override
 	public double getDouble(int columnIndex) {
 		return cursor.getDouble(columnIndex);
 	}
 
+	@Override
 	public Timestamp getTimestamp(int columnIndex) throws SQLException {
 		throw new SQLException("Android does not support timestamp.  Use JAVA_DATE_LONG or JAVA_DATE_STRING types");
 	}
 
+	@Override
 	public InputStream getBlobStream(int columnIndex) {
 		return new ByteArrayInputStream(cursor.getBlob(columnIndex));
 	}
 
+	@Override
 	public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
 		throw new SQLException("Android does not support BigDecimal type.  Use BIG_DECIMAL or BIG_DECIMAL_STRING types");
 	}
 
+	@Override
 	public boolean wasNull(int columnIndex) {
 		return cursor.isNull(columnIndex);
 	}
 
+	@Override
 	public ObjectCache getObjectCache() {
 		return objectCache;
 	}
 
+	@Override
 	public void close() {
 		cursor.close();
 	}
 
+	@Override
 	public void closeQuietly() {
 		close();
 	}

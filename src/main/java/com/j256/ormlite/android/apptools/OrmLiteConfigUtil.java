@@ -325,6 +325,7 @@ public class OrmLiteConfigUtil {
 		for (File file : dir.listFiles()) {
 			if (file.getName().equals(RESOURCE_DIR_NAME) && file.isDirectory()) {
 				File[] rawFiles = file.listFiles(new FileFilter() {
+					@Override
 					public boolean accept(File file) {
 						return file.getName().equals(RAW_DIR_NAME) && file.isDirectory();
 					}

@@ -40,6 +40,7 @@ public class JellyBeanApiCompatibility extends BasicApiCompatibility {
 			this.cancellationSignal = new CancellationSignal();
 		}
 
+		@Override
 		public void cancel() {
 			cancellationSignal.cancel();
 		}

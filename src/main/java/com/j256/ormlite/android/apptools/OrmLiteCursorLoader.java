@@ -117,6 +117,7 @@ public class OrmLiteCursorLoader<T> extends AsyncTaskLoader<Cursor> implements D
 		dao.unregisterObserver(this);
 	}
 
+	@Override
 	public void onChange() {
 		onContentChanged();
 	}

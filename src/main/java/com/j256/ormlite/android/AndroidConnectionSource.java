@@ -44,6 +44,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		this.sqliteDatabase = sqliteDatabase;
 	}
 
+	@Override
 	public DatabaseConnection getReadOnlyConnection() throws SQLException {
 		/*
 		 * We have to use the read-write connection because getWritableDatabase() can call close on
@@ -54,6 +55,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		return getReadWriteConnection();
 	}
 
+	@Override
 	public DatabaseConnection getReadWriteConnection() throws SQLException {
 		DatabaseConnection conn = getSavedConnection();
 		if (conn != null) {
@@ -81,35 +83,43 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 		return connection;
 	}
 
+	@Override
 	public void releaseConnection(DatabaseConnection connection) {
 		// noop since connection management is handled by AndroidOS
 	}
 
+	@Override
 	public boolean saveSpecialConnection(DatabaseConnection connection) throws SQLException {
 		return saveSpecial(connection);
 	}
 
+	@Override
 	public void clearSpecialConnection(DatabaseConnection connection) {
 		clearSpecial(connection, logger);
 	}
 
+	@Override
 	public void close() {
 		// the helper is closed so it calls close here, so this CANNOT be a call back to helper.close()
 		isOpen = false;
 	}
 
+	@Override
 	public void closeQuietly() {
 		close();
 	}
 
+	@Override
 	public DatabaseType getDatabaseType() {
 		return databaseType;
 	}
 
+	@Override
 	public boolean isOpen() {
 		return isOpen;
 	}
 
+	@Override
 	public boolean isSingleConnection() {
 		return true;
 	}

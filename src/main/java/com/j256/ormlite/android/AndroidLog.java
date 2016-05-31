@@ -67,6 +67,7 @@ public class AndroidLog implements com.j256.ormlite.logger.Log {
 		refreshLevelCache();
 	}
 
+	@Override
 	public boolean isLevelEnabled(Level level) {
 		// we don't care if this is not synchronized, it will be updated sooner or later and multiple updates are fine.
 		if (++levelCacheC >= REFRESH_LEVEL_CACHE_EVERY) {
@@ -81,6 +82,7 @@ public class AndroidLog implements com.j256.ormlite.logger.Log {
 		}
 	}
 
+	@Override
 	public void log(Level level, String msg) {
 		switch (level) {
 			case TRACE :
@@ -107,6 +109,7 @@ public class AndroidLog implements com.j256.ormlite.logger.Log {
 		}
 	}
 
+	@Override
 	public void log(Level level, String msg, Throwable t) {
 		switch (level) {
 			case TRACE :
