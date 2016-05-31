@@ -53,10 +53,12 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		logger.trace("{}: db {} opened, read-write = {}", this, db, readWrite);
 	}
 
+	@Override
 	public boolean isAutoCommitSupported() {
 		return true;
 	}
 
+	@Override
 	public boolean isAutoCommit() throws SQLException {
 		try {
 			boolean inTransaction = db.inTransaction();
@@ -68,6 +70,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	@Override
 	public void setAutoCommit(boolean autoCommit) {
 		/*
 		 * Sqlite does not support auto-commit. The various JDBC drivers seem to implement it with the use of a
@@ -85,6 +88,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	@Override
 	public Savepoint setSavePoint(String name) throws SQLException {
 		try {
 			db.beginTransaction();
@@ -102,6 +106,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		return readWrite;
 	}
 
+	@Override
 	public void commit(Savepoint savepoint) throws SQLException {
 		try {
 			db.setTransactionSuccessful();
@@ -120,6 +125,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	@Override
 	public void rollback(Savepoint savepoint) throws SQLException {
 		try {
 			// no setTransactionSuccessful() means it is a rollback
@@ -138,10 +144,12 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	@Override
 	public int executeStatement(String statementStr, int resultFlags) throws SQLException {
 		return AndroidCompiledStatement.execSql(db, statementStr, statementStr, NO_STRING_ARGS);
 	}
 
+	@Override
 	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes,
 			int resultFlags) {
 		// resultFlags argument is not used in Android-land since the {@link Cursor} is bi-directional.
@@ -150,6 +158,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		return stmt;
 	}
 
+	@Override
 	public int insert(String statement, Object[] args, FieldType[] argFieldTypes, GeneratedKeyHolder keyHolder)
 			throws SQLException {
 		SQLiteStatement stmt = null;
@@ -174,21 +183,25 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	@Override
 	public int update(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
 		return update(statement, args, argFieldTypes, "updated");
 	}
 
+	@Override
 	public int delete(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
 		// delete is the same as update
 		return update(statement, args, argFieldTypes, "deleted");
 	}
 
+	@Override
 	public <T> Object queryForOne(String statement, Object[] args, FieldType[] argFieldTypes,
 			GenericRowMapper<T> rowMapper, ObjectCache objectCache) throws SQLException {
 		Cursor cursor = null;
+		AndroidDatabaseResults results = null;
 		try {
 			cursor = db.rawQuery(statement, toStrings(args));
-			AndroidDatabaseResults results = new AndroidDatabaseResults(cursor, objectCache);
+			results = new AndroidDatabaseResults(cursor, objectCache);
 			logger.trace("{}: queried for one result: {}", this, statement);
 			if (!results.first()) {
 				return null;
@@ -203,10 +216,12 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("queryForOne from database failed: " + statement, e);
 		} finally {
+			IOUtils.closeQuietly(results);
 			closeQuietly(cursor);
 		}
 	}
 
+	@Override
 	public long queryForLong(String statement) throws SQLException {
 		SQLiteStatement stmt = null;
 		try {
@@ -221,6 +236,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	@Override
 	public long queryForLong(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
 		Cursor cursor = null;
 		AndroidDatabaseResults results = null;
@@ -243,6 +259,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	@Override
 	public void close() throws IOException {
 		try {
 			db.close();
@@ -252,10 +269,12 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	@Override
 	public void closeQuietly() {
 		IOUtils.closeQuietly(this);
 	}
 
+	@Override
 	public boolean isClosed() throws SQLException {
 		try {
 			boolean isOpen = db.isOpen();
@@ -266,6 +285,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	@Override
 	public boolean isTableExists(String tableName) {
 		Cursor cursor =
 				db.rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '" + tableName + "'", null);
@@ -403,10 +423,12 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			this.name = name;
 		}
 
+		@Override
 		public int getSavepointId() {
 			return 0;
 		}
 
+		@Override
 		public String getSavepointName() {
 			return name;
 		}
