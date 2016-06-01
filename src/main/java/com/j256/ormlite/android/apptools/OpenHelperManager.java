@@ -113,14 +113,6 @@ public class OpenHelperManager {
 	}
 
 	/**
-	 * @deprecated This has been renamed to be {@link #releaseHelper()}.
-	 */
-	@Deprecated
-	public static void release() {
-		releaseHelper();
-	}
-
-	/**
 	 * Release the helper that was previously returned by a call {@link #getHelper(Context)} or
 	 * {@link #getHelper(Context, Class)}. This will decrement the usage counter and close the helper if the counter is
 	 * 0.

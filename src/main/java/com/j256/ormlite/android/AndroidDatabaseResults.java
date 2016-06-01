@@ -46,16 +46,6 @@ public class AndroidDatabaseResults implements DatabaseResults {
 		this.objectCache = objectCache;
 	}
 
-	/**
-	 * Constructor that allows you to inject a cursor that has already been configured with first-call set to false.
-	 * 
-	 * @deprecated The firstCall is no longer needed since the library now calls first() and next on its own.
-	 */
-	@Deprecated
-	public AndroidDatabaseResults(Cursor cursor, boolean firstCall, ObjectCache objectCache) {
-		this(cursor, objectCache);
-	}
-
 	@Override
 	public int getColumnCount() {
 		return cursor.getColumnCount();
