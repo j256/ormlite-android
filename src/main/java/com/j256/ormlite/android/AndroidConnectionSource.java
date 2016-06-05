@@ -45,18 +45,18 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 	}
 
 	@Override
-	public DatabaseConnection getReadOnlyConnection() throws SQLException {
+	public DatabaseConnection getReadOnlyConnection(String tableName) throws SQLException {
 		/*
 		 * We have to use the read-write connection because getWritableDatabase() can call close on
 		 * getReadableDatabase() in the future. This has something to do with Android's SQLite connection management.
 		 * 
 		 * See android docs: http://developer.android.com/reference/android/database/sqlite/SQLiteOpenHelper.html
 		 */
-		return getReadWriteConnection();
+		return getReadWriteConnection(tableName);
 	}
 
 	@Override
-	public DatabaseConnection getReadWriteConnection() throws SQLException {
+	public DatabaseConnection getReadWriteConnection(String tableName) throws SQLException {
 		DatabaseConnection conn = getSavedConnection();
 		if (conn != null) {
 			return conn;
@@ -115,12 +115,12 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 	}
 
 	@Override
-	public boolean isOpen() {
+	public boolean isOpen(String tableName) {
 		return isOpen;
 	}
 
 	@Override
-	public boolean isSingleConnection() {
+	public boolean isSingleConnection(String tableName) {
 		return true;
 	}
 

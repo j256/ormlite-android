@@ -40,7 +40,7 @@ public class OrmLiteCursorLoader<T> extends AsyncTaskLoader<Cursor> implements D
 	public Cursor loadInBackground() {
 		Cursor cursor;
 		try {
-			DatabaseConnection connection = dao.getConnectionSource().getReadOnlyConnection();
+			DatabaseConnection connection = dao.getConnectionSource().getReadOnlyConnection(dao.getTableName());
 			AndroidCompiledStatement statement = (AndroidCompiledStatement) query.compile(connection, SELECT);
 			cursor = statement.getCursor();
 		} catch (SQLException e) {

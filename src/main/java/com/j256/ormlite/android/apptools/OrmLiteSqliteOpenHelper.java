@@ -192,7 +192,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		 * create or update the database. So we have to use the database argument and save a connection to it on the
 		 * AndroidConnectionSource, otherwise it will go recursive if the subclass calls getConnectionSource().
 		 */
-		DatabaseConnection conn = cs.getSpecialConnection();
+		DatabaseConnection conn = cs.getSpecialConnection(null);
 		boolean clearSpecial = false;
 		if (conn == null) {
 			conn = new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
@@ -223,7 +223,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 		 * create or update the database. So we have to use the database argument and save a connection to it on the
 		 * AndroidConnectionSource, otherwise it will go recursive if the subclass calls getConnectionSource().
 		 */
-		DatabaseConnection conn = cs.getSpecialConnection();
+		DatabaseConnection conn = cs.getSpecialConnection(null);
 		boolean clearSpecial = false;
 		if (conn == null) {
 			conn = new AndroidDatabaseConnection(db, true, cancelQueriesEnabled);
