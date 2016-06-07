@@ -206,6 +206,11 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	}
 
 	@Override
+	public Object getObject(int columnIndex) throws SQLException {
+		throw new SQLException("Android does not support Object type.");
+	}
+
+	@Override
 	public boolean wasNull(int columnIndex) {
 		return cursor.isNull(columnIndex);
 	}
