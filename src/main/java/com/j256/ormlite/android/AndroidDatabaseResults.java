@@ -9,12 +9,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.database.Cursor;
-
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.db.SqliteAndroidDatabaseType;
 import com.j256.ormlite.support.DatabaseResults;
+
+import android.database.Cursor;
 
 /**
  * Android implementation of our results object.
@@ -29,9 +29,10 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	private final String[] columnNames;
 	private final Map<String, Integer> columnNameMap;
 	private final ObjectCache objectCache;
+	private final boolean cacheStore;
 	private static final DatabaseType databaseType = new SqliteAndroidDatabaseType();
 
-	public AndroidDatabaseResults(Cursor cursor, ObjectCache objectCache) {
+	public AndroidDatabaseResults(Cursor cursor, ObjectCache objectCache, boolean cacheStore) {
 		this.cursor = cursor;
 		this.columnNames = cursor.getColumnNames();
 		if (this.columnNames.length >= MIN_NUM_COLUMN_NAMES_MAP) {
@@ -44,6 +45,7 @@ public class AndroidDatabaseResults implements DatabaseResults {
 			columnNameMap = null;
 		}
 		this.objectCache = objectCache;
+		this.cacheStore = cacheStore;
 	}
 
 	@Override
@@ -202,7 +204,8 @@ public class AndroidDatabaseResults implements DatabaseResults {
 
 	@Override
 	public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
-		throw new SQLException("Android does not support BigDecimal type.  Use BIG_DECIMAL or BIG_DECIMAL_STRING types");
+		throw new SQLException(
+				"Android does not support BigDecimal type.  Use BIG_DECIMAL or BIG_DECIMAL_STRING types");
 	}
 
 	@Override
@@ -216,8 +219,17 @@ public class AndroidDatabaseResults implements DatabaseResults {
 	}
 
 	@Override
-	public ObjectCache getObjectCache() {
+	public ObjectCache getObjectCacheForRetrieve() {
 		return objectCache;
+	}
+
+	@Override
+	public ObjectCache getObjectCacheForStore() {
+		if (cacheStore) {
+			return objectCache;
+		} else {
+			return null;
+		}
 	}
 
 	@Override

@@ -67,7 +67,7 @@ public abstract class OrmLiteCursorAdapter<T, ViewType extends View> extends Cur
 	 * Map a single row to our cursor object.
 	 */
 	protected T cursorToObject(Cursor cursor) throws SQLException {
-		return preparedQuery.mapRow(new AndroidDatabaseResults(cursor, null));
+		return preparedQuery.mapRow(new AndroidDatabaseResults(cursor, null, true));
 	}
 
 	/**

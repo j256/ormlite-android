@@ -151,9 +151,9 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 
 	@Override
 	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes,
-			int resultFlags) {
+			int resultFlags, boolean cacheStore) {
 		// resultFlags argument is not used in Android-land since the {@link Cursor} is bi-directional.
-		CompiledStatement stmt = new AndroidCompiledStatement(statement, db, type, cancelQueriesEnabled);
+		CompiledStatement stmt = new AndroidCompiledStatement(statement, db, type, cancelQueriesEnabled, cacheStore);
 		logger.trace("{}: compiled statement got {}: {}", this, stmt, statement);
 		return stmt;
 	}
@@ -201,7 +201,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		AndroidDatabaseResults results = null;
 		try {
 			cursor = db.rawQuery(statement, toStrings(args));
-			results = new AndroidDatabaseResults(cursor, objectCache);
+			results = new AndroidDatabaseResults(cursor, objectCache, true);
 			logger.trace("{}: queried for one result: {}", this, statement);
 			if (!results.first()) {
 				return null;
@@ -242,7 +242,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		AndroidDatabaseResults results = null;
 		try {
 			cursor = db.rawQuery(statement, toStrings(args));
-			results = new AndroidDatabaseResults(cursor, null);
+			results = new AndroidDatabaseResults(cursor, null, false);
 			long result;
 			if (results.first()) {
 				result = results.getLong(0);

@@ -37,17 +37,20 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	private final SQLiteDatabase db;
 	private final StatementType type;
 	private final boolean cancelQueriesEnabled;
+	private final boolean cacheStore;
 
 	private Cursor cursor;
 	private List<Object> args;
 	private Integer max;
 	private CancellationHook cancellationHook;
 
-	public AndroidCompiledStatement(String sql, SQLiteDatabase db, StatementType type, boolean cancelQueriesEnabled) {
+	public AndroidCompiledStatement(String sql, SQLiteDatabase db, StatementType type, boolean cancelQueriesEnabled,
+			boolean cacheStore) {
 		this.sql = sql;
 		this.db = db;
 		this.type = type;
 		this.cancelQueriesEnabled = cancelQueriesEnabled;
+		this.cacheStore = cacheStore;
 	}
 
 	@Override
@@ -66,7 +69,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		if (!type.isOkForQuery()) {
 			throw new IllegalArgumentException("Cannot call query on a " + type + " statement");
 		}
-		return new AndroidDatabaseResults(getCursor(), objectCache);
+		return new AndroidDatabaseResults(getCursor(), objectCache, cacheStore);
 	}
 
 	@Override
@@ -129,30 +132,30 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		}
 
 		switch (sqlType) {
-			case STRING :
-			case LONG_STRING :
-			case DATE :
-			case BOOLEAN :
-			case CHAR :
-			case BYTE :
-			case SHORT :
-			case INTEGER :
-			case LONG :
-			case FLOAT :
-			case DOUBLE :
+			case STRING:
+			case LONG_STRING:
+			case DATE:
+			case BOOLEAN:
+			case CHAR:
+			case BYTE:
+			case SHORT:
+			case INTEGER:
+			case LONG:
+			case FLOAT:
+			case DOUBLE:
 				args.add(parameterIndex, obj.toString());
 				break;
-			case BYTE_ARRAY :
-			case SERIALIZABLE :
+			case BYTE_ARRAY:
+			case SERIALIZABLE:
 				args.add(parameterIndex, obj);
 				break;
-			case BLOB :
+			case BLOB:
 				// this is only for derby serializable
-			case BIG_DECIMAL :
+			case BIG_DECIMAL:
 				// this should be handled as a STRING
 				throw new SQLException("Invalid Android type: " + sqlType);
-			case UNKNOWN :
-			default :
+			case UNKNOWN:
+			default:
 				throw new SQLException("Unknown sql argument type: " + sqlType);
 		}
 	}
