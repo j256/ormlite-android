@@ -185,7 +185,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 				if (max == null) {
 					finalSql = sql;
 				} else {
-					finalSql = sql + " " + max;
+					finalSql = sql + " LIMIT " + max;
 				}
 				if (cancelQueriesEnabled) {
 					cancellationHook = apiCompatibility.createCancellationHook();
