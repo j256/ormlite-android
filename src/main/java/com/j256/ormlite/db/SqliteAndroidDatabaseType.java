@@ -52,6 +52,15 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType {
 	}
 
 	@Override
+	public void appendEscapedEntityName(StringBuilder sb, String name) {
+		/*
+		 * Android Sqlite doesn't seem to be able to handle the 'foo'.'bar' form of the column name which is for
+		 * database.table I think so we just default to be single quoted like before.
+		 */
+		sb.append('`').append(name).append('`');
+	}
+
+	@Override
 	protected void appendBooleanType(StringBuilder sb, FieldType fieldType, int fieldWidth) {
 		// we have to convert booleans to numbers
 		appendShortType(sb, fieldType, fieldWidth);
@@ -64,7 +73,7 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType {
 		}
 		// we are only overriding certain types
 		switch (defaultPersister.getSqlType()) {
-			case DATE :
+			case DATE:
 				/*
 				 * We need to map the dates into their string equivalents because of mapping issues with Sqlite's
 				 * default date string formats.
@@ -76,7 +85,7 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType {
 				} else {
 					return DateStringType.getSingleton();
 				}
-			default :
+			default:
 				return super.getDataPersister(defaultPersister, fieldType);
 		}
 	}
