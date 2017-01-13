@@ -112,15 +112,15 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			db.setTransactionSuccessful();
 			db.endTransaction();
 			if (savepoint == null) {
-				logger.trace("{}: transaction is successfuly ended", this);
+				logger.trace("{}: transaction is successfully ended", this);
 			} else {
-				logger.trace("{}: transaction {} is successfuly ended", this, savepoint.getSavepointName());
+				logger.trace("{}: transaction {} is successfully ended", this, savepoint.getSavepointName());
 			}
 		} catch (android.database.SQLException e) {
 			if (savepoint == null) {
-				throw SqlExceptionUtil.create("problems commiting transaction", e);
+				throw SqlExceptionUtil.create("problems committing transaction", e);
 			} else {
-				throw SqlExceptionUtil.create("problems commiting transaction " + savepoint.getSavepointName(), e);
+				throw SqlExceptionUtil.create("problems committing transaction " + savepoint.getSavepointName(), e);
 			}
 		}
 	}
@@ -131,9 +131,9 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			// no setTransactionSuccessful() means it is a rollback
 			db.endTransaction();
 			if (savepoint == null) {
-				logger.trace("{}: transaction is ended, unsuccessfuly", this);
+				logger.trace("{}: transaction is ended, unsuccessfully", this);
 			} else {
-				logger.trace("{}: transaction {} is ended, unsuccessfuly", this, savepoint.getSavepointName());
+				logger.trace("{}: transaction {} is ended, unsuccessfully", this, savepoint.getSavepointName());
 			}
 		} catch (android.database.SQLException e) {
 			if (savepoint == null) {
