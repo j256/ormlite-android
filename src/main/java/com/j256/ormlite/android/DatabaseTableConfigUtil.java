@@ -176,6 +176,7 @@ public class DatabaseTableConfigUtil {
 	private static final int VERSION = 27;
 	private static final int FOREIGN_COLUMN_NAME = 28;
 	private static final int READ_ONLY = 29;
+	private static final int FULL_COLUMN_DEFINITON = 30;
 
 	/**
 	 * Convert the name of the @DatabaseField fields into a number for easy processing later.
@@ -231,6 +232,8 @@ public class DatabaseTableConfigUtil {
 			return ALLOW_GENERATED_ID_INSERT;
 		} else if (configName.equals("columnDefinition")) {
 			return COLUMN_DEFINITON;
+		} else if (configName.equals("fullColumnDefinition")) {
+			return FULL_COLUMN_DEFINITON;
 		} else if (configName.equals("foreignAutoCreate")) {
 			return FOREIGN_AUTO_CREATE;
 		} else if (configName.equals("version")) {
@@ -314,99 +317,102 @@ public class DatabaseTableConfigUtil {
 	 */
 	private static void assignConfigField(int configNum, DatabaseFieldConfig config, Field field, Object value) {
 		switch (configNum) {
-			case COLUMN_NAME :
+			case COLUMN_NAME:
 				config.setColumnName(valueIfNotBlank((String) value));
 				break;
-			case DATA_TYPE :
+			case DATA_TYPE:
 				config.setDataType((DataType) value);
 				break;
-			case DEFAULT_VALUE :
+			case DEFAULT_VALUE:
 				String defaultValue = (String) value;
 				if (!(defaultValue == null || defaultValue.equals(DatabaseField.DEFAULT_STRING))) {
 					config.setDefaultValue(defaultValue);
 				}
 				break;
-			case WIDTH :
+			case WIDTH:
 				config.setWidth((Integer) value);
 				break;
-			case CAN_BE_NULL :
+			case CAN_BE_NULL:
 				config.setCanBeNull((Boolean) value);
 				break;
-			case ID :
+			case ID:
 				config.setId((Boolean) value);
 				break;
-			case GENERATED_ID :
+			case GENERATED_ID:
 				config.setGeneratedId((Boolean) value);
 				break;
-			case GENERATED_ID_SEQUENCE :
+			case GENERATED_ID_SEQUENCE:
 				config.setGeneratedIdSequence(valueIfNotBlank((String) value));
 				break;
-			case FOREIGN :
+			case FOREIGN:
 				config.setForeign((Boolean) value);
 				break;
-			case USE_GET_SET :
+			case USE_GET_SET:
 				config.setUseGetSet((Boolean) value);
 				break;
-			case UNKNOWN_ENUM_NAME :
+			case UNKNOWN_ENUM_NAME:
 				config.setUnknownEnumValue(DatabaseFieldConfig.findMatchingEnumVal(field, (String) value));
 				break;
-			case THROW_IF_NULL :
+			case THROW_IF_NULL:
 				config.setThrowIfNull((Boolean) value);
 				break;
-			case PERSISTED :
+			case PERSISTED:
 				config.setPersisted((Boolean) value);
 				break;
-			case FORMAT :
+			case FORMAT:
 				config.setFormat(valueIfNotBlank((String) value));
 				break;
-			case UNIQUE :
+			case UNIQUE:
 				config.setUnique((Boolean) value);
 				break;
-			case UNIQUE_COMBO :
+			case UNIQUE_COMBO:
 				config.setUniqueCombo((Boolean) value);
 				break;
-			case INDEX :
+			case INDEX:
 				config.setIndex((Boolean) value);
 				break;
-			case UNIQUE_INDEX :
+			case UNIQUE_INDEX:
 				config.setUniqueIndex((Boolean) value);
 				break;
-			case INDEX_NAME :
+			case INDEX_NAME:
 				config.setIndexName(valueIfNotBlank((String) value));
 				break;
-			case UNIQUE_INDEX_NAME :
+			case UNIQUE_INDEX_NAME:
 				config.setUniqueIndexName(valueIfNotBlank((String) value));
 				break;
-			case FOREIGN_AUTO_REFRESH :
+			case FOREIGN_AUTO_REFRESH:
 				config.setForeignAutoRefresh((Boolean) value);
 				break;
-			case MAX_FOREIGN_AUTO_REFRESH_LEVEL :
+			case MAX_FOREIGN_AUTO_REFRESH_LEVEL:
 				config.setMaxForeignAutoRefreshLevel((Integer) value);
 				break;
-			case PERSISTER_CLASS :
+			case PERSISTER_CLASS:
 				@SuppressWarnings("unchecked")
 				Class<? extends DataPersister> clazz = (Class<? extends DataPersister>) value;
 				config.setPersisterClass(clazz);
 				break;
-			case ALLOW_GENERATED_ID_INSERT :
+			case ALLOW_GENERATED_ID_INSERT:
 				config.setAllowGeneratedIdInsert((Boolean) value);
 				break;
-			case COLUMN_DEFINITON :
+			case COLUMN_DEFINITON:
 				config.setColumnDefinition(valueIfNotBlank((String) value));
 				break;
-			case FOREIGN_AUTO_CREATE :
+			case FULL_COLUMN_DEFINITON:
+				config.setFullColumnDefinition(valueIfNotBlank((String) value));
+				break;
+			case FOREIGN_AUTO_CREATE:
 				config.setForeignAutoCreate((Boolean) value);
 				break;
-			case VERSION :
+			case VERSION:
 				config.setVersion((Boolean) value);
 				break;
-			case FOREIGN_COLUMN_NAME :
+			case FOREIGN_COLUMN_NAME:
 				config.setForeignColumnName(valueIfNotBlank((String) value));
 				break;
-			case READ_ONLY :
+			case READ_ONLY:
 				config.setReadOnly((Boolean) value);
 				break;
-			default :
+			default:
 				throw new IllegalStateException("Could not find support for DatabaseField number " + configNum);
 		}
 	}
