@@ -4,6 +4,11 @@ machine:
     version: openjdk7
 
 # we need the -U to make sure we download the latest ormlite-core SNAPSHOT
+dependencies:
+  override:
+    - mvn -U dependency:go-offline
+
+# we need the -U to make sure we download the latest ormlite-core SNAPSHOT
 test:
   override:
     - mvn -U test
