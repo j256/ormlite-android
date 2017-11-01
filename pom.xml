@@ -58,42 +58,6 @@
 	</developers>
 	<profiles>
 		<profile>
-			<id>sf</id>
-			<distributionManagement>
-				<repository>
-					<id>sourceforge</id>
-					<name>SourceForge</name>
-					<url>sftp://graywatson,ormlite@frs.sourceforge.net:/home/frs/project/o/or/ormlite/releases</url>
-				</repository>
-				<snapshotRepository>
-					<id>sourceforge</id>
-					<name>SourceForge</name>
-					<url>sftp://graywatson,ormlite@frs.sourceforge.net:/home/frs/project/o/or/ormlite/snapshots</url>
-				</snapshotRepository>
-			</distributionManagement>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.1</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>${gpgPhase}</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<keyname>D3412AC1</keyname>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
 			<id>st</id>
 			<distributionManagement>
 				<repository>
@@ -128,6 +92,29 @@
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+		<profile>
+			<!-- we need this profile because otherwise we won't find the ormlite-core SNAPSHOT release -->
+			<id>testing</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<repositories>
+				<repository>
+					<id>j256.com-snapshot</id>
+					<url>s3://j256.com/maven/snapshot</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+				<repository>
+					<id>j256.com-release</id>
+					<url>s3://j256.com/maven/release</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
 		</profile>
 	</profiles>
 	<build>
@@ -320,6 +307,14 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<extensions>
+			<extension>
+				<!-- this gives us the ability to contact our s3://j256.com/ repo -->
+				<groupId>org.springframework.build</groupId>
+				<artifactId>aws-maven</artifactId>
+				<version>5.0.0.RELEASE</version>
+			</extension>
+		</extensions>
 	</build>
 	<dependencies>
 		<!-- =================================================================== -->
@@ -381,6 +376,9 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- =================================================================== -->
+		<!-- test dependencies -->
+		<!-- =================================================================== -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

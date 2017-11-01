@@ -3,7 +3,10 @@ machine:
   java:
     version: openjdk7
 
+# we need the -U to make sure we download the latest ormlite-core SNAPSHOT
 test:
+  override:
+    - mvn -U test
   post:
     - mvn jacoco:report
     - bash <(curl -s https://codecov.io/bash)
