@@ -287,8 +287,8 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 
 	@Override
 	public boolean isTableExists(String tableName) {
-		Cursor cursor =
-				db.rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '" + tableName + "'", null);
+		Cursor cursor = db.rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = ?",
+				new String[] { tableName });
 		try {
 			boolean result;
 			if (cursor.getCount() > 0) {
@@ -340,35 +340,35 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 			} else {
 				SqlType sqlType = argFieldTypes[i].getSqlType();
 				switch (sqlType) {
-					case STRING :
-					case LONG_STRING :
-					case CHAR :
+					case STRING:
+					case LONG_STRING:
+					case CHAR:
 						stmt.bindString(i + 1, arg.toString());
 						break;
-					case BOOLEAN :
-					case BYTE :
-					case SHORT :
-					case INTEGER :
-					case LONG :
+					case BOOLEAN:
+					case BYTE:
+					case SHORT:
+					case INTEGER:
+					case LONG:
 						stmt.bindLong(i + 1, ((Number) arg).longValue());
 						break;
-					case FLOAT :
-					case DOUBLE :
+					case FLOAT:
+					case DOUBLE:
 						stmt.bindDouble(i + 1, ((Number) arg).doubleValue());
 						break;
-					case BYTE_ARRAY :
-					case SERIALIZABLE :
+					case BYTE_ARRAY:
+					case SERIALIZABLE:
 						stmt.bindBlob(i + 1, (byte[]) arg);
 						break;
-					case DATE :
+					case DATE:
 						// this is mapped to a STRING under Android
-					case BLOB :
+					case BLOB:
 						// this is only for derby serializable
-					case BIG_DECIMAL :
+					case BIG_DECIMAL:
 						// this should be handled as a STRING
 						throw new SQLException("Invalid Android type: " + sqlType);
-					case UNKNOWN :
-					default :
+					case UNKNOWN:
+					default:
 						throw new SQLException("Unknown sql argument type: " + sqlType);
 				}
 			}
