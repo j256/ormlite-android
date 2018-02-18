@@ -20,9 +20,21 @@ public class OrmLiteConfigUtilTest {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		OrmLiteConfigUtil.writeConfigFile(output, new Class[] { Foo.class });
 		String result = output.toString();
-		assertTrue(result, result.contains(lineSeparator +
-			"fieldName=id" + lineSeparator +
-			"id=true" + lineSeparator));
+		assertTrue(result,
+				result.contains(lineSeparator //
+						+ "fieldName=id" //
+						+ lineSeparator + "id=true" + lineSeparator));
+	}
+
+	@Test
+	public void testBasicSorted() throws Exception {
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		OrmLiteConfigUtil.writeConfigFile(output, new Class[] { Foo.class }, true);
+		String result = output.toString();
+		assertTrue(result,
+				result.contains(lineSeparator //
+						+ "fieldName=id" //
+						+ lineSeparator + "id=true" + lineSeparator));
 	}
 
 	@Test
@@ -30,9 +42,21 @@ public class OrmLiteConfigUtilTest {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		OrmLiteConfigUtil.writeConfigFile(output, new File("src/test/java/com/j256/ormlite/android/apptools/"));
 		String result = output.toString();
-		assertTrue(result, result.contains(lineSeparator +
-			"fieldName=id" + lineSeparator +
-			"id=true" + lineSeparator));
+		assertTrue(result,
+				result.contains(lineSeparator //
+						+ "fieldName=id" + lineSeparator //
+						+ "id=true" + lineSeparator));
+	}
+
+	@Test
+	public void testCurrentDirSorted() throws Exception {
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		OrmLiteConfigUtil.writeConfigFile(output, new File("src/test/java/com/j256/ormlite/android/apptools/"), true);
+		String result = output.toString();
+		assertTrue(result,
+				result.contains(lineSeparator //
+						+ "fieldName=id" + lineSeparator //
+						+ "id=true" + lineSeparator));
 	}
 
 	@Test
@@ -40,9 +64,10 @@ public class OrmLiteConfigUtilTest {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		OrmLiteConfigUtil.writeConfigFile(output, new Class[] { ForeignCollectionTest.class });
 		String result = output.toString();
-		assertTrue(result, result.contains(lineSeparator +
-			"fieldName=collection" + lineSeparator +
-			"foreignCollection=true" + lineSeparator));
+		assertTrue(result,
+				result.contains(lineSeparator //
+						+ "fieldName=collection" + lineSeparator //
+						+ "foreignCollection=true" + lineSeparator));
 	}
 
 	@Test
@@ -50,9 +75,10 @@ public class OrmLiteConfigUtilTest {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		OrmLiteConfigUtil.writeConfigFile(output, new Class[] { Foo.class });
 		String result = output.toString();
-		assertTrue(result, result.contains(lineSeparator +
-			"fieldName=foreign" + lineSeparator +
-			"foreign=true" + lineSeparator));
+		assertTrue(result,
+				result.contains(lineSeparator //
+						+ "fieldName=foreign" + lineSeparator //
+						+ "foreign=true" + lineSeparator));
 	}
 
 	protected static class Foo {
