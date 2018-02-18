@@ -179,56 +179,63 @@ public class OrmLiteConfigUtil {
 		writer.newLine();
 	}
 
-	private static void findAnnotatedClasses(List<Class<?>> classList, File dir, int level) throws SQLException,
-			IOException {
-		for (File file : dir.listFiles()) {
-			if (file.isDirectory()) {
-				// recurse if we aren't deep enough
-				if (level < maxFindSourceLevel) {
-					findAnnotatedClasses(classList, file, level + 1);
-				}
-				continue;
-			}
-			// skip non .java files
-			if (!file.getName().endsWith(".java")) {
-				continue;
-			}
-			String packageName = getPackageOfClass(file);
-			if (packageName == null) {
-				System.err.println("Could not find package name for: " + file);
-				continue;
-			}
-			// get the filename and cut off the .java
-			String name = file.getName();
-			name = name.substring(0, name.length() - ".java".length());
-			String className = packageName + "." + name;
-			Class<?> clazz;
-			try {
-				clazz = Class.forName(className);
-			} catch (Throwable t) {
-				// amazingly, this sometimes throws an Error
-				System.err.println("Could not load class file for: " + file);
-				System.err.println("     " + t);
-				continue;
-			}
-			if (classHasAnnotations(clazz)) {
-				classList.add(clazz);
-			}
-			// handle inner classes
-			try {
-				for (Class<?> innerClazz : clazz.getDeclaredClasses()) {
-					if (classHasAnnotations(innerClazz)) {
-						classList.add(innerClazz);
-					}
-				}
-			} catch (Throwable t) {
-				// amazingly, this sometimes throws an Error
-				System.err.println("Could not load inner classes for: " + clazz);
-				System.err.println("     " + t);
-				continue;
-			}
-		}
-	}
+    private static void findAnnotatedClasses(List<Class<?>> classList, File dir, int level) throws SQLException,
+            IOException {
+        List<File> files = Arrays.asList(dir.listFiles());
+        Collections.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File file1, File file2) {
+                return file1.getName().compareTo(file2.getName());
+            }
+        });
+        for (File file : files) {
+            if (file.isDirectory()) {
+                // recurse if we aren't deep enough
+                if (level < maxFindSourceLevel) {
+                    findAnnotatedClasses(classList, file, level + 1);
+                }
+                continue;
+            }
+            // skip non .java files
+            if (!file.getName().endsWith(".java")) {
+                continue;
+            }
+            String packageName = getPackageOfClass(file);
+            if (packageName == null) {
+                System.err.println("Could not find package name for: " + file);
+                continue;
+            }
+            // get the filename and cut off the .java
+            String name = file.getName();
+            name = name.substring(0, name.length() - ".java".length());
+            String className = packageName + "." + name;
+            Class<?> clazz;
+            try {
+                clazz = Class.forName(className);
+            } catch (Throwable t) {
+                // amazingly, this sometimes throws an Error
+                System.err.println("Could not load class file for: " + file);
+                System.err.println("     " + t);
+                continue;
+            }
+            if (classHasAnnotations(clazz)) {
+                classList.add(clazz);
+            }
+            // handle inner classes
+            try {
+                for (Class<?> innerClazz : clazz.getDeclaredClasses()) {
+                    if (classHasAnnotations(innerClazz)) {
+                        classList.add(innerClazz);
+                    }
+                }
+            } catch (Throwable t) {
+                // amazingly, this sometimes throws an Error
+                System.err.println("Could not load inner classes for: " + clazz);
+                System.err.println("     " + t);
+                continue;
+            }
+        }
+    }
 
 	private static void writeConfigForTable(BufferedWriter writer, Class<?> clazz) throws SQLException, IOException {
 		String tableName = DatabaseTableConfig.extractTableName(clazz);
