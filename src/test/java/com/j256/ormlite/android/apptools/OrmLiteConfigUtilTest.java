@@ -1,5 +1,6 @@
 package com.j256.ormlite.android.apptools;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -29,12 +30,16 @@ public class OrmLiteConfigUtilTest {
 	@Test
 	public void testBasicSorted() throws Exception {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		OrmLiteConfigUtil.writeConfigFile(output, new Class[] { Foo.class }, true);
-		String result = output.toString();
-		assertTrue(result,
-				result.contains(lineSeparator //
+		OrmLiteConfigUtil.writeConfigFile(output, new Class[] { Foo.class, Bar.class }, false);
+		String result1 = output.toString();
+		assertTrue(result1,
+				result1.contains(lineSeparator //
 						+ "fieldName=id" //
 						+ lineSeparator + "id=true" + lineSeparator));
+		output.reset();
+		OrmLiteConfigUtil.writeConfigFile(output, new Class[] { Foo.class, Bar.class }, true);
+		String result2 = output.toString();
+		assertFalse(result2.equals(result1));
 	}
 
 	@Test
@@ -86,6 +91,13 @@ public class OrmLiteConfigUtilTest {
 		int id;
 		@DatabaseField(foreign = true)
 		Foreign foreign;
+	}
+
+	protected static class Bar {
+		@DatabaseField(id = true)
+		int id;
+		@DatabaseField(foreign = true)
+		String zipper;
 	}
 
 	protected static class Foreign {
