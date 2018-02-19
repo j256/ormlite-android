@@ -61,7 +61,7 @@ public class DatabaseTableConfigUtil {
 	public static <T> DatabaseTableConfig<T> fromClass(ConnectionSource connectionSource, Class<T> clazz)
 			throws SQLException {
 		DatabaseType databaseType = connectionSource.getDatabaseType();
-		String tableName = DatabaseTableConfig.extractTableName(clazz);
+		String tableName = DatabaseTableConfig.extractTableName(databaseType, clazz);
 		List<DatabaseFieldConfig> fieldConfigs = new ArrayList<DatabaseFieldConfig>();
 		for (Class<?> classWalk = clazz; classWalk != null; classWalk = classWalk.getSuperclass()) {
 			for (Field field : classWalk.getDeclaredFields()) {
