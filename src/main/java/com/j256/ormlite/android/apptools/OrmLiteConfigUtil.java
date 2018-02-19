@@ -331,7 +331,7 @@ public class OrmLiteConfigUtil {
 
 	private static void writeConfigForTable(BufferedWriter writer, Class<?> clazz, boolean sortClasses)
 			throws SQLException, IOException {
-		String tableName = DatabaseTableConfig.extractTableName(clazz);
+		String tableName = DatabaseTableConfig.extractTableName(databaseType, clazz);
 		List<DatabaseFieldConfig> fieldConfigs = new ArrayList<DatabaseFieldConfig>();
 		// walk up the classes finding the fields
 		try {
