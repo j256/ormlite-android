@@ -10,7 +10,7 @@ jobs:
           key: j256-ormlite-android-{{ checksum "pom.xml" }}
       - run:
           name: Get maven project dependencies
-          command: mvn -U dependency:go-offline compile
+          command: mvn -P testing -U dependency:go-offline compile
       # save the project dependencies
       - save_cache:
           paths:
@@ -18,7 +18,7 @@ jobs:
           key: j256-ormlite-android-{{ checksum "pom.xml" }}
       - run:
           name: mvn package
-          command: mvn package
+          command: mvn -P testing package
       # uploads the test metadata from the `target/surefire-reports` directory so that it can show up in the CircleCI dashboard. 
       - store_test_results: 
           path: target/surefire-reports
