@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<!-- ormlite configuration file for Maven (http://maven.apache.org/) -->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.j256.ormlite</groupId>
@@ -39,7 +40,7 @@
 		<easymock-version>3.4</easymock-version>
 		<h2-version>1.2.128</h2-version>
 		<junit-version>4.8.1</junit-version>
-		<log4j-version>1.2.15</log4j-version>
+		<log4j-version>1.2.17</log4j-version>
 		<ormlite-version>${project.version}</ormlite-version>
 	</properties>
 	<developers>
@@ -251,7 +252,7 @@
 					<outputFile>src/main/java/com/j256/ormlite/android/AndroidDatabaseConnection.java</outputFile>
 					<regex>true</regex>
 					<token>(VERSION__).*(__)</token>
-					<value>$1${version}$2</value>
+					<value>$1${project.version}$2</value>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -326,7 +327,6 @@
 		</extensions>
 	</build>
 	<dependencies>
-		<!-- =================================================================== -->
 		<!-- main dependencies -->
 		<dependency>
 			<groupId>com.j256.ormlite</groupId>
@@ -348,7 +348,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- =================================================================== -->
 		<!-- test dependencies -->
 		<dependency>
 			<groupId>com.j256.ormlite</groupId>
@@ -385,9 +384,8 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- =================================================================== -->
+
 		<!-- test dependencies -->
-		<!-- =================================================================== -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
