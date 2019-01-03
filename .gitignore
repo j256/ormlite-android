@@ -1,2 +1,8 @@
+target
+.settings
+.classpath
+.gitignore
+.project
+.apt_generated
 .idea
 *.iml
