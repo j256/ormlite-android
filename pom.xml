@@ -41,7 +41,7 @@
 		<h2-version>1.2.128</h2-version>
 		<junit-version>4.8.1</junit-version>
 		<log4j-version>1.2.17</log4j-version>
-sure		<ormlite-version>${project.version}</ormlite-version>
+		<ormlite-version>${project.version}</ormlite-version>
 	</properties>
 	<developers>
 		<developer>
