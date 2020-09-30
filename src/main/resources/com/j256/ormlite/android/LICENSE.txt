@@ -1,6 +1,6 @@
-Copyright 2010 to 2011 by Gray Watson
+ISC License (https://opensource.org/licenses/ISC)
 
-This file is part of the ORMLite package.
+Copyright 2010 to 2020, Gray Watson
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -13,5 +13,3 @@ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
-The author may be contacted via http://ormlite.sourceforge.net/
