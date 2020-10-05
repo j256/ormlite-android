@@ -67,7 +67,7 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 *            Version of the database we are opening. This causes {@link #onUpgrade(SQLiteDatabase, int, int)} to be
 	 *            called if the stored database is a different version.
      * @param errorHandler 
-	 *            The {@link <a href="https://developer.android.com/reference/android/database/DatabaseErrorHandler">DatabaseErrorHandler</a>} to be used when sqlite reports database
+	 *            The <a href="https://developer.android.com/reference/android/database/DatabaseErrorHandler">DatabaseErrorHandler</a> to be used when sqlite reports database
      *            corruption, or null to use the default error handler.
 	 */
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion, DatabaseErrorHandler errorHandler) {
