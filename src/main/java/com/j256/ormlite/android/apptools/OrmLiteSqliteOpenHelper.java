@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 
 import android.content.Context;
+import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -52,6 +53,25 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion) {
 		super(context, databaseName, factory, databaseVersion);
+		logger.trace("{}: constructed connectionSource {}", this, connectionSource);
+	}
+
+	/**
+	 * @param context
+	 *            Associated content from the application. This is needed to locate the database.
+	 * @param databaseName
+	 *            Name of the database we are opening.
+	 * @param factory
+	 *            Cursor factory or null if none.
+	 * @param databaseVersion
+	 *            Version of the database we are opening. This causes {@link #onUpgrade(SQLiteDatabase, int, int)} to be
+	 *            called if the stored database is a different version.
+	 * @param errorHandler 
+	 *            The <a href="https://developer.android.com/reference/android/database/DatabaseErrorHandler">DatabaseErrorHandler</a> to be used when sqlite reports database
+	 *            corruption, or null to use the default error handler.
+	 */
+	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion, DatabaseErrorHandler errorHandler) {
+		super(context, databaseName, factory, databaseVersion, errorHandler);
 		logger.trace("{}: constructed connectionSource {}", this, connectionSource);
 	}
 
