@@ -292,7 +292,8 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 
 	@Override
 	public boolean isTableExists(String tableName) {
-		Cursor cursor = db.rawQuery("SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = ?",
+		String queryString = "SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = ?";
+		Cursor cursor = db.rawQuery(queryString ,
 				new String[] { tableName });
 		try {
 			boolean result;
