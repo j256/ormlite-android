@@ -1,6 +1,7 @@
 package com.j256.ormlite.android;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
@@ -308,6 +309,17 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 	}
 
+	@Override
+	public Connection getUnderlyingConnection() {
+		// not relevant to android-land
+		return null;
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "@" + Integer.toHexString(super.hashCode());
+	}
+
 	private int update(String statement, Object[] args, FieldType[] argFieldTypes, String label) throws SQLException {
 		SQLiteStatement stmt = null;
 		try {
@@ -395,11 +407,6 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		}
 
 		return strings;
-	}
-
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + "@" + Integer.toHexString(super.hashCode());
 	}
 
 	/**
