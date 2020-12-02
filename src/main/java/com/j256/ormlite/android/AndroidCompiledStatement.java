@@ -171,6 +171,11 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		// as far as I could tell this is not supported by Android API
 	}
 
+	@Override
+	public String getStatement() {
+		return sql;
+	}
+
 	/***
 	 * This is mostly an internal class but is exposed for those people who need access to the Cursor itself.
 	 * 
@@ -203,7 +208,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "@" + Integer.toHexString(super.hashCode());
+		return sql;
 	}
 
 	/**
