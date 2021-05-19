@@ -40,7 +40,7 @@ import android.util.Log;
  */
 public class AndroidLogBackend implements LogBackend {
 
-	private final static String ALL_LOGS_NAME = "simplelogging";
+	private final static String ALL_LOGS_NAME = "ORMLite";
 	// check to see if the android level has changed every so often
 	private final static int REFRESH_LEVEL_CACHE_EVERY = 200;
 
