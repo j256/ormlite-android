@@ -1,18 +1,21 @@
 package com.j256.ormlite.android;
 
-import android.util.Log;
-
+import com.j256.ormlite.logger.Level;
+import com.j256.ormlite.logger.LogBackend;
+import com.j256.ormlite.logger.LogBackendFactory;
 import com.j256.ormlite.logger.LoggerFactory;
 
+import android.util.Log;
+
 /**
- * Implementation of our logger which delegates to the internal Android logger.
+ * Log backend that delegates to the internal Android logger.
  * 
  * <p>
  * To see log messages you will do something like:
  * </p>
  * 
  * <pre>
- * adb shell setprop log.tag.OrmLiteBaseActivity VERBOSE
+ * adb shell setprop log.tag.YourActivity VERBOSE
  * </pre>
  * 
  * <p>
@@ -26,38 +29,40 @@ import com.j256.ormlite.logger.LoggerFactory;
  * </pre>
  * 
  * <p>
- * To see all ORMLite log messages use:
+ * To see all log messages use:
  * </p>
  * 
  * <pre>
- * adb shell setprop log.tag.ORMLite DEBUG
+ * adb shell setprop log.tag.simplelogging DEBUG
  * </pre>
  * 
  * @author graywatson
  */
-public class AndroidLog implements com.j256.ormlite.logger.Log {
+public class AndroidLogBackend implements LogBackend {
 
 	private final static String ALL_LOGS_NAME = "ORMLite";
+	// check to see if the android level has changed every so often
 	private final static int REFRESH_LEVEL_CACHE_EVERY = 200;
 
 	private final static int MAX_TAG_LENGTH = 23;
-	private String className;
+	private final String className;
 
 	// we do this because supposedly Log.isLoggable() always does IO
 	private volatile int levelCacheC = 0;
 	private final boolean levelCache[];
 
-	public AndroidLog(String className) {
+	public AndroidLogBackend(String className) {
 		// get the last part of the class name
-		this.className = LoggerFactory.getSimpleClassName(className);
+		String simpleName = LoggerFactory.getSimpleClassName(className);
 		// make sure that our tag length is not too long
-		int length = this.className.length();
+		int length = simpleName.length();
 		if (length > MAX_TAG_LENGTH) {
-			this.className = this.className.substring(length - MAX_TAG_LENGTH, length);
+			simpleName = this.className.substring(length - MAX_TAG_LENGTH, length);
 		}
+		this.className = simpleName;
 		// find the maximum level value
 		int maxLevel = 0;
-		for (com.j256.ormlite.logger.Log.Level level : com.j256.ormlite.logger.Log.Level.values()) {
+		for (Level level : Level.values()) {
 			int androidLevel = levelToAndroidLevel(level);
 			if (androidLevel > maxLevel) {
 				maxLevel = androidLevel;
@@ -85,25 +90,25 @@ public class AndroidLog implements com.j256.ormlite.logger.Log {
 	@Override
 	public void log(Level level, String msg) {
 		switch (level) {
-			case TRACE :
+			case TRACE:
 				Log.v(className, msg);
 				break;
-			case DEBUG :
+			case DEBUG:
 				Log.d(className, msg);
 				break;
-			case INFO :
-				Log.i(className, msg);
-				break;
-			case WARNING :
+			/* INFO below */
+			case WARNING:
 				Log.w(className, msg);
 				break;
-			case ERROR :
+			case ERROR:
 				Log.e(className, msg);
 				break;
-			case FATAL :
+			case FATAL:
+				// no fatal level
 				Log.e(className, msg);
 				break;
-			default :
+			case INFO:
+			default:
 				Log.i(className, msg);
 				break;
 		}
@@ -112,32 +117,32 @@ public class AndroidLog implements com.j256.ormlite.logger.Log {
 	@Override
 	public void log(Level level, String msg, Throwable t) {
 		switch (level) {
-			case TRACE :
+			case TRACE:
 				Log.v(className, msg, t);
 				break;
-			case DEBUG :
+			case DEBUG:
 				Log.d(className, msg, t);
 				break;
-			case INFO :
-				Log.i(className, msg, t);
-				break;
-			case WARNING :
+			/* INFO below */
+			case WARNING:
 				Log.w(className, msg, t);
 				break;
-			case ERROR :
+			case ERROR:
 				Log.e(className, msg, t);
 				break;
-			case FATAL :
+			case FATAL:
+				// no level higher than e
 				Log.e(className, msg, t);
 				break;
-			default :
+			case INFO:
+			default:
 				Log.i(className, msg, t);
 				break;
 		}
 	}
 
 	private void refreshLevelCache() {
-		for (com.j256.ormlite.logger.Log.Level level : com.j256.ormlite.logger.Log.Level.values()) {
+		for (Level level : Level.values()) {
 			int androidLevel = levelToAndroidLevel(level);
 			if (androidLevel < levelCache.length) {
 				levelCache[androidLevel] = isLevelEnabledInternal(androidLevel);
@@ -150,22 +155,32 @@ public class AndroidLog implements com.j256.ormlite.logger.Log {
 		return Log.isLoggable(className, androidLevel) || Log.isLoggable(ALL_LOGS_NAME, androidLevel);
 	}
 
-	private int levelToAndroidLevel(com.j256.ormlite.logger.Log.Level level) {
+	private int levelToAndroidLevel(Level level) {
 		switch (level) {
-			case TRACE :
+			case TRACE:
 				return Log.VERBOSE;
-			case DEBUG :
+			case DEBUG:
 				return Log.DEBUG;
-			case INFO :
-				return Log.INFO;
-			case WARNING :
+			/* INFO below */
+			case WARNING:
 				return Log.WARN;
-			case ERROR :
+			case ERROR:
 				return Log.ERROR;
-			case FATAL :
+			case FATAL:
 				return Log.ERROR;
-			default :
+			case INFO:
+			default:
 				return Log.INFO;
+		}
+	}
+
+	/**
+	 * Factory for generating AndroidLogBackend instances.
+	 */
+	public static class AndroidLogBackendFactory implements LogBackendFactory {
+		@Override
+		public LogBackend createLogBackend(String classLabel) {
+			return new AndroidLogBackend(classLabel);
 		}
 	}
 }
