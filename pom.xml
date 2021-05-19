@@ -37,7 +37,7 @@
 		<android-support-version>r6</android-support-version>
 		<!-- external test package versions -->
 		<easymock-version>3.4</easymock-version>
-		<h2-version>1.2.128</h2-version>
+		<h2-version>1.4.200</h2-version>
 		<junit-version>4.13.1</junit-version>
 		<!-- yes we know this is an issue but it is here for backwards compatibility -->
 		<log4j-version>1.2.17</log4j-version>
@@ -74,11 +74,10 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.1</version>
+						<version>1.6</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
-								<phase>${gpgPhase}</phase>
 								<goals>
 									<goal>sign</goal>
 								</goals>
@@ -144,7 +143,7 @@
 				<configuration>
 					<mavenExecutorId>forked-path</mavenExecutorId>
 					<useReleaseProfile>false</useReleaseProfile>
-					<arguments>-Psonatype-oss-release -DgpgPhase=${gpgPhase} -Dgpg.passphrase=${gpg.passphrase}</arguments>
+					<arguments>-Psonatype-oss-release</arguments>
 				</configuration>
 			</plugin>
 			<plugin>
