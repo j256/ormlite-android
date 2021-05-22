@@ -57,7 +57,7 @@ public class AndroidLogBackend implements LogBackend {
 		// make sure that our tag length is not too long
 		int length = simpleName.length();
 		if (length > MAX_TAG_LENGTH) {
-			simpleName = this.className.substring(length - MAX_TAG_LENGTH, length);
+			simpleName = className.substring(length - MAX_TAG_LENGTH, length);
 		}
 		this.className = simpleName;
 		// find the maximum level value
