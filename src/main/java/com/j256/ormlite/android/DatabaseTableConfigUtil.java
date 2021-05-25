@@ -177,6 +177,7 @@ public class DatabaseTableConfigUtil {
 	private static final int FOREIGN_COLUMN_NAME = 28;
 	private static final int READ_ONLY = 29;
 	private static final int FULL_COLUMN_DEFINITON = 30;
+	private static final int JAVAX_ENTITY = 31;
 
 	/**
 	 * Convert the name of the @DatabaseField fields into a number for easy processing later.
@@ -242,6 +243,8 @@ public class DatabaseTableConfigUtil {
 			return FOREIGN_COLUMN_NAME;
 		} else if (configName.equals("readOnly")) {
 			return READ_ONLY;
+		} else if (configName.equals("javaxEntity")) {
+			return JAVAX_ENTITY;
 		} else {
 			throw new IllegalStateException("Could not find support for DatabaseField " + configName);
 		}
@@ -411,6 +414,9 @@ public class DatabaseTableConfigUtil {
 				break;
 			case READ_ONLY:
 				config.setReadOnly((Boolean) value);
+				break;
+			case JAVAX_ENTITY:
+				config.setJavaxEntity((Boolean) value);
 				break;
 			default:
 				throw new IllegalStateException("Could not find support for DatabaseField number " + configNum);
