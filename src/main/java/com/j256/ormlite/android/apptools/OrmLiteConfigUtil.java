@@ -55,7 +55,12 @@ import com.j256.ormlite.table.DatabaseTableConfigLoader;
  * </p>
  * 
  * @author graywatson
+ * 
+ * @deprecated As of version 4.49 configuration files have been replaced by
+ *             automatic annotation processing at compile time.
+ * @see com.j256.ormlite.android.annotations.Database
  */
+@Deprecated
 public class OrmLiteConfigUtil {
 
 	/**
