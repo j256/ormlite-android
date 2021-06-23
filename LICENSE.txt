@@ -1,6 +1,6 @@
 ISC License (https://opensource.org/licenses/ISC)
 
-Copyright 2019, Gray Watson
+Copyright 2021, Gray Watson
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
