@@ -8,6 +8,7 @@ import java.sql.Savepoint;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.os.Build;
 
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.FieldType;
@@ -321,6 +322,29 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	}
 
 	private int update(String statement, Object[] args, FieldType[] argFieldTypes, String label) throws SQLException {
+		if (Build.VERSION.SDK_INT >= 11) {// Build.VERSION_CODES.HONEYCOMB
+			return updateHoneycombImpl(statement, args, argFieldTypes, label);
+		} else {
+			return updateBasicImpl(statement, args, argFieldTypes, label);
+		}
+	}
+
+	private int updateHoneycombImpl(String statement, Object[] args, FieldType[] argFieldTypes, String label) throws SQLException {
+		SQLiteStatement stmt = null;
+		try {
+			stmt = db.compileStatement(statement);
+			bindArgs(stmt, args, argFieldTypes);
+			int result = stmt.executeUpdateDelete();
+			logger.trace("{} statement is compiled and executed, changed {}: {}", label, result, statement);
+			return result;
+		} catch (android.database.SQLException e) {
+			throw SqlExceptionUtil.create("updating database failed: " + statement, e);
+		} finally {
+			closeQuietly(stmt);
+		}
+	}
+
+	private int updateBasicImpl(String statement, Object[] args, FieldType[] argFieldTypes, String label) throws SQLException {
 		SQLiteStatement stmt = null;
 		try {
 			stmt = db.compileStatement(statement);
