@@ -5,7 +5,7 @@
 	<groupId>com.j256.ormlite</groupId>
 	<artifactId>ormlite-android</artifactId>
 	<version>6.2-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>aar</packaging>
 	<name>ORMLite Android</name>
 	<url>https://ormlite.com/</url>
 	<description>Lightweight Object Relational Model (ORM) Android classes</description>
@@ -34,7 +34,8 @@
 
 		<!-- <android-version>2.3.3</android-version> -->
 		<android-version>4.1.1.4</android-version>
-		<android-support-version>r6</android-support-version>
+		<android-support-version>1.0.0</android-support-version>
+		<android-sdk-version>28</android-sdk-version>
 		<!-- external test package versions -->
 		<easymock-version>3.4</easymock-version>
 		<h2-version>1.4.200</h2-version>
@@ -250,6 +251,15 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<groupId>com.simpligility.maven.plugins</groupId>
+				<artifactId>android-maven-plugin</artifactId>
+				<configuration>
+					<sdk>
+						<platform>${android-sdk-version}</platform>
+					</sdk>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>3.2.4</version>
@@ -272,6 +282,13 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>com.simpligility.maven.plugins</groupId>
+					<artifactId>android-maven-plugin</artifactId>
+					<version>4.2.0</version>
+					<extensions>true</extensions>
+				</plugin>
+
 				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
@@ -321,6 +338,13 @@
 			</extension>
 		</extensions>
 	</build>
+	<repositories>
+		<repository>
+			<id>google</id>
+			<name>Google Maven</name>
+			<url>http://maven.google.com/</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<!-- main dependencies -->
 		<dependency>
@@ -335,10 +359,12 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>com.google.android</groupId>
-			<artifactId>support-v4</artifactId>
-			<version>${android-support-version}</version>
+			<groupId>androidx.loader</groupId>
+			<artifactId>loader</artifactId>
+			<scope>compile</scope>
+			<version>1.1.0</version>
 			<optional>true</optional>
+			<type>aar</type>
 		</dependency>
 
 		<!-- test dependencies -->
