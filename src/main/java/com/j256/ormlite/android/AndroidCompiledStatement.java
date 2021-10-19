@@ -5,10 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
-
 import com.j256.ormlite.android.compat.ApiCompatibility;
 import com.j256.ormlite.android.compat.ApiCompatibility.CancellationHook;
 import com.j256.ormlite.android.compat.ApiCompatibilityUtils;
@@ -20,6 +16,10 @@ import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 import com.j256.ormlite.support.CompiledStatement;
 import com.j256.ormlite.support.DatabaseResults;
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 
 /**
  * Android implementation of the compiled statement.

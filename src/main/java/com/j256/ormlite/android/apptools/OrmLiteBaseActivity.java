@@ -1,12 +1,12 @@
 package com.j256.ormlite.android.apptools;
 
-import android.app.Activity;
-import android.content.Context;
-import android.os.Bundle;
-
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.support.ConnectionSource;
+
+import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
 
 /**
  * Base class to use for activities in Android.

@@ -8,12 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 
-import android.content.Context;
-import android.database.DatabaseErrorHandler;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
-import android.database.sqlite.SQLiteOpenHelper;
-
 import com.j256.ormlite.android.AndroidConnectionSource;
 import com.j256.ormlite.android.AndroidDatabaseConnection;
 import com.j256.ormlite.dao.Dao;
@@ -25,6 +19,12 @@ import com.j256.ormlite.misc.IOUtils;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.table.DatabaseTableConfigLoader;
+
+import android.content.Context;
+import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteOpenHelper;
 
 /**
  * SQLite database open helper which can be extended by your application to help manage when the application needs to
@@ -66,11 +66,13 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 * @param databaseVersion
 	 *            Version of the database we are opening. This causes {@link #onUpgrade(SQLiteDatabase, int, int)} to be
 	 *            called if the stored database is a different version.
-	 * @param errorHandler 
-	 *            The <a href="https://developer.android.com/reference/android/database/DatabaseErrorHandler">DatabaseErrorHandler</a> to be used when sqlite reports database
-	 *            corruption, or null to use the default error handler.
+	 * @param errorHandler
+	 *            The <a href=
+	 *            "https://developer.android.com/reference/android/database/DatabaseErrorHandler">DatabaseErrorHandler</a>
+	 *            to be used when sqlite reports database corruption, or null to use the default error handler.
 	 */
-	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion, DatabaseErrorHandler errorHandler) {
+	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion,
+			DatabaseErrorHandler errorHandler) {
 		super(context, databaseName, factory, databaseVersion, errorHandler);
 		logger.trace("{}: constructed connectionSource {}", this, connectionSource);
 	}
@@ -288,8 +290,8 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 * Get a DAO for our class. This uses the {@link DaoManager} to cache the DAO for future gets.
 	 * 
 	 * <p>
-	 * NOTE: This routing does not return Dao&lt;T, ID&gt; because of casting issues if we are assigning it to a custom DAO.
-	 * Grumble.
+	 * NOTE: This routing does not return Dao&lt;T, ID&gt; because of casting issues if we are assigning it to a custom
+	 * DAO. Grumble.
 	 * </p>
 	 */
 	public <D extends Dao<T, ?>, T> D getDao(Class<T> clazz) throws SQLException {
@@ -304,8 +306,8 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 * Get a RuntimeExceptionDao for our class. This uses the {@link DaoManager} to cache the DAO for future gets.
 	 * 
 	 * <p>
-	 * NOTE: This routing does not return RuntimeExceptionDao&lt;T, ID&gt; because of casting issues if we are assigning it to
-	 * a custom DAO. Grumble.
+	 * NOTE: This routing does not return RuntimeExceptionDao&lt;T, ID&gt; because of casting issues if we are assigning
+	 * it to a custom DAO. Grumble.
 	 * </p>
 	 */
 	public <D extends RuntimeExceptionDao<T, ?>, T> D getRuntimeExceptionDao(Class<T> clazz) {

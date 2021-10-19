@@ -4,11 +4,11 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
-import android.content.Context;
-import android.content.Loader;
-
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.PreparedQuery;
+
+import android.content.Context;
+import android.content.Loader;
 
 /**
  * A {@link Loader} implementation that queries specified {@link Dao} using a {@link PreparedQuery}.

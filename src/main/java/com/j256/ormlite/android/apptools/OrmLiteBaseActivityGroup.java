@@ -1,10 +1,10 @@
 package com.j256.ormlite.android.apptools;
 
+import com.j256.ormlite.support.ConnectionSource;
+
 import android.app.ActivityGroup;
 import android.content.Context;
 import android.os.Bundle;
-
-import com.j256.ormlite.support.ConnectionSource;
 
 /**
  * Base class to use for activity groups in Android.
