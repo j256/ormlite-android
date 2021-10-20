@@ -5,11 +5,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
-import android.os.Build;
-
 import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.SqlType;
@@ -27,6 +22,7 @@ import com.j256.ormlite.support.GeneratedKeyHolder;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.os.Build;
 
 /**
  * Database connection for Android.
@@ -326,52 +322,45 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	}
 
 	private int update(String statement, Object[] args, FieldType[] argFieldTypes, String label) throws SQLException {
-		if (Build.VERSION.SDK_INT >= 11) {// Build.VERSION_CODES.HONEYCOMB
-			return updateHoneycombImpl(statement, args, argFieldTypes, label);
-		} else {
-			return updateBasicImpl(statement, args, argFieldTypes, label);
-		}
-	}
-
-	private int updateHoneycombImpl(String statement, Object[] args, FieldType[] argFieldTypes, String label) throws SQLException {
+		int result = -1;
 		SQLiteStatement stmt = null;
 		try {
 			stmt = db.compileStatement(statement);
 			bindArgs(stmt, args, argFieldTypes);
-			int result = stmt.executeUpdateDelete();
-			logger.trace("{} statement is compiled and executed, changed {}: {}", label, result, statement);
-			return result;
+			if (Build.VERSION.SDK_INT >= 11) { // Build.VERSION_CODES.HONEYCOMB
+				result = stmt.executeUpdateDelete();
+			} else {
+				stmt.execute();
+			}
 		} catch (android.database.SQLException e) {
 			throw SqlExceptionUtil.create("updating database failed: " + statement, e);
 		} finally {
 			closeQuietly(stmt);
 		}
-	}
-
-	private int updateBasicImpl(String statement, Object[] args, FieldType[] argFieldTypes, String label) throws SQLException {
-		SQLiteStatement stmt = null;
-		try {
-			stmt = db.compileStatement(statement);
-			bindArgs(stmt, args, argFieldTypes);
-			stmt.execute();
-		} catch (android.database.SQLException e) {
-			throw SqlExceptionUtil.create("updating database failed: " + statement, e);
-		} finally {
-			closeQuietly(stmt);
-			stmt = null;
-		}
-		int result;
-		try {
-			stmt = db.compileStatement("SELECT CHANGES()");
-			result = (int) stmt.simpleQueryForLong();
-		} catch (android.database.SQLException e) {
-			// ignore the exception and just return 1
-			result = 1;
-		} finally {
-			closeQuietly(stmt);
+		if (result < 0) {
+			result = selectNumChanges(label);
 		}
 		logger.trace("{} statement is compiled and executed, changed {}: {}", label, result, statement);
 		return result;
+	}
+
+	/**
+	 * Return the number of changes from the previous statement. This is needed because the executeUpdateDelete() method
+	 * was not introduced until HONEYCOMB. This needs to be in the same connection as the previous statement. Thanks
+	 * to @WonShaw.
+	 */
+	private int selectNumChanges(String label) {
+		SQLiteStatement stmt = null;
+		try {
+			stmt = db.compileStatement("SELECT CHANGES()");
+			return (int) stmt.simpleQueryForLong();
+		} catch (android.database.SQLException e) {
+			logger.warn(e, "{} unable to run statement 'SELECT CHANGES()' to get the changed lines", label);
+			// ignore the exception and just return 1
+			return 1;
+		} finally {
+			closeQuietly(stmt);
+		}
 	}
 
 	private void bindArgs(SQLiteStatement stmt, Object[] args, FieldType[] argFieldTypes) throws SQLException {
