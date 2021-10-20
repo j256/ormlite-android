@@ -4,14 +4,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.database.sqlite.SQLiteOpenHelper;
-
 import com.j256.ormlite.dao.BaseDaoImpl;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
+
+import android.content.Context;
+import android.content.res.Resources;
+import android.database.sqlite.SQLiteOpenHelper;
 
 /**
  * This helps organize and access database connections to optimize connection sharing. There are several schemes to
@@ -70,7 +70,8 @@ public class OpenHelperManager {
 	 * onCreate() type of method when the application or service is starting. The caller should then keep the helper
 	 * around until it is shutting down when {@link #releaseHelper()} should be called.
 	 */
-	public static synchronized <T extends OrmLiteSqliteOpenHelper> T getHelper(Context context, Class<T> openHelperClass) {
+	public static synchronized <T extends OrmLiteSqliteOpenHelper> T getHelper(Context context,
+			Class<T> openHelperClass) {
 		if (openHelperClass == null) {
 			throw new IllegalArgumentException("openHelperClass argument is null");
 		}
@@ -149,8 +150,8 @@ public class OpenHelperManager {
 		} else if (helperClass == null) {
 			helperClass = openHelperClass;
 		} else if (helperClass != openHelperClass) {
-			throw new IllegalStateException("Helper class was " + helperClass + " but is trying to be reset to "
-					+ openHelperClass);
+			throw new IllegalStateException(
+					"Helper class was " + helperClass + " but is trying to be reset to " + openHelperClass);
 		}
 	}
 
@@ -211,7 +212,8 @@ public class OpenHelperManager {
 		} catch (Exception e) {
 			throw new IllegalStateException(
 					"Could not find public constructor that has a single (Context) argument for helper class "
-							+ openHelperClass, e);
+							+ openHelperClass,
+					e);
 		}
 		try {
 			return (OrmLiteSqliteOpenHelper) constructor.newInstance(context);
@@ -223,7 +225,8 @@ public class OpenHelperManager {
 	/**
 	 * Lookup the helper class either from the resource string or by looking for a generic parameter.
 	 */
-	private static Class<? extends OrmLiteSqliteOpenHelper> lookupHelperClass(Context context, Class<?> componentClass) {
+	private static Class<? extends OrmLiteSqliteOpenHelper> lookupHelperClass(Context context,
+			Class<?> componentClass) {
 
 		// see if we have the magic resource class name set
 		Resources resources = context.getResources();

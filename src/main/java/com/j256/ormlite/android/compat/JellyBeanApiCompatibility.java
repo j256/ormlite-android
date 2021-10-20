@@ -30,7 +30,7 @@ public class JellyBeanApiCompatibility extends BasicApiCompatibility {
 	}
 
 	/**
-	 * Hook object that supports canceling a running query. 
+	 * Hook object that supports canceling a running query.
 	 */
 	protected static class JellyBeanCancellationHook implements CancellationHook {
 

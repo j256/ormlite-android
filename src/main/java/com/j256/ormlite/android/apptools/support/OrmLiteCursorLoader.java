@@ -4,15 +4,15 @@ import static com.j256.ormlite.stmt.StatementBuilder.StatementType.SELECT;
 
 import java.sql.SQLException;
 
-import android.content.Context;
-import android.database.Cursor;
-import android.support.v4.content.AsyncTaskLoader;
-
 import com.j256.ormlite.android.AndroidCompiledStatement;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.Dao.DaoObserver;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.support.DatabaseConnection;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.support.v4.content.AsyncTaskLoader;
 
 /**
  * Cursor loader supported by later Android APIs that allows asynchronous content loading.

@@ -1,9 +1,9 @@
 package com.j256.ormlite.android.apptools;
 
+import com.j256.ormlite.support.ConnectionSource;
+
 import android.app.Service;
 import android.content.Context;
-
-import com.j256.ormlite.support.ConnectionSource;
 
 /**
  * Base class to use for services in Android.

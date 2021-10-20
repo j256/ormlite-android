@@ -2,13 +2,13 @@ package com.j256.ormlite.android.apptools;
 
 import java.sql.SQLException;
 
+import com.j256.ormlite.android.AndroidDatabaseResults;
+import com.j256.ormlite.stmt.PreparedQuery;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.view.View;
 import android.widget.CursorAdapter;
-
-import com.j256.ormlite.android.AndroidDatabaseResults;
-import com.j256.ormlite.stmt.PreparedQuery;
 
 /**
  * Cursor adapter base class.

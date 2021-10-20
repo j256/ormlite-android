@@ -24,6 +24,10 @@ import com.j256.ormlite.support.CompiledStatement;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.support.GeneratedKeyHolder;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
+
 /**
  * Database connection for Android.
  * 

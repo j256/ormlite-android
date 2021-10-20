@@ -2,9 +2,6 @@ package com.j256.ormlite.android;
 
 import java.sql.SQLException;
 
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.db.SqliteAndroidDatabaseType;
@@ -15,6 +12,9 @@ import com.j256.ormlite.support.BaseConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.support.DatabaseConnectionProxyFactory;
+
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
 /**
  * Android version of the connection source. Takes a standard Android {@link SQLiteOpenHelper}. For best results, use
