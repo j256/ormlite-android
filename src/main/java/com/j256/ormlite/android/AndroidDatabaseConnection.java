@@ -192,13 +192,12 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 
 	@Override
 	public int update(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
-		return update(statement, args, argFieldTypes, "updated");
+		return execute(statement, args, argFieldTypes, "updated");
 	}
 
 	@Override
 	public int delete(String statement, Object[] args, FieldType[] argFieldTypes) throws SQLException {
-		// delete is the same as update
-		return update(statement, args, argFieldTypes, "deleted");
+		return execute(statement, args, argFieldTypes, "deleted");
 	}
 
 	@Override
@@ -321,7 +320,7 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 		return getClass().getSimpleName() + "@" + Integer.toHexString(super.hashCode());
 	}
 
-	private int update(String statement, Object[] args, FieldType[] argFieldTypes, String label) throws SQLException {
+	private int execute(String statement, Object[] args, FieldType[] argFieldTypes, String label) throws SQLException {
 		int result = -1;
 		SQLiteStatement stmt = null;
 		try {
