@@ -1,6 +1,5 @@
 package com.j256.ormlite.android;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,12 +94,12 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() throws Exception {
 		if (cursor != null && !cursor.isClosed()) {
 			try {
 				cursor.close();
 			} catch (android.database.SQLException e) {
-				throw new IOException("Problems closing Android cursor", e);
+				throw new SQLException("Problems closing Android cursor", e);
 			}
 		}
 		cancellationHook = null;
