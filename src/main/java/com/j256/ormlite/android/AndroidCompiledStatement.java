@@ -11,7 +11,6 @@ import com.j256.ormlite.dao.ObjectCache;
 import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
-import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 import com.j256.ormlite.support.CompiledStatement;
 import com.j256.ormlite.support.DatabaseResults;
@@ -198,7 +197,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 				cursor.moveToFirst();
 				logger.trace("{}: started rawQuery cursor for: {}", this, finalSql);
 			} catch (android.database.SQLException e) {
-				throw SqlExceptionUtil.create("Problems executing Android query: " + finalSql, e);
+				throw new SQLException("Problems executing Android query: " + finalSql, e);
 			}
 		}
 
@@ -217,7 +216,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		try {
 			db.execSQL(finalSql, argArray);
 		} catch (android.database.SQLException e) {
-			throw SqlExceptionUtil.create("Problems executing " + label + " Android statement: " + finalSql, e);
+			throw new SQLException("Problems executing " + label + " Android statement: " + finalSql, e);
 		}
 		int result;
 		SQLiteStatement stmt = null;

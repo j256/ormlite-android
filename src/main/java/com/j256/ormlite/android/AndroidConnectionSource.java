@@ -7,7 +7,6 @@ import com.j256.ormlite.db.DatabaseType;
 import com.j256.ormlite.db.SqliteAndroidDatabaseType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
-import com.j256.ormlite.misc.SqlExceptionUtil;
 import com.j256.ormlite.support.BaseConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.support.DatabaseConnection;
@@ -67,7 +66,7 @@ public class AndroidConnectionSource extends BaseConnectionSource implements Con
 				try {
 					db = helper.getWritableDatabase();
 				} catch (android.database.SQLException e) {
-					throw SqlExceptionUtil.create("Getting a writable database from helper " + helper + " failed", e);
+					throw new SQLException("Getting a writable database from helper " + helper + " failed", e);
 				}
 			} else {
 				db = sqliteDatabase;
