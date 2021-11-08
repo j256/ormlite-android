@@ -1,6 +1,5 @@
 package com.j256.ormlite.android;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -31,7 +30,7 @@ import android.os.Build;
  */
 public class AndroidDatabaseConnection implements DatabaseConnection {
 
-	private static final String ANDROID_VERSION = "VERSION__5.6__";
+	private static final String ANDROID_VERSION = "VERSION__5.7__";
 
 	private static Logger logger = LoggerFactory.getLogger(AndroidDatabaseConnection.class);
 	private static final String[] NO_STRING_ARGS = new String[0];
@@ -266,12 +265,12 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() throws Exception {
 		try {
 			db.close();
 			logger.trace("{}: db {} closed", this, db);
 		} catch (android.database.SQLException e) {
-			throw new IOException("problems closing the database connection", e);
+			throw new SQLException("problems closing the database connection", e);
 		}
 	}
 
