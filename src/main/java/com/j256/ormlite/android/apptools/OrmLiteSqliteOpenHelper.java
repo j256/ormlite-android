@@ -92,7 +92,14 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 *            called if the stored database is a different version.
 	 * @param configFileId
 	 *            file-id which probably should be a R.raw.ormlite_config.txt or some static value.
+	 * 
+	 * @deprecated As of version 4.49 configuration files have been replaced by
+	 *             automatic annotation processing at compile time. Add an
+	 *             {@link com.j256.ormlite.android.annotations.Database}
+	 *             annotation to the class that inherits from this class to
+	 *             activate annotation processing.
 	 */
+	@Deprecated
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion,
 			int configFileId) {
 		this(context, databaseName, factory, databaseVersion, openFileId(context, configFileId));
@@ -112,7 +119,14 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 *            called if the stored database is a different version.
 	 * @param configFile
 	 *            Configuration file to be loaded.
+	 * 
+	 * @deprecated As of version 4.49 configuration files have been replaced by
+	 *             automatic annotation processing at compile time. Add an
+	 *             {@link com.j256.ormlite.android.annotations.Database}
+	 *             annotation to the class that inherits from this class to
+	 *             activate annotation processing.
 	 */
+	@Deprecated
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion,
 			File configFile) {
 		this(context, databaseName, factory, databaseVersion, openFile(configFile));
@@ -133,7 +147,14 @@ public abstract class OrmLiteSqliteOpenHelper extends SQLiteOpenHelper {
 	 *            called if the stored database is a different version.
 	 * @param stream
 	 *            Stream opened to the configuration file to be loaded. It will be closed when this method returns.
+	 * 
+	 * @deprecated As of version 4.49 configuration files have been replaced by
+	 *             automatic annotation processing at compile time. Add an
+	 *             {@link com.j256.ormlite.android.annotations.Database}
+	 *             annotation to the class that inherits from this class to
+	 *             activate annotation processing.
 	 */
+	@Deprecated
 	public OrmLiteSqliteOpenHelper(Context context, String databaseName, CursorFactory factory, int databaseVersion,
 			InputStream stream) {
 		super(context, databaseName, factory, databaseVersion);

@@ -154,6 +154,24 @@
 					<source>1.7</source>
 					<target>1.7</target>
 				</configuration>
+				<executions>
+					<execution>
+						<id>default-compile</id>
+						<configuration>
+							<compilerArgument>-proc:none</compilerArgument>
+							<includes>
+								<include>com/j256/ormlite/android/processor/OrmLiteAnnotationProcessor.java</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>compile-everything-else</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -278,6 +296,33 @@
 					<useSystemClassLoader>false</useSystemClassLoader>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<artifactSet>
+								<includes>
+									<include>com.squareup:javapoet</include>
+								</includes>
+							</artifactSet>
+							<minimizeJar>true</minimizeJar>
+							<relocations>
+								<relocation>
+									<pattern>com.squareup.javapoet</pattern>
+									<shadedPattern>com.j256.ormlite.android.processor.javapoet</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -351,6 +396,11 @@
 			<version>${android-support-version}</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>com.squareup</groupId>
+			<artifactId>javapoet</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 
 		<!-- test dependencies -->
 		<dependency>
@@ -400,6 +450,12 @@
 			<groupId>org.easymock</groupId>
 			<artifactId>easymock</artifactId>
 			<version>${easymock-version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.testing.compile</groupId>
+			<artifactId>compile-testing</artifactId>
+			<version>0.6</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

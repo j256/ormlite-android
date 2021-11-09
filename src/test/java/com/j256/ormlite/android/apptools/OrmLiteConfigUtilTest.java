@@ -12,6 +12,7 @@ import org.junit.Test;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 
+@SuppressWarnings("deprecation")
 public class OrmLiteConfigUtilTest {
 
 	private static final String lineSeparator = System.getProperty("line.separator");
