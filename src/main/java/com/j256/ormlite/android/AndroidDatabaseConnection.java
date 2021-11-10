@@ -10,7 +10,6 @@ import com.j256.ormlite.field.SqlType;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 import com.j256.ormlite.misc.IOUtils;
-import com.j256.ormlite.misc.VersionUtils;
 import com.j256.ormlite.stmt.GenericRowMapper;
 import com.j256.ormlite.stmt.StatementBuilder.StatementType;
 import com.j256.ormlite.support.CompiledStatement;
@@ -29,18 +28,12 @@ import android.os.Build;
  */
 public class AndroidDatabaseConnection implements DatabaseConnection {
 
-	private static final String ANDROID_VERSION = "VERSION__5.7__";
-
 	private static Logger logger = LoggerFactory.getLogger(AndroidDatabaseConnection.class);
 	private static final String[] NO_STRING_ARGS = new String[0];
 
 	private final SQLiteDatabase db;
 	private final boolean readWrite;
 	private final boolean cancelQueriesEnabled;
-
-	static {
-		VersionUtils.checkCoreVersusAndroidVersions(ANDROID_VERSION);
-	}
 
 	public AndroidDatabaseConnection(SQLiteDatabase db, boolean readWrite) {
 		this(db, readWrite, false);
