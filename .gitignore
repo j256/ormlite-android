@@ -6,3 +6,4 @@ target
 .apt_generated
 .idea
 *.iml
+/dependency-reduced-pom.xml

@@ -261,7 +261,6 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<createDependencyReducedPom>false</createDependencyReducedPom>
 							<artifactSet>
 								<includes>
 									<include>com.j256.ormlite:ormlite-core</include>
