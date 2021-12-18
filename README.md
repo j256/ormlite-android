@@ -11,3 +11,8 @@ download the [ormlite-jdbc](https://github.com/j256/ormlite-jdbc) package instea
 * Maven packages are published via [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.j256.ormlite/ormlite-android/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/com.j256.ormlite/ormlite-android/) [![javadoc](https://javadoc.io/badge2/com.j256.ormlite/ormlite-android/javadoc.svg)](https://javadoc.io/doc/com.j256.ormlite/ormlite-android)
 
 Enjoy, Gray Watson
+
+# ChangeLog Release Notes
+
+The ChangeLog file comes from the ormlite-core repository.  See the
+[ChangeLog.txt file](https://github.com/j256/ormlite-core/blob/master/src/main/javadoc/doc-files/changelog.txt).
