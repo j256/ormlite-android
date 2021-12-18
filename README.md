@@ -1,8 +1,10 @@
 ORMLite Android
 ===============
 
-This package provides the Android specific functionality.  You will also need to download the [ormlite-core](https://github.com/j256/ormlite-core) package as well.  Users that are connecting to SQL databases via JDBC connections should
-download the [ormlite-jdbc](https://github.com/j256/ormlite-jdbc) package instead of this Android one.
+This package provides the Android specific functionality.  The released jars for this include the [ormlite-core]
+https://github.com/j256/ormlite-core) package as well.  Users that are connecting to SQL databases via JDBC
+connections should download the [ormlite-jdbc](https://github.com/j256/ormlite-jdbc) package instead of this
+Android one.
 
 * For more background on ORMLite, see the [ormlite-core repo](https://github.com/j256/ormlite-core).
 * For more information, visit the [ORMLite home page](http://ormlite.com/).	
@@ -11,6 +13,20 @@ download the [ormlite-jdbc](https://github.com/j256/ormlite-jdbc) package instea
 * Maven packages are published via [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.j256.ormlite/ormlite-android/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/com.j256.ormlite/ormlite-android/) [![javadoc](https://javadoc.io/badge2/com.j256.ormlite/ormlite-android/javadoc.svg)](https://javadoc.io/doc/com.j256.ormlite/ormlite-android)
 
 Enjoy, Gray Watson
+
+# Maven Configuration
+
+Maven packages are published via [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.j256.ormlite/ormlite-android/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/com.j256.ormlite/ormlite-android/) which includes the [ormlite-core](https://github.com/j256/ormlite-core) classes.
+
+For JDBC usage:
+
+``` xml
+<dependency>
+	<groupId>com.j256.ormlite</groupId>
+	<artifactId>ormlite-android</artifactId>
+	<version>6.0</version>
+</dependency>
+```
 
 # ChangeLog Release Notes
 
