@@ -331,14 +331,12 @@
 		<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>android</artifactId>
-			<scope>provided</scope>
 			<version>${android-version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>support-v4</artifactId>
-			<scope>provided</scope>
 			<version>${android-support-version}</version>
 			<optional>true</optional>
 		</dependency>
