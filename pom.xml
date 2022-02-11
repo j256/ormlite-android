@@ -342,7 +342,7 @@
 		<repository>
 			<id>google</id>
 			<name>Google Maven</name>
-			<url>http://maven.google.com/</url>
+			<url>https://maven.google.com/</url>
 		</repository>
 	</repositories>
 	<dependencies>
