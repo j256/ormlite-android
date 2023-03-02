@@ -1,5 +1,7 @@
 package com.j256.ormlite.android;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -213,12 +215,18 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	 * Execute some SQL on the database and return the number of rows changed.
 	 */
 	static int execSql(SQLiteDatabase db, String label, String finalSql, Object[] argArray) throws SQLException {
+		int result = -1;
 		try {
-			db.execSQL(finalSql, argArray);
+			result = exeSqlCompatibly(db, finalSql, argArray);
 		} catch (android.database.SQLException e) {
 			throw new SQLException("Problems executing " + label + " Android statement: " + finalSql, e);
 		}
-		int result;
+
+		// reflected sql method returns will >= 0
+		if (result >= 0) {
+			return result;
+		}
+
 		SQLiteStatement stmt = null;
 		try {
 			// ask sqlite how many rows were just changed
@@ -234,6 +242,41 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		}
 		logger.trace("executing statement {} changed {} rows: {}", label, result, finalSql);
 		return result;
+	}
+
+	/**
+	 * Use reflection first, when reflection error, use origin method without return code
+	 * @return modified rows count
+	 */
+	private static int exeSqlCompatibly(SQLiteDatabase db, String sql, Object[] bindArgs) {
+		try {
+			int result = invokeExecSqlMethod(db, sql, bindArgs);
+			return result;
+		} catch (android.database.SQLException e) {
+			db.execSQL(sql, bindArgs);
+			return -1;
+		}
+	}
+
+	private static int invokeExecSqlMethod(SQLiteDatabase db, String sql, Object[] bindArgs) throws android.database.SQLException {
+		try {
+			Object result = hiddenExecSqlMethod().invoke(db, sql, bindArgs);
+			logger.trace("invokeExecSqlMethod result: {}", result);
+			return (int) result;
+		} catch (Exception e) {
+			throw new android.database.SQLException("reflect error", e);
+		}
+	}
+
+	private static Method hiddenExecSqlMethod() {
+		Class<SQLiteDatabase> clz = SQLiteDatabase.class;
+		Class<?> objArrClass = Array.newInstance(Object.class, 0).getClass();
+		try {
+			Method executeSqlMethod = clz.getMethod("executeSql", String.class, objArrClass);
+			return executeSqlMethod;
+		} catch (NoSuchMethodException e) {
+			return null;
+		}
 	}
 
 	private void isInPrep() throws SQLException {
