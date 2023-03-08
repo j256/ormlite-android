@@ -1,6 +1,6 @@
 package com.j256.ormlite.android;
 
-import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -33,6 +33,8 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	private static final String[] NO_STRING_ARGS = new String[0];
 	private static final ApiCompatibility apiCompatibility = ApiCompatibilityUtils.getCompatibility();
 
+	private static Method hiddenExecSqlMethod;
+
 	private final String sql;
 	private final SQLiteDatabase db;
 	private final StatementType type;
@@ -43,6 +45,10 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	private List<Object> args;
 	private Integer max;
 	private CancellationHook cancellationHook;
+
+	static {
+		hiddenExecSqlMethod = hiddenExecSqlMethod();
+	}
 
 	public AndroidCompiledStatement(String sql, SQLiteDatabase db, StatementType type, boolean cancelQueriesEnabled,
 			boolean cacheStore) {
@@ -215,17 +221,18 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	 * Execute some SQL on the database and return the number of rows changed.
 	 */
 	static int execSql(SQLiteDatabase db, String label, String finalSql, Object[] argArray) throws SQLException {
-		int result = -1;
 		try {
-			result = exeSqlCompatibly(db, finalSql, argArray);
+			Integer result = execSqlCompatibly(db, finalSql, argArray);
+			// reflection sql method returns will >= 0, public API will return null
+			if (result != null && result >= 0) {
+				logger.trace("executing statement using reflection {} changed {} rows: {}", label, result, finalSql);
+				return result;
+			}
 		} catch (android.database.SQLException e) {
 			throw new SQLException("Problems executing " + label + " Android statement: " + finalSql, e);
 		}
 
-		// reflected sql method returns will >= 0
-		if (result >= 0) {
-			return result;
-		}
+		int result;
 
 		SQLiteStatement stmt = null;
 		try {
@@ -248,32 +255,35 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	 * Use reflection first, when reflection error, use origin method without return code
 	 * @return modified rows count
 	 */
-	private static int exeSqlCompatibly(SQLiteDatabase db, String sql, Object[] bindArgs) {
+	private static Integer execSqlCompatibly(SQLiteDatabase db, String sql, Object[] bindArgs) {
 		try {
-			int result = invokeExecSqlMethod(db, sql, bindArgs);
-			return result;
+			return invokeHiddenExecSqlMethod(db, sql, bindArgs);
 		} catch (android.database.SQLException e) {
+			logger.trace(e, "reflection failed, call origin method, sql {}", sql);
 			db.execSQL(sql, bindArgs);
-			return -1;
+			return null;
 		}
 	}
 
-	private static int invokeExecSqlMethod(SQLiteDatabase db, String sql, Object[] bindArgs) throws android.database.SQLException {
+	private static int invokeHiddenExecSqlMethod(SQLiteDatabase db, String sql, Object[] bindArgs) throws android.database.SQLException {
 		try {
-			Object result = hiddenExecSqlMethod().invoke(db, sql, bindArgs);
-			logger.trace("invokeExecSqlMethod result: {}", result);
-			return (int) result;
-		} catch (Exception e) {
-			throw new android.database.SQLException("reflect error", e);
+			if (hiddenExecSqlMethod != null) {
+				Object result = hiddenExecSqlMethod.invoke(db, sql, bindArgs);
+				logger.trace("invoke hidden execSql method result: {}", result);
+				return (int) result;
+			} else {
+				throw new android.database.SQLException("reflection get method error");
+			}
+		} catch (InvocationTargetException | IllegalAccessException e) {
+			// reflection cannot work, set method null, no need invoke anymore
+			hiddenExecSqlMethod = null;
+			throw new android.database.SQLException("reflection invoke error", e);
 		}
 	}
 
 	private static Method hiddenExecSqlMethod() {
-		Class<SQLiteDatabase> clz = SQLiteDatabase.class;
-		Class<?> objArrClass = Array.newInstance(Object.class, 0).getClass();
 		try {
-			Method executeSqlMethod = clz.getMethod("executeSql", String.class, objArrClass);
-			return executeSqlMethod;
+			return SQLiteDatabase.class.getMethod("executeSql", String.class, Object[].class);
 		} catch (NoSuchMethodException e) {
 			return null;
 		}
