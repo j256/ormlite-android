@@ -256,28 +256,29 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	 * @return modified rows count
 	 */
 	private static Integer execSqlCompatibly(SQLiteDatabase db, String sql, Object[] bindArgs) {
-		try {
-			return invokeHiddenExecSqlMethod(db, sql, bindArgs);
-		} catch (android.database.SQLException e) {
-			logger.trace(e, "reflection failed, call origin method, sql {}", sql);
+		Integer result = invokeHiddenExecSqlMethod(db, sql, bindArgs);
+		if (result == null) {
+			logger.trace("reflection failed, call origin method, sql {}", sql);
 			db.execSQL(sql, bindArgs);
-			return null;
 		}
+		return result;
 	}
 
-	private static int invokeHiddenExecSqlMethod(SQLiteDatabase db, String sql, Object[] bindArgs) throws android.database.SQLException {
+	private static Integer invokeHiddenExecSqlMethod(SQLiteDatabase db, String sql, Object[] bindArgs) {
 		try {
 			if (hiddenExecSqlMethod != null) {
 				Object result = hiddenExecSqlMethod.invoke(db, sql, bindArgs);
 				logger.trace("invoke hidden execSql method result: {}", result);
 				return (int) result;
 			} else {
-				throw new android.database.SQLException("reflection get method error");
+				logger.trace("reflection get method error");
+				return null;
 			}
 		} catch (InvocationTargetException | IllegalAccessException e) {
 			// reflection cannot work, set method null, no need invoke anymore
+			logger.trace("reflection invoke error");
 			hiddenExecSqlMethod = null;
-			throw new android.database.SQLException("reflection invoke error", e);
+			return null;
 		}
 	}
 
