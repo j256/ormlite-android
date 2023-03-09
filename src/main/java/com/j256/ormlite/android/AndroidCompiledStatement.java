@@ -1,5 +1,7 @@
 package com.j256.ormlite.android;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,8 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	private static final String[] NO_STRING_ARGS = new String[0];
 	private static final ApiCompatibility apiCompatibility = ApiCompatibilityUtils.getCompatibility();
 
+	private static Method hiddenExecSqlMethod;
+
 	private final String sql;
 	private final SQLiteDatabase db;
 	private final StatementType type;
@@ -41,6 +45,10 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	private List<Object> args;
 	private Integer max;
 	private CancellationHook cancellationHook;
+
+	static {
+		hiddenExecSqlMethod = hiddenExecSqlMethod();
+	}
 
 	public AndroidCompiledStatement(String sql, SQLiteDatabase db, StatementType type, boolean cancelQueriesEnabled,
 			boolean cacheStore) {
@@ -214,11 +222,18 @@ public class AndroidCompiledStatement implements CompiledStatement {
 	 */
 	static int execSql(SQLiteDatabase db, String label, String finalSql, Object[] argArray) throws SQLException {
 		try {
-			db.execSQL(finalSql, argArray);
+			Integer result = execSqlCompatibly(db, finalSql, argArray);
+			// reflection sql method returns will >= 0, public API will return null
+			if (result != null && result >= 0) {
+				logger.trace("executing statement using reflection {} changed {} rows: {}", label, result, finalSql);
+				return result;
+			}
 		} catch (android.database.SQLException e) {
 			throw new SQLException("Problems executing " + label + " Android statement: " + finalSql, e);
 		}
+
 		int result;
+
 		SQLiteStatement stmt = null;
 		try {
 			// ask sqlite how many rows were just changed
@@ -234,6 +249,45 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		}
 		logger.trace("executing statement {} changed {} rows: {}", label, result, finalSql);
 		return result;
+	}
+
+	/**
+	 * Use reflection first, when reflection error, use origin method without return code
+	 * @return modified rows count
+	 */
+	private static Integer execSqlCompatibly(SQLiteDatabase db, String sql, Object[] bindArgs) {
+		Integer result = invokeHiddenExecSqlMethod(db, sql, bindArgs);
+		if (result == null) {
+			logger.trace("reflection failed, call origin method, sql {}", sql);
+			db.execSQL(sql, bindArgs);
+		}
+		return result;
+	}
+
+	private static Integer invokeHiddenExecSqlMethod(SQLiteDatabase db, String sql, Object[] bindArgs) {
+		try {
+			if (hiddenExecSqlMethod != null) {
+				Object result = hiddenExecSqlMethod.invoke(db, sql, bindArgs);
+				logger.trace("invoke hidden execSql method result: {}", result);
+				return (int) result;
+			} else {
+				logger.trace("reflection get method error");
+				return null;
+			}
+		} catch (InvocationTargetException | IllegalAccessException e) {
+			// reflection cannot work, set method null, no need invoke anymore
+			logger.trace("reflection invoke error");
+			hiddenExecSqlMethod = null;
+			return null;
+		}
+	}
+
+	private static Method hiddenExecSqlMethod() {
+		try {
+			return SQLiteDatabase.class.getMethod("executeSql", String.class, Object[].class);
+		} catch (NoSuchMethodException e) {
+			return null;
+		}
 	}
 
 	private void isInPrep() throws SQLException {
