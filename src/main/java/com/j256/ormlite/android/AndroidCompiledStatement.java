@@ -141,6 +141,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 			case LONG:
 			case FLOAT:
 			case DOUBLE:
+      case BIG_DECIMAL:
 				args.add(parameterIndex, obj.toString());
 				break;
 			case BYTE_ARRAY:
@@ -149,8 +150,6 @@ public class AndroidCompiledStatement implements CompiledStatement {
 				break;
 			case BLOB:
 				// this is only for derby serializable
-			case BIG_DECIMAL:
-				// this should be handled as a STRING
 				throw new SQLException("Invalid Android type: " + sqlType);
 			case UNKNOWN:
 			default:
