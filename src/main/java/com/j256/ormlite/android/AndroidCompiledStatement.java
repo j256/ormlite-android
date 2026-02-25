@@ -133,7 +133,6 @@ public class AndroidCompiledStatement implements CompiledStatement {
 			case STRING:
 			case LONG_STRING:
 			case DATE:
-			case BOOLEAN:
 			case CHAR:
 			case BYTE:
 			case SHORT:
@@ -147,6 +146,9 @@ public class AndroidCompiledStatement implements CompiledStatement {
 			case SERIALIZABLE:
 				args.add(parameterIndex, obj);
 				break;
+      case BOOLEAN:
+        args.add(parameterIndex, ((Boolean) obj ? 1 : 0));
+        break;
 			case BLOB:
 				// this is only for derby serializable
 			case BIG_DECIMAL:
@@ -251,12 +253,15 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		}
 	}
 
-	private String[] getStringArray() {
-		if (args == null) {
-			return NO_STRING_ARGS;
-		} else {
-			// we assume we have Strings in args
-			return args.toArray(new String[args.size()]);
-		}
-	}
+  private String[] getStringArray() {
+    if (args == null) {
+      return NO_STRING_ARGS;
+    }
+    String[] result = new String[args.size()];
+    for (int i = 0; i < args.size(); i++) {
+      Object arg = args.get(i);
+      result[i] = (arg == null) ? null : arg.toString();
+    }
+    return result;
+  }
 }
